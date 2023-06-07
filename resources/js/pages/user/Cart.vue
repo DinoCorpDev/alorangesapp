@@ -47,7 +47,7 @@
                     <div class="cuadro-emptycart">
                         <v-img class="img-cartempty mb-6" src="/public/assets/img/iconoCarrito.png" />
                         <p class="text-cartempty">AUN NO HAY PRODUCTOS EN LA LISTA DE PEDIDOS</p>
-                        <custom-button text="IR A PRODUCTOS" color="nero" class="mt-2" :to="{ name: 'Shop' }"/>
+                        <custom-button text="IR A PRODUCTOS" color="nero" class="mt-2" :to="{ name: 'Shop' }" />
                     </div>
                 </div>
             </v-stepper-content>
@@ -441,6 +441,7 @@
                             <v-divider class="my-3" />
                             <label class="black--text text-uppercase">(Regalo / Referido)</label>
                             <custom-input />
+                            <custom-button class="mt-2" text="Aplicar" color="grey" />
                         </div>
                     </v-col>
                     <v-col cols="12" order="3" order-md="3" order-sm="3" class="d-flex justify-space-between">
@@ -981,6 +982,10 @@ export default {
         AddressDialog,
         ProfileDialog
     },
+    props: {
+        shopId: { type: Number, required: false, default: null },
+        forCheckout: { type: Boolean, default: false }
+    },
     data() {
         return {
             langSelectItems: ["COLOMBIA", "DEUTSCHLAND", "ENGLAND"],
@@ -1000,14 +1005,20 @@ export default {
             checkoutLoading: false,
             dataCheckout: {},
             fecha: new Date(),
-            pick: 1
+            pick: 1,
+            couponCode: null,
+            couponLoading: false
         };
     },
     computed: {
-        ...mapGetters("auth", ["currentUser"])
+        ...mapGetters("auth", ["currentUser"], "cart", [
+            "getCouponCode",
+            "getSelectedCartIds",
+            "getSelectedCartIdsByShopId"
+        ])
     },
     methods: {
-        ...mapActions("auth", ["getUser"]),
+        ...mapActions("auth", ["getUser"], "cart", ["saveCoupon", "resetCoupon"]),
         async getCart() {
             const res = await this.call_api("post", `carts`, {});
             if (res.data.success) {
@@ -1134,6 +1145,37 @@ export default {
                 }
             };
             const res = await this.call_api("post", "payment/image", formData, config);
+        },
+        async applyCoupon() {
+            if (this.isAuthenticated) {
+                if (!this.couponCode) return;
+
+                this.couponLoading = true;
+                let data = {
+                    coupon_code: this.couponCode,
+                    shop_id: this.shopId,
+                    cart_item_ids: this.shopId ? this.getSelectedCartIdsByShopId(this.shopId) : this.getSelectedCartIds
+                };
+                const res = await this.call_api("post", "checkout/coupon/apply", data);
+
+                if (res.data.success) {
+                    this.snack({ message: res.data.message });
+                    this.saveCoupon({
+                        shopId: this.shopId,
+                        couponCode: this.couponCode,
+                        couponDetails: res.data.coupon_details
+                    });
+                } else {
+                    this.snack({ message: res.data.message, color: "red" });
+                }
+                this.couponLoading = false;
+            } else {
+                this.showLoginDialog(true);
+            }
+        },
+        removeCoupon() {
+            this.couponCode = null;
+            this.resetCoupon(this.shopId);
         }
     },
     async created() {
