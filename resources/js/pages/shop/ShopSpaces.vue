@@ -1,5 +1,7 @@
 <template>
     <v-container fluid>
+        <contact-dialog :show="contactDialogShow" @close="contactDialogClosed" />
+
         <v-row tag="main" class="main">
             <v-col cols="12">
                 <Carousel
@@ -11,7 +13,7 @@
                 />
             </v-col>
         </v-row>
-        <contact-dialog :show="contactDialogShow" @close="contactDialogClosed" />
+
         <v-row tag="section">
             <v-col cols="12" md="6">
                 <ShopActionCard img="/public/assets/img/shop-spaces/icon-msg.png" @click="contactDialogOpen()" />

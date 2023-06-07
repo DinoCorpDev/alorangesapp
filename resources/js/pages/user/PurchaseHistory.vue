@@ -5,7 +5,7 @@
         <v-row v-for="(item, i) in orders" :key="i">
             <v-col cols="12 invoice-div">
                 <order-history
-                    style="background-color: #f5f5f5;"
+                    style="background-color: #f5f5f5"
                     :order="item?.code"
                     :date="item?.date"
                     colorStatus="red"

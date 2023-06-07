@@ -5,7 +5,7 @@
             <v-divider class="my-3" />
             <v-row>
                 <v-col cols="12" v-for="(product, i) in order.products.data" :key="i">
-                    <product-cart
+                    <ProductCart
                         :name="product?.name"
                         :price="product?.price"
                         icon1="/public/assets/img/icons/back.svg"
@@ -44,7 +44,6 @@
             <div class="div-total">
                 <div>
                     <p class="subtitle-2 text-uppercase font-weight-bold">Sub-total</p>
-                    <!-- <p class="body-2">{{ format_price(product.price + product.tax) }} COP</p> -->
                     <p class="body-2">000.000.000 COP</p>
                 </div>
                 <div>
@@ -57,199 +56,34 @@
                 </div>
                 <div>
                     <p class="subtitle-1 text-uppercase font-weight-bold">Total</p>
-                    <!-- <p class="body-1">{{ format_price(product.total) }} COP</p> -->
                     <p class="body-1">000.000.000 COP</p>
                 </div>
             </div>
             <v-divider class="my-3" />
         </div>
-        <!-- <div
-            class="grey lighten-4 border border-gray-200 pa-4 rounded d-flex justify-space-between align-center"
-            v-if="is_addon_activated('multi_vendor')"
-        >
-            <router-link
-                :to="{ name: 'ShopDetails', params: { slug: order.shop.slug } }"
-                class="text-reset fs-16 fw-700 lh-1"
-                >{{ order.shop.name }}</router-link
-            >
-            <span class="text-end">
-                <div
-                    class="fs-12 red--text c-pointer"
-                    v-if="order.delivery_status == 'order_placed' && order.payment_status == 'unpaid'"
-                    @click="cancelOrder(order)"
-                >
-                    {{ $t("cancel_order") }}
-                </div>
-                <div
-                    class="fs-12 red--text c-pointer"
-                    v-if="
-                        is_addon_activated('refund') &&
-                        !order.has_refund_request &&
-                        order.payment_status == 'paid' &&
-                        today <= order.created_at + refundSettings.refund_request_time_period &&
-                        refundSettings.refund_request_order_status.includes(order.delivery_status)
-                    "
-                    @click="refundRequest(order.id)"
-                >
-                    {{ $t("request_refund") }}
-                </div>
-            </span>
-        </div> -->
 
-        <!-- <div
-            class="grey lighten-4 border border-gray-200 pa-4 rounded d-flex justify-space-between align-center"
-            v-else
-        >
-            <span class="fs-16 fw-700 lh-1">{{ $t("order_details") }}</span>
-            <div
-                class="fs-12 red--text c-pointer"
-                v-if="order.delivery_status == 'order_placed' && order.payment_status == 'unpaid'"
-                @click="cancelOrder(order)"
-            >
-                {{ $t("cancel_order") }}
-            </div>
-            <div
-                class="fs-12 red--text c-pointer"
-                v-if="
-                    is_addon_activated('refund') &&
-                    !order.has_refund_request &&
-                    order.payment_status == 'paid' &&
-                    today <= order.created_at + refundSettings.refund_request_time_period &&
-                    refundSettings.refund_request_order_status.includes(order.delivery_status)
-                "
-                @click="refundRequest(order.id)"
-            >
-                {{ $t("request_refund") }}
-            </div>
-        </div> -->
         <Steps :order-details="order" />
 
-        <!-- <div class="grey lighten-4 pa-4" v-if="order.courier_name">
-            <div class="fw-700 fs-17 mb-3 text-center">{{ $t("tracking_information") }}</div>
-            <v-row class="border-top border-gray-300 border-end" no-gutters>
-                <v-col cols="12" md="4" class="border-bottom border-start border-gray-300">
-                    <div class="px-3 py-2 border-bottom border-gray-300 fw-600">{{ $t("courier_name") }}</div>
-                    <div class="pa-3">{{ order.courier_name }}</div>
-                </v-col>
-                <v-col cols="12" md="4" class="border-bottom border-start border-gray-300">
-                    <div class="px-3 py-2 border-bottom border-gray-300 fw-600">{{ $t("tracking_number") }}</div>
-                    <div class="pa-3">{{ order.tracking_number }}</div>
-                </v-col>
-                <v-col cols="12" md="4" class="border-bottom border-start border-gray-300">
-                    <div class="px-3 py-2 border-bottom border-gray-300 fw-600">{{ $t("tracking_url") }}</div>
-                    <div class="pa-3">
-                        <a :href="order.tracking_url" target="_blank">{{ $t("track") }}</a>
-                    </div>
-                </v-col>
-            </v-row>
-        </div> -->
-
-        <!-- <div class="py-5">
-            <v-data-table
-                :headers="headers"
-                :items="order.products.data"
-                class=""
-                hide-default-footer
-                mobile-breakpoint="750"
-                item-key="order_detail_id"
-            >
-                <template v-slot:[`item.serial`]="{ item }">
-                    <span class="d-block fw-600">{{ order.products.data.indexOf(item) + 1 }}</span>
-                </template>
-                <template v-slot:[`item.product`]="{ item }">
-                    <div class="d-flex align-center">
-                        <img
-                            :src="item.thumbnail"
-                            :alt="item.name"
-                            @error="imageFallback($event)"
-                            class="size-70px flex-shrink-0"
-                        />
-                        <div class="flex-grow-1 ms-4">
-                            <div class="text-truncate-2">{{ item.name }}</div>
-                            <div class="" v-if="item.combinations.length > 0">
-                                <span v-for="(combination, j) in item.combinations" :key="j" class="me-4 py-1 fs-12">
-                                    <span class="opacity-70">{{ combination.attribute }}</span> :
-                                    <span class="fw-500">{{ combination.value }}</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                <template v-slot:[`item.quantity`]="{ item }">
-                    <span class="d-block fw-600">{{ item.quantity }}</span>
-                </template>
-                <template v-slot:[`item.unit_price`]="{ item }">
-                    <span class="d-block fw-600">{{ format_price(item.price + item.tax) }}</span>
-                </template>
-                <template v-slot:[`item.total`]="{ item }">
-                    <span class="d-block fw-600">{{ format_price(item.total) }}</span>
-                </template>
-                <template v-slot:[`item.review`]="{ item }" v-if="order.delivery_status == 'delivered'">
-                    <v-btn @click="openReviewDialog(item.id)" text small class="px-2 text-primary">
-                        {{ $t("write_a_review") }}
-                    </v-btn>
-                </template>
-            </v-data-table>
-        </div> -->
-        <!-- <v-row class="mb-5">
-            <v-col xl="7" md="6" cols="12" order="2" order-md="1">
-                <div v-if="order.payment_status == 'paid'" class="mt-5 ms-lg-5">
-                    <img :src="paid_sticker" />
-                </div>
-                <div v-else-if="order.payment_type == 'cash_on_delivery'" class="mt-5 ms-lg-5">
-                    <img :src="cod_sticker" />
-                </div>
-            </v-col>
-            <v-col xl="5" md="6" cols="12" order="1" order-md="2">
-                <v-list dense>
-                    <v-list-item class="fw-700">
-                        <v-list-item-content>{{ $t("sub_total") }} :</v-list-item-content>
-                        <v-list-item-content class="align-end col-4 justify-end">{{
-                            format_price(order.subtotal)
-                        }}</v-list-item-content>
-                    </v-list-item>
-                    <v-list-item class="fw-700">
-                        <v-list-item-content>{{ $t("tax") }} :</v-list-item-content>
-                        <v-list-item-content class="align-end col-4 justify-end">{{
-                            format_price(order.tax)
-                        }}</v-list-item-content>
-                    </v-list-item>
-                    <v-list-item class="fw-700">
-                        <v-list-item-content>{{ $t("shipping_charge") }} :</v-list-item-content>
-                        <v-list-item-content class="align-end col-4 justify-end">{{
-                            format_price(order.shipping_cost)
-                        }}</v-list-item-content>
-                    </v-list-item>
-                    <v-list-item class="fw-700">
-                        <v-list-item-content>{{ $t("coupon_discount") }} :</v-list-item-content>
-                        <v-list-item-content class="align-end col-4 justify-end">{{
-                            format_price(order.coupon_discount)
-                        }}</v-list-item-content>
-                    </v-list-item>
-                </v-list>
-                <div class="grey lighten-4 border border-gray-200 rounded">
-                    <v-list-item class="fw-700">
-                        <v-list-item-content>{{ $t("total") }} :</v-list-item-content>
-                        <v-list-item-content class="align-end col-4 justify-end px-0">{{
-                            format_price(order.grand_total)
-                        }}</v-list-item-content>
-                    </v-list-item>
-                </div>
-            </v-col>
-        </v-row> -->
-        <review-dialog ref="submitReview" />
+        <ReviewDialog ref="submitReview" />
         <ConfirmDialog ref="confirmCancel" />
     </div>
 </template>
 
 <script>
-import Steps from "./Steps";
-import ReviewDialog from "./ReviewDialog";
-import ProductCart from "../../components/global/ProductCart.vue";
-import ConfirmDialog from "../../components/inc/ConfirmDialog";
 import { mapGetters } from "vuex";
+
+import ConfirmDialog from "../../components/inc/ConfirmDialog";
+import ProductCart from "../../components/global/ProductCart.vue";
+import ReviewDialog from "./ReviewDialog";
+import Steps from "./Steps";
+
 export default {
-    components: { ReviewDialog, Steps, ConfirmDialog, ProductCart },
+    components: {
+        ConfirmDialog,
+        ProductCart,
+        ReviewDialog,
+        Steps
+    },
     props: {
         orderDetails: { type: Object, default: () => {} }
     },
@@ -310,9 +144,6 @@ export default {
         ...mapGetters("app", ["refundSettings"])
     },
     methods: {
-        openReviewDialog(productId) {
-            this.$refs.submitReview.open(productId);
-        },
         cancelOrder(order) {
             this.$refs.confirmCancel
                 .open(this.$i18n.t("confirm_cancel"), this.$i18n.t("are_you_sure_you_want_to_cancel_this_order"))
@@ -341,6 +172,7 @@ export default {
     }
 };
 </script>
+
 <style scoped>
 .div-total {
     display: flex;

@@ -425,7 +425,7 @@
                                     @click="$refs.fileInput.click()"
                                 />
                                 <input
-                                    style="display: none;"
+                                    style="display: none"
                                     ref="fileInput"
                                     type="file"
                                     @change="fileSelected"

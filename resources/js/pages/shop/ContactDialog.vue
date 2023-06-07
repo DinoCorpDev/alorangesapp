@@ -48,9 +48,7 @@
                         <select-custom />
                     </v-col>
                     <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">
-                            Numero de documento
-                        </span>
+                        <span class="black--text body-2 text-uppercase"> Numero de documento </span>
                         <custom-input />
                     </v-col>
                 </v-row>
