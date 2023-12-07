@@ -5,7 +5,7 @@
                 <v-col lg="3" class="user-layout-sidebar d-lg-block">
                     <SideMenu2 class="d-none d-sm-block" />
                     <div class="d-sm-none btn-menu">
-                        <CustomButton @click="drawer = !drawer" dark text="MENU" icon="la-ellipsis-v" />
+                        <CustomButton @click="drawer = !drawer" :dark="true" text="MENU" icon="la-ellipsis-v" />
                     </div>
                 </v-col>
                 <v-col cols="12" lg="9" class="user-layout-content">

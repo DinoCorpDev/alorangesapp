@@ -5,7 +5,7 @@
                 <SideMenu class="d-none d-sm-block" />
                 <div class="user-layout-button d-sm-none">
                     <h6>Perfil</h6>
-                    <CustomButton @click="userNavDrawerActive = !userNavDrawerActive" dark>
+                    <CustomButton @click="userNavDrawerActive = !userNavDrawerActive" :dark="true">
                         <BarsIcon />
                         <span>{{ $t("Menu") }}</span>
                     </CustomButton>
