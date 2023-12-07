@@ -48,4 +48,9 @@ class Order extends Model
     {
         return $this->hasMany(RefundRequest::class);
     }
+
+    public function encargado()
+    {
+        return $this->hasOne(Encargado::class);
+    }
 }

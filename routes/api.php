@@ -29,6 +29,8 @@ use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\EncargadoController;
+use App\Models\Encargado;
 
 Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
 
@@ -178,6 +180,12 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
             Route::delete('wishlists/services', [WishlistController::class, 'destroyService']);
             Route::delete('wishlists/brands', [WishlistController::class, 'destroyBrand']);
             Route::apiResource('follow', FollowController::class)->except(['update', 'show']);
+
+            Route::group(['prefix' => 'encargados'], function () {
+                Route::post('/', [EncargadoController::class, 'store']);
+                Route::put('/{id}', [EncargadoController::class, 'update']);
+                Route::delete('/{id}', [EncargadoController::class, 'destroy']);
+            });
 
             Route::get('addresses', [AddressController::class, 'addresses']);
             Route::post('address/create', [AddressController::class, 'createShippingAddress']);
