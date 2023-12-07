@@ -13,7 +13,7 @@ class EncargadoRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,9 @@ class EncargadoRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'nombre_encargado' => 'required|max:64',
+            'indicativo' => 'required|max:5',
+            'encargado_telefono' => 'required|max:20'
         ];
     }
 }

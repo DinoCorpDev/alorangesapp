@@ -424,36 +424,15 @@
                                             <span class="subtitle1 text-uppercase bold">TELÉFONO / CELULAR</span>
                                             <span class="body1">--</span>
                                         </div>
-                                        <v-form>
-                                            <v-container>
-                                                <v-row>
-                                                    <v-col cols="12">
-                                                        <v-text-field
-                                                            label="Nombre Completo"
-                                                            required
-                                                            hide-details
-                                                        ></v-text-field>
-                                                    </v-col>
-                                                    <v-col cols="12">
-                                                        <span class="subtitle1 text-uppercase bold"
-                                                            >TELÉFONO / CELULAR</span
-                                                        >
-                                                    </v-col>
-                                                    <v-col cols="3" md="3">
-                                                        <v-text-field label="+XX" hide-details required></v-text-field>
-                                                    </v-col>
-
-                                                    <v-col cols="9" md="9" sm="9">
-                                                        <v-text-field hide-details required></v-text-field>
-                                                    </v-col>
-
-                                                    <v-col cols="12">
-                                                        <v-btn type="submit" block class="mt-2">GUARDAR</v-btn>
-                                                    </v-col>
-                                                </v-row>
-                                            </v-container>
-                                        </v-form>
-                                        <CustomButton color="grey" class="mr-3" text="EDITAR" @click="editProfile()" />
+                                        <CustomButton
+                                            color="grey"
+                                            class="mr-3"
+                                            text="EDITAR"
+                                            @click="showFormEncargado"
+                                        />
+                                        <template v-if="(mostrarFormEncargado = true)">
+                                            <Encargado @ocultar-form-encargado="showFormEncargado" />
+                                        </template>
                                     </div>
                                 </v-col>
                                 <v-col cols="12"> </v-col>
@@ -2723,6 +2702,7 @@ import Cubo from "../../components/icons/Cubo.vue";
 import CustomFavorite from "../../components/icons/CustomFavorite.vue";
 import Flecha from "../../components/icons/Flecha.vue";
 import TotalPago from "../../components/global/TotalPago.vue";
+import Encargado from "./Encargado.vue";
 
 // const button = document.getElementById("customButton");
 // const tooltip = document.getElementById("tooltip");
@@ -2746,7 +2726,8 @@ export default {
         Cubo,
         TypePayment,
         CustomFavorite,
-        Flecha
+        Flecha,
+        Encargado
     },
     data() {
         return {
@@ -2780,7 +2761,8 @@ export default {
             mostrarDatosServicio: false,
             mostrarDatosFacturacion: false,
             mostrarDetalles: false,
-            mostrarDetallesFinal: false
+            mostrarDetallesFinal: false,
+            mostrarFormEncargado: false
         };
     },
     computed: {
@@ -2810,6 +2792,9 @@ export default {
     },
     methods: {
         ...mapActions("auth", ["getUser"]),
+        showFormEncargado() {
+            this.mostrarFormEncargado = !this.mostrarFormEncargado;
+        },
         toggleDatosEnvio() {
             this.mostrarDatosEnvio = !this.mostrarDatosEnvio;
         },

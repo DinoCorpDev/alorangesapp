@@ -182,7 +182,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
             Route::apiResource('follow', FollowController::class)->except(['update', 'show']);
 
             Route::group(['prefix' => 'encargados'], function () {
-                Route::post('/', [EncargadoController::class, 'store']);
+                Route::post('', [EncargadoController::class, 'store']);
                 Route::put('/{id}', [EncargadoController::class, 'update']);
                 Route::delete('/{id}', [EncargadoController::class, 'destroy']);
             });

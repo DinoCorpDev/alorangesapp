@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Encargado extends Model
 {
-    use HasFactory;
+    protected $guarded = [];
+    public $timestamps = false;
 
     public function order()
     {
