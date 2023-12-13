@@ -414,24 +414,41 @@
                                         />
                                     </div>
                                     <div class="form">
-                                        <h6 class="black--text bold">Encargado</h6>
-                                        <v-divider class="my-3" />
-                                        <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">NOMBRE COMPLETO</span>
-                                            <span class="body1">{{ currentUser.name || "--" }}</span>
-                                        </div>
-                                        <div class="d-flex justify-space-between mb-3">
-                                            <span class="subtitle1 text-uppercase bold">TELÉFONO / CELULAR</span>
-                                            <span class="body1">--</span>
-                                        </div>
                                         <CustomButton
+                                            v-if="formEncargadoVacio"
                                             color="grey"
-                                            class="mr-3"
-                                            text="EDITAR"
-                                            @click="showFormEncargado"
+                                            class="mt-2"
+                                            text="DESEA DEJAR UN ENCARGADO PARA RECIBIR LOS ARTICULOS?"
+                                            @click="toggleFormEncargado"
                                         />
-                                        <template v-if="(mostrarFormEncargado = true)">
-                                            <Encargado @ocultar-form-encargado="showFormEncargado" />
+                                        <template v-if="formEncargado">
+                                            <Encargado
+                                                @ocultar-form-encargado="toggleFormEncargado"
+                                                @datos-encargado="manejarDatosEncargado"
+                                            />
+                                        </template>
+                                        <template v-if="!formEncargadoVacio && !formEncargado">
+                                            <h6 class="black--text bold">Encargado</h6>
+                                            <v-divider class="my-3" />
+                                            <div class="d-flex justify-space-between mb-2">
+                                                <span class="subtitle1 text-uppercase bold">NOMBRE COMPLETO</span>
+                                                <span class="body1">{{
+                                                    datosFormEncargado.nombre_encargado || "--"
+                                                }}</span>
+                                            </div>
+                                            <div class="d-flex justify-space-between mb-3">
+                                                <span class="subtitle1 text-uppercase bold">TELÉFONO / CELULAR</span>
+                                                <span class="body1"
+                                                    >{{ datosFormEncargado.indicativo || "--" }}
+                                                    {{ datosFormEncargado.encargado_telefono || "--" }}</span
+                                                >
+                                            </div>
+                                            <CustomButton
+                                                color="grey"
+                                                class="mt-2"
+                                                text="EDITAR"
+                                                @click="toggleFormEncargado"
+                                            />
                                         </template>
                                     </div>
                                 </v-col>
@@ -2762,13 +2779,20 @@ export default {
             mostrarDatosFacturacion: false,
             mostrarDetalles: false,
             mostrarDetallesFinal: false,
-            mostrarFormEncargado: false
+            mostrarFormEncargado: false,
+            datosFormEncargado: {}
         };
     },
     computed: {
         ...mapGetters("auth", ["currentUser"]),
         ...mapState("cart", ["cartProducts", "cartPrice"]),
-        ...mapGetters("cart", ["getCartPrice", "getCartCount"])
+        ...mapGetters("cart", ["getCartPrice", "getCartCount"]),
+        formEncargado: function () {
+            return this.mostrarFormEncargado;
+        },
+        formEncargadoVacio: function () {
+            return Object.values(this.datosFormEncargado).every(x => x === null || x === "");
+        }
     },
     mounted() {
         this.$vuetify.theme.dark = false;
@@ -2792,8 +2816,12 @@ export default {
     },
     methods: {
         ...mapActions("auth", ["getUser"]),
-        showFormEncargado() {
+        toggleFormEncargado() {
             this.mostrarFormEncargado = !this.mostrarFormEncargado;
+        },
+        manejarDatosEncargado(data) {
+            this.datosFormEncargado = data;
+            this.toggleFormEncargado();
         },
         toggleDatosEnvio() {
             this.mostrarDatosEnvio = !this.mostrarDatosEnvio;
@@ -2929,6 +2957,13 @@ export default {
                 formData.append("shipping_address_id", shippingAddressId);
                 formData.append("billing_address_id", billingAddressId);
                 formData.append("delivery_type", "standard");
+
+                if (Object.keys(this.datosFormEncargado).length > 0) {
+                    formData.append("hay_encargado", true);
+                    for (let key in this.datosFormEncargado) {
+                        formData.append(key, this.datosFormEncargado[key]);
+                    }
+                }
 
                 this.cartItems.forEach((item, index) => {
                     if (item?.isCollection) {

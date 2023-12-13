@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('nombre_encargado', 64);
             $table->string('indicativo', 5);
             $table->string('encargado_telefono', 20);
+            $table->bigInteger('order_id');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
         });
     }
 
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('encargado');
+        Schema::dropIfExists('encargados');
     }
 };

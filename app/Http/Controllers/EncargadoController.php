@@ -13,6 +13,7 @@ class EncargadoController extends Controller
             'nombre_encargado' => $request->nombre_encargado,
             'indicativo' => $request->indicativo,
             'encargado_telefono' => $request->encargado_telefono,
+            'order_id' => $request->order_id
         ]);
 
         return response()->json([

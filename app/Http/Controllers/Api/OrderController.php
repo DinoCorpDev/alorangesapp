@@ -13,6 +13,7 @@ use App\Models\CollectionOrderDetail;
 use App\Models\CombinedOrder;
 use App\Models\Coupon;
 use App\Models\CouponUsage;
+use App\Models\Encargado;
 use App\Models\Language;
 use App\Models\ManualPaymentMethod;
 use App\Models\Order;
@@ -443,6 +444,15 @@ class OrderController extends Controller
             if ($shop_commission > 0) {
                 $admin_commission = ($shop_commission * $order_price) / 100;
                 $seller_earning = $shop_total - $admin_commission;
+            }
+
+            if ($request->hay_encargado) {
+                Encargado::updateOrCreate([
+                    'nombre_encargado' => $request->nombre_encargado,
+                    'indicativo' => $request->indicativo,
+                    'encargado_telefono' => $request->encargado_telefono,
+                    'order_id' => $order->id
+                ]);
             }
 
             $order->admin_commission = $admin_commission;
