@@ -58,8 +58,7 @@
                             <v-col
                                 cols="12"
                                 md="9"
-                                class="d-flex justify-center justify-md-end align-center pl-0 pl-md-3"
-                                style="gap: 25px"
+                                class="d-flex justify-center justify-md-end align-center pl-0 pl-md-3 gap"
                             >
                                 <total :total="priceTotal" />
                                 <v-divider vertical></v-divider>
@@ -97,8 +96,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold"
                                             style="display: flex; justify-content: flex-start"
@@ -106,7 +105,7 @@
                                             Descuento detalle
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold">000.000.000 COP</span>
                                     </v-col>
                                 </v-row>
@@ -114,8 +113,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start"
@@ -123,7 +122,7 @@
                                             Recargo detalle
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold">000.000.000 COP</span>
                                     </v-col>
                                 </v-row>
@@ -131,8 +130,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0" style="font-size: 15px">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3" style="font-size: 15px">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start"
@@ -140,7 +139,7 @@
                                             TOTAL BRUTO FACTURA
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold" style="font-size: 15px"
                                             >000.000.000 COP</span
                                         >
@@ -150,8 +149,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start"
@@ -159,7 +158,7 @@
                                             IVA
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold">000.000.000 COP</span>
                                     </v-col>
                                 </v-row>
@@ -167,8 +166,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start"
@@ -176,7 +175,7 @@
                                             Otros impuestos
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold">000.000.000 COP</span>
                                     </v-col>
                                 </v-row>
@@ -184,8 +183,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start; font-size: 15px"
@@ -193,7 +192,7 @@
                                             TOTAL IMPUESTO
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold" style="font-size: 15px"
                                             >000.000.000 COP</span
                                         >
@@ -203,8 +202,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start"
@@ -212,7 +211,7 @@
                                             Rete ICA
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold">000.000.000 COP</span>
                                     </v-col>
                                 </v-row>
@@ -220,8 +219,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start"
@@ -229,7 +228,7 @@
                                             Rete IVA
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold">000.000.000 COP</span>
                                     </v-col>
                                 </v-row>
@@ -237,8 +236,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start"
@@ -246,7 +245,7 @@
                                             Rete fuente
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold">000.000.000 COP</span>
                                     </v-col>
                                 </v-row>
@@ -254,8 +253,8 @@
                                     <v-divider style="max-width: 60%; margin-right: 82px" />
                                 </v-row>
                                 <v-row>
-                                    <v-col cols="2" />
-                                    <v-col cols="3" class="py-0">
+                                    <v-col cols="0" md="2" class="py-0" />
+                                    <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                         <span
                                             class="body2 font-weight-bold py-0"
                                             style="display: flex; justify-content: flex-start; font-size: 15px"
@@ -263,7 +262,7 @@
                                             TOTAL RETENCIONES
                                         </span>
                                     </v-col>
-                                    <v-col cols="4" class="seguimiento py-0">
+                                    <v-col cols="6" md="4" class="seguimiento py-0">
                                         <span class="body2 font-weight-bold" style="font-size: 15px"
                                             >000.000.000 COP</span
                                         >
@@ -305,7 +304,7 @@
                                         <v-row>
                                             <v-col cols="11">
                                                 <SelectCustom
-                                                    :dark="darkBoxes"
+                                                    dark="true"
                                                     label="Usuario Principal"
                                                     :items="addressesParaEnvio"
                                                     @input="changeAddress($event, 0)"
@@ -338,47 +337,49 @@
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Dirección</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Dirección</span>
+                                            <span class="body1 pr-3">{{
                                                 selectedAddressEnvio?.address ||
                                                 "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold"> Dirección adicional </span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">
+                                                Dirección adicional
+                                            </span>
+                                            <span class="body1 pr-3">{{
                                                 selectedAddressEnvio?.address ||
                                                 "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Codigo Postal</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Codigo Postal</span>
+                                            <span class="body1 pr-3">{{
                                                 selectedAddressEnvio?.postal_code ||
                                                 "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Departamento</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Departamento</span>
+                                            <span class="body1 pr-3">{{
                                                 selectedAddressEnvio?.country ||
                                                 "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Municipio</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Municipio</span>
+                                            <span class="body1 pr-3">{{
                                                 selectedAddressEnvio?.city ||
                                                 "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Localidad</span>
-                                            <span class="body1"> -- </span>
+                                            <span class="subtitle1 text-uppercase bold pl-3">Localidad</span>
+                                            <span class="body1 pr-3"> -- </span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Barrio</span>
-                                            <span class="body1">
+                                            <span class="subtitle1 text-uppercase bold pl-3">Barrio</span>
+                                            <span class="body1 pr-3">
                                                 {{
                                                     selectedAddressEnvio?.neighborhood ||
                                                     "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
@@ -387,21 +388,32 @@
                                         </div>
 
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Telefono / Movil</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Telefono / Celular</span>
+                                            <span class="body1 pr-3">{{
                                                 addressPrincipal?.phone | filtroParaOcultarInfo(mostrarDatosEnvio)
                                             }}</span>
                                         </div>
+
                                         <CustomButton
                                             v-if="Object.entries(addressPrincipal).length !== 0"
-                                            class="mr-3"
+                                            class="mr-3 ml-3"
+                                            style="width: 136px"
                                             color="grey"
                                             text="EDITAR"
                                             @click="editAddress(addressPrincipal, 'shipping')"
                                         />
                                         <CustomButton
+                                            v-if="Object.entries(addressPrincipal).length !== 0"
+                                            class="mr-3 ml-3"
+                                            color="grey"
+                                            text="AÑADIR"
+                                            style="width: 136px"
+                                            @click="openAdress('shipping')"
+                                        />
+                                        <CustomButton
                                             v-if="Object.entries(addressPrincipal).length === 0"
                                             block
+                                            class="mr-3 ml-3"
                                             color="grey"
                                             text="AÑADIR"
                                             @click="openAdress('shipping')"
@@ -502,81 +514,120 @@
                                             </v-row>
                                             <v-divider class="my-3" />
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">país</span>
-                                                <span class="body1">--</span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">país</span>
+                                                <span class="body1 pr-3">--</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Nombre de Dirección</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3"
+                                                    >Nombre de Dirección</span
+                                                >
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.name | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Dirección</span>
-                                                <span class="body1 text-right">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Dirección</span>
+                                                <span class="body1 text-right pr-3">{{
                                                     addressServicio?.address
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold"> Dirección adicional </span>
-                                                <span class="body1">--</span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">
+                                                    Dirección adicional
+                                                </span>
+                                                <span class="body1 pr-3">--</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Codigo Postal</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Codigo Postal</span>
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.postal_code
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Departamento</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Departamento</span>
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.country
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Municipio</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Municipio</span>
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.city | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">localidad</span>
-                                                <span class="body1"> -- </span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">localidad</span>
+                                                <span class="body1 pr-3"> -- </span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Barrio</span>
-                                                <span class="body1"> -- </span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">Barrio</span>
+                                                <span class="body1 pr-3"> -- </span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Telefono / Movil</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Telefono / Movil</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.phone
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                         </div>
-                                        <label class="label my-3">
+                                        <!-- <label class="label my-3 d-flex justify-end align-end" style="border: 1px solid #9e9e9e; border-radius: 5px;">
                                             <input
                                                 type="checkbox"
                                                 v-model="useDefaultAddress1"
                                                 id="useDefaultAddress1"
                                             />
                                             <span class="body-1 black--text text">
-                                                Usar la misma Dirección de envió para que Idovela preste los servicio de
+                                                Usar la misma <strong>Dirección de envió</strong> para que Idovela preste los servicio de
                                                 instalación, mantenimiento y más.
                                             </span>
-                                            <span class="checkmark"></span>
+                                            <span class="checkmark" style="margin-top: 5%"></span>
+
+                                        </label> -->
+
+                                        <label class="label mt-3" style="border: 2px solid #9e9e9e; border-radius: 5px">
+                                            <v-row>
+                                                <v-col cols="1" class="py-0 px-0">
+                                                    <input
+                                                        type="checkbox"
+                                                        v-model="useDefaultAddress1"
+                                                        id="useDefaultAddress1"
+                                                    />
+                                                    <span class="checkmark"></span>
+                                                </v-col>
+                                                <v-col cols="11" class="d-flex px-0">
+                                                    <span
+                                                        class="body-1 black--text text py-4"
+                                                        style="padding-right: 17px"
+                                                    >
+                                                        Usar la misma <strong>Dirección de envió</strong> para que
+                                                        Idovela preste los servicio de instalación, mantenimiento y más.
+                                                    </span>
+                                                </v-col>
+                                            </v-row>
                                         </label>
-                                        <v-divider class="my-3" />
+
+                                        <v-row>
+                                            <v-col cols="7" class="d-flex jusify-start align-center">
+                                                <p class="mb-0" style="font-size: 15px">
+                                                    ¿Desea utilizar otra dirección?
+                                                </p>
+                                            </v-col>
+                                            <v-col cols="5">
+                                                <CustomButton class="mr-3" color="grey" text="AÑADIR" @click="" />
+                                            </v-col>
+                                        </v-row>
+
                                         <CustomButton
                                             v-if="
                                                 Object.entries(addressServicio).length !== 0 &&
                                                 useDefaultAddress1 == false
                                             "
-                                            class="mr-3"
+                                            style="width: 136px"
+                                            class="mr-3 ml-3"
                                             color="grey"
                                             text="EDITAR"
                                             @click="editAddress(addressServicio, 'service')"
@@ -685,7 +736,7 @@
                         <v-col cols="12">
                             <v-row class="barra-inferior">
                                 <v-col
-                                    class="d-none d-md-flex justify-start align-center"
+                                    class="d-none d-md-flex justify-start align-center pl-0 pl-md-3"
                                     cols="2"
                                     style="display: flex"
                                 >
@@ -696,8 +747,7 @@
                                 <v-col
                                     cols="12"
                                     md="8"
-                                    class="d-flex justify-center justify-md-start align-center"
-                                    style="gap: 25px"
+                                    class="d-flex justify-start justify-md-start align-center gap pl-0 pl-md-3"
                                 >
                                     <TotalFlete :total="priceTotal" />
                                     <v-divider vertical></v-divider>
@@ -755,7 +805,7 @@
                                     style="display: flex; justify-content: flex-end; align-items: center"
                                 >
                                     <v-row>
-                                        <v-col cols="6" md="0" class="d-flex d-md-none">
+                                        <v-col cols="6" md="0" class="d-flex d-md-none pl-0">
                                             <div v-if="mostrarDetalles == false" class="boton-continuar">
                                                 <CustomButton
                                                     class="boton-continuar"
@@ -765,7 +815,7 @@
                                                 />
                                             </div>
                                         </v-col>
-                                        <v-col cols="6" md="12">
+                                        <v-col cols="6" md="12" class="pl-0">
                                             <div v-if="mostrarDetalles == false" class="boton-continuar">
                                                 <CustomButton
                                                     class="boton-continuar"
@@ -782,8 +832,8 @@
                                         <v-divider style="max-width: 60%; margin-right: 82px" />
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
+                                        <v-col cols="0" md="2" class="py-0" />
+                                        <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                             <span
                                                 class="body2 font-weight-bold"
                                                 style="display: flex; justify-content: flex-start"
@@ -791,7 +841,7 @@
                                                 Envío de mercancia
                                             </span>
                                         </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
+                                        <v-col cols="6" md="4" class="seguimiento py-0">
                                             <span class="body2 font-weight-bold">000.000.000 COP</span>
                                         </v-col>
                                     </v-row>
@@ -799,8 +849,8 @@
                                         <v-divider style="max-width: 60%; margin-right: 82px" />
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
+                                        <v-col cols="0" md="2" class="py-0" />
+                                        <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                             <span
                                                 class="body2 font-weight-bold py-0"
                                                 style="display: flex; justify-content: flex-start"
@@ -808,7 +858,7 @@
                                                 Movilidad de servicio
                                             </span>
                                         </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
+                                        <v-col cols="6" md="4" class="seguimiento py-0">
                                             <span class="body2 font-weight-bold">000.000.000 COP</span>
                                         </v-col>
                                     </v-row>
@@ -816,8 +866,8 @@
                                         <v-divider style="max-width: 60%; margin-right: 82px" />
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
+                                        <v-col cols="0" md="2" class="py-0" />
+                                        <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                             <span
                                                 class="body2 font-weight-bold py-0"
                                                 style="display: flex; justify-content: flex-start"
@@ -825,7 +875,7 @@
                                                 Rete fuente
                                             </span>
                                         </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
+                                        <v-col cols="6" md="4" class="seguimiento py-0">
                                             <span class="body2 font-weight-bold">000.000.000 COP</span>
                                         </v-col>
                                     </v-row>
@@ -833,8 +883,8 @@
                                         <v-divider style="max-width: 60%; margin-right: 82px" />
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
+                                        <v-col cols="0" md="2" class="py-0" />
+                                        <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                             <span
                                                 class="body2 font-weight-bold py-0"
                                                 style="display: flex; justify-content: flex-start"
@@ -842,7 +892,7 @@
                                                 IVA
                                             </span>
                                         </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
+                                        <v-col cols="6" md="4" class="seguimiento py-0">
                                             <span class="body2 font-weight-bold">000.000.000 COP</span>
                                         </v-col>
                                     </v-row>
@@ -850,8 +900,8 @@
                                         <v-divider style="max-width: 60%; margin-right: 82px" />
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
+                                        <v-col cols="0" md="2" class="py-0" />
+                                        <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                             <span
                                                 class="body2 font-weight-bold py-0"
                                                 style="display: flex; justify-content: flex-start"
@@ -859,7 +909,7 @@
                                                 Recargo detalle
                                             </span>
                                         </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
+                                        <v-col cols="6" md="4" class="seguimiento py-0">
                                             <span class="body2 font-weight-bold">000.000.000 COP</span>
                                         </v-col>
                                     </v-row>
@@ -867,8 +917,8 @@
                                         <v-divider style="max-width: 60%; margin-right: 82px" />
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
+                                        <v-col cols="0" md="2" class="py-0" />
+                                        <v-col cols="6" md="3" class="py-0 pl-0 pl-md-3">
                                             <span
                                                 class="body2 font-weight-bold py-0"
                                                 style="display: flex; justify-content: flex-start; font-size: 15px"
@@ -876,13 +926,13 @@
                                                 Otros impuestos
                                             </span>
                                         </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
+                                        <v-col cols="6" md="4" class="seguimiento py-0">
                                             <span class="body2 font-weight-bold">000.000.000 COP</span>
                                         </v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col
-                                            class="boton-continuar"
+                                            class="boton-continuar pl-0 pl-md-3"
                                             style="display: flex; justify-content: flex-start; align-items: center"
                                         >
                                             <CustomButton
@@ -893,7 +943,7 @@
                                             />
                                         </v-col>
                                         <v-col
-                                            class="boton-continuar"
+                                            class="boton-continuar pl-0 pl-md-3"
                                             style="display: flex; justify-content: flex-end; align-items: center"
                                         >
                                             <CustomButton
@@ -1107,26 +1157,28 @@
                                     "
                                 >
                                     <div class="d-flex justify-space-between mb-2">
-                                        <span class="subtitle1 text-uppercase bold">correo electrónico</span>
-                                        <span class="body1">--</span>
+                                        <span class="subtitle1 text-uppercase bold pl-3">correo electrónico</span>
+                                        <span class="body1 pr-3">--</span>
                                     </div>
                                     <div class="d-flex justify-space-between mb-2">
-                                        <span class="subtitle1 text-uppercase bold">Tipo de persona</span>
-                                        <span class="body1 text-right">--</span>
+                                        <span class="subtitle1 text-uppercase bold pl-3">Tipo de persona</span>
+                                        <span class="body1 text-right pr-3">--</span>
                                     </div>
                                     <div class="d-flex justify-space-between mb-2">
-                                        <span class="subtitle1 text-uppercase bold"> Descripción de Dirección </span>
-                                        <span class="body1">{{
+                                        <span class="subtitle1 text-uppercase bold pl-3">
+                                            Descripción de Dirección
+                                        </span>
+                                        <span class="body1 pr-3">{{
                                             addressFacturacion?.address | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                         }}</span>
                                     </div>
                                     <div class="d-flex justify-space-between mb-2">
-                                        <span class="subtitle1 text-uppercase bold">Tipo de documento</span>
-                                        <span class="body1">--</span>
+                                        <span class="subtitle1 text-uppercase bold pl-3">Tipo de documento</span>
+                                        <span class="body1 pr-3">--</span>
                                     </div>
                                     <div class="d-flex justify-space-between mb-2">
-                                        <span class="subtitle1 text-uppercase bold">Número de documento</span>
-                                        <span class="body1">--</span>
+                                        <span class="subtitle1 text-uppercase bold pl-3">Número de documento</span>
+                                        <span class="body1 pr-3">--</span>
                                     </div>
                                 </div>
                                 <!-- <label class="label my-3">
@@ -1178,16 +1230,16 @@
                         </v-col>
                         <v-col cols="12" order="3" order-md="3" order-sm="3" class="d-flex justify-space-between">
                             <v-row class="barra-inferior">
-                                <v-col cols="2" style="display: flex; justify-content: flex-start; align-items: center">
+                                <v-col
+                                    cols="2"
+                                    class="d-none d-md-flex"
+                                    style="display: flex; justify-content: flex-start; align-items: center"
+                                >
                                     <div v-if="mostrarDetalles == false">
                                         <CustomButton text="< Volver" color="nero" @click="numberPag = 2" />
                                     </div>
                                 </v-col>
-                                <v-col
-                                    cols="12"
-                                    md="8"
-                                    style="display: flex; justify-content: flex-start; gap: 70px; align-items: center"
-                                >
+                                <v-col cols="12" md="8" class="gap-1 pl-0 pl-md-3">
                                     <TotalPago :total="priceTotal" />
 
                                     <v-divider vertical></v-divider>
@@ -1213,13 +1265,26 @@
                                         </i>
                                     </CustomButton>
                                 </v-col>
+
+                                <v-col cols="6" class="d-flex d-md-none pl-0">
+                                    <div v-if="mostrarDetalles == false" class="boton-continuar">
+                                        <CustomButton
+                                            class="boton-continuar"
+                                            text="< Volver"
+                                            color="nero"
+                                            @click="numberPag = 2"
+                                        />
+                                    </div>
+                                </v-col>
+
                                 <v-col
-                                    cols="12"
+                                    cols="6"
                                     md="2"
                                     style="display: flex; justify-content: flex-end; align-items: center"
                                 >
-                                    <div v-if="mostrarDetalles == false">
+                                    <div v-if="mostrarDetalles == false" class="boton-continuar">
                                         <CustomButton
+                                            class="boton-continuar"
                                             text="Continuar"
                                             color="nero"
                                             @click="proceedCheckout()"
@@ -1228,344 +1293,350 @@
                                         />
                                     </div>
                                 </v-col>
-                                <v-col
-                                    cols="12"
-                                    style="justify-content: center; max-height: 300px; overflow-y: scroll"
-                                    v-if="mostrarDetalles"
-                                >
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="4" style="display: flex; justify-content: flex-start; gap: 10px">
-                                            <total :total="priceTotal" />
-                                            <v-divider vertical></v-divider>
-                                            <div class="icono-cantidad">
-                                                <CustomFavorite />
-                                                <span style="color: #919191; margin-left: 10px">{{
-                                                    getCartCount
-                                                }}</span>
-                                            </div>
-                                        </v-col>
-                                        <v-col cols="3" />
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold"
-                                                style="display: flex; justify-content: flex-start"
+                                <v-col cols="12" v-if="mostrarDetalles">
+                                    <div style="justify-content: center; max-height: 300px; overflow-y: scroll">
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col
+                                                cols="12"
+                                                md="4"
+                                                style="display: flex; justify-content: flex-start; gap: 10px"
                                             >
-                                                Descuento detalle
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
+                                                <total :total="priceTotal" />
+                                                <v-divider vertical></v-divider>
+                                                <div class="icono-cantidad">
+                                                    <CustomFavorite />
+                                                    <span style="color: #919191; margin-left: 10px">{{
+                                                        getCartCount
+                                                    }}</span>
+                                                </div>
+                                            </v-col>
+                                            <v-col cols="0" md="3" />
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Descuento detalle
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Recargo detalle
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start; font-size: 15px"
+                                                >
+                                                    TOTAL BRUTO FACTURA
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold" style="font-size: 15px"
+                                                    >000.000.000 COP</span
+                                                >
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    IVA
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Otros impuestos
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start; font-size: 15px"
+                                                >
+                                                    TOTAL IMPUESTO
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold" style="font-size: 15px"
+                                                    >000.000.000 COP</span
+                                                >
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Rete ICA
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Rete IVA
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Rete fuente
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start; font-size: 15px"
+                                                >
+                                                    TOTAL RETENCIONES
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold" style="font-size: 15px"
+                                                    >000.000.000 COP</span
+                                                >
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col
+                                                cols="12"
+                                                md="6"
+                                                style="display: flex; justify-content: flex-start; gap: 10px"
                                             >
-                                                Recargo detalle
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start; font-size: 15px"
-                                            >
-                                                TOTAL BRUTO FACTURA
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold" style="font-size: 15px"
-                                                >000.000.000 COP</span
-                                            >
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                IVA
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Otros impuestos
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start; font-size: 15px"
-                                            >
-                                                TOTAL IMPUESTO
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold" style="font-size: 15px"
-                                                >000.000.000 COP</span
-                                            >
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Rete ICA
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Rete IVA
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Rete fuente
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start; font-size: 15px"
-                                            >
-                                                TOTAL RETENCIONES
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold" style="font-size: 15px"
-                                                >000.000.000 COP</span
-                                            >
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="6" style="display: flex; justify-content: flex-start; gap: 10px">
-                                            <TotalFlete :total="priceTotal" />
-                                            <v-divider vertical></v-divider>
-                                            <div class="icono-exclamacion d-flex">
-                                                <v-tooltip top color="black">
-                                                    <template v-slot:activator="{ on, attrs }">
-                                                        <i
-                                                            class="las la-exclamation-circle"
-                                                            v-bind="attrs"
-                                                            v-on="on"
-                                                            style="font-size: 30px; transform: rotate(180deg)"
-                                                        ></i>
-                                                    </template>
-                                                    <span>El costo logístico se suma al valor subtotal</span>
-                                                    <br />
-                                                    <span>de la compra al pagar. El precio del Envío de</span>
-                                                    <br />
-                                                    <span>mercancia es gratuito en la ciudad capital al</span>
-                                                    <br />
-                                                    <span>superar el valor de 500.000 COP en el pedido.</span>
-                                                    <br />
-                                                    <span>(Valor sujeto a cambio) El costo de movilidad</span>
-                                                    <br />
-                                                    <span>de servicio varía dependiendo la ubicación de</span>
-                                                    <br />
-                                                    <span>la dirección de servicio. Para saber más.</span>
-                                                </v-tooltip>
-                                            </div>
-                                        </v-col>
-                                        <v-col cols="1" />
-                                    </v-row>
+                                                <TotalFlete :total="priceTotal" />
+                                                <v-divider vertical></v-divider>
+                                                <div class="icono-exclamacion d-flex">
+                                                    <v-tooltip top color="black">
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                            <i
+                                                                class="las la-exclamation-circle"
+                                                                v-bind="attrs"
+                                                                v-on="on"
+                                                                style="font-size: 30px; transform: rotate(180deg)"
+                                                            ></i>
+                                                        </template>
+                                                        <span>El costo logístico se suma al valor subtotal</span>
+                                                        <br />
+                                                        <span>de la compra al pagar. El precio del Envío de</span>
+                                                        <br />
+                                                        <span>mercancia es gratuito en la ciudad capital al</span>
+                                                        <br />
+                                                        <span>superar el valor de 500.000 COP en el pedido.</span>
+                                                        <br />
+                                                        <span>(Valor sujeto a cambio) El costo de movilidad</span>
+                                                        <br />
+                                                        <span>de servicio varía dependiendo la ubicación de</span>
+                                                        <br />
+                                                        <span>la dirección de servicio. Para saber más.</span>
+                                                    </v-tooltip>
+                                                </div>
+                                            </v-col>
+                                            <v-col cols="0" md="1" />
+                                        </v-row>
 
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
 
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Envío de mercancia
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Movilidad de servicio
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Rete fuente
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                IVA
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start"
-                                            >
-                                                Recargo detalle
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row style="justify-content: center">
-                                        <v-divider style="max-width: 60%; margin-right: 82px" />
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="2" />
-                                        <v-col cols="3" class="py-0">
-                                            <span
-                                                class="body2 font-weight-bold py-0"
-                                                style="display: flex; justify-content: flex-start; font-size: 15px"
-                                            >
-                                                Otros impuestos
-                                            </span>
-                                        </v-col>
-                                        <v-col cols="4" class="seguimiento py-0">
-                                            <span class="body2 font-weight-bold">000.000.000 COP</span>
-                                        </v-col>
-                                    </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Envío de mercancia
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Movilidad de servicio
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Rete fuente
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    IVA
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start"
+                                                >
+                                                    Recargo detalle
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row style="justify-content: center">
+                                            <v-divider style="max-width: 60%; margin-right: 82px" />
+                                        </v-row>
+                                        <v-row>
+                                            <v-col cols="0" md="2" class="py-0" />
+                                            <v-col cols="6" md="3" class="py-0">
+                                                <span
+                                                    class="body2 font-weight-bold py-0"
+                                                    style="display: flex; justify-content: flex-start; font-size: 15px"
+                                                >
+                                                    Otros impuestos
+                                                </span>
+                                            </v-col>
+                                            <v-col cols="6" md="4" class="seguimiento py-0">
+                                                <span class="body2 font-weight-bold">000.000.000 COP</span>
+                                            </v-col>
+                                        </v-row>
+                                    </div>
                                     <v-row>
                                         <v-col style="display: flex; justify-content: flex-start; align-items: center">
                                             <CustomButton text="< Volver" color="nero" @click="numberPag = 2" />
@@ -2180,52 +2251,54 @@
                                             "
                                         >
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Nombre de Dirección</span>
-                                                <span class="body1">Dirección principal</span>
+                                                <span class="subtitle1 text-uppercase bold pl-3"
+                                                    >Nombre de Dirección</span
+                                                >
+                                                <span class="body1 pr-3">Dirección principal</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Dirección</span>
-                                                <span class="body1 text-right">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Dirección</span>
+                                                <span class="body1 text-right pr-3">{{
                                                     addressFacturacion?.address
                                                         | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">
+                                                <span class="subtitle1 text-uppercase bold pl-3">
                                                     Descripción de Dirección
                                                 </span>
-                                                <span class="body1">{{
+                                                <span class="body1 pr-3">{{
                                                     addressFacturacion?.address
                                                         | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Codigo Postal</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Codigo Postal</span>
+                                                <span class="body1 pr-3">{{
                                                     addressFacturacion?.postal_code
                                                         | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Departamento</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Departamento</span>
+                                                <span class="body1 pr-3">{{
                                                     addressFacturacion?.country
                                                         | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Municipio</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Municipio</span>
+                                                <span class="body1 pr-3">{{
                                                     addressFacturacion?.city | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Barrio</span>
-                                                <span class="body1"> -- </span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">Barrio</span>
+                                                <span class="body1 pr-3"> -- </span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Telefono / Movil</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Telefono / Movil</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.phone | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
@@ -2239,57 +2312,59 @@
                                             "
                                         >
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Nombre de Dirección</span>
-                                                <span class="body1">Dirección principal</span>
+                                                <span class="subtitle1 text-uppercase bold pl-3"
+                                                    >Nombre de Dirección</span
+                                                >
+                                                <span class="body1 pr-3">Dirección principal</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Dirección</span>
-                                                <span class="body1 text-right">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Dirección</span>
+                                                <span class="body1 text-right pr-3">{{
                                                     addressPrincipal?.address | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">
+                                                <span class="subtitle1 text-uppercase bold pl-3">
                                                     Descripción de Dirección
                                                 </span>
-                                                <span class="body1">{{
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.address | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Codigo Postal</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Codigo Postal</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.postal_code
                                                         | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Departamento</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Departamento</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.country | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Municipio</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Municipio</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.city | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Barrio</span>
-                                                <span class="body1"> -- </span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">Barrio</span>
+                                                <span class="body1 pr-3"> -- </span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">
+                                                <span class="subtitle1 text-uppercase bold pl-3">
                                                     Nombre de quien lo va a recibir
                                                 </span>
-                                                <span class="body1">{{
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.name | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Telefono / Movil</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Telefono / Movil</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.phone | filtroParaOcultarInfo(mostrarDatosEnvio)
                                                 }}</span>
                                             </div>
@@ -2312,20 +2387,20 @@
                                         <h5 class="black--text">Encargado</h5>
                                         <v-divider class="my-3" />
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Correo electronico</span>
-                                            <span class="body1">{{ currentUser.email || "--" }}</span>
+                                            <span class="subtitle1 text-uppercase bold pl-3">Correo electronico</span>
+                                            <span class="body1 pr-3">{{ currentUser.email || "--" }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Tipo de Persona</span>
-                                            <span class="body1">{{ currentUser.personType || "--" }}</span>
+                                            <span class="subtitle1 text-uppercase bold pl-3">Tipo de Persona</span>
+                                            <span class="body1 pr-3">{{ currentUser.personType || "--" }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Nombre</span>
-                                            <span class="body1">{{ currentUser.name || "--" }}</span>
+                                            <span class="subtitle1 text-uppercase bold pl-3">Nombre</span>
+                                            <span class="body1 pr-3">{{ currentUser.name || "--" }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-3">
-                                            <span class="subtitle1 text-uppercase bold">Documento</span>
-                                            <span class="body1">
+                                            <span class="subtitle1 text-uppercase bold pl-3">Documento</span>
+                                            <span class="body1 pr-3">
                                                 {{ currentUser.documentType || "--" }}
                                                 {{ currentUser.documentNumber || "--" }}
                                             </span>
@@ -2364,52 +2439,54 @@
                                             "
                                         >
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Nombre de Dirección</span>
-                                                <span class="body1">Dirección principal</span>
+                                                <span class="subtitle1 text-uppercase bold pl-3"
+                                                    >Nombre de Dirección</span
+                                                >
+                                                <span class="body1 pr-3">Dirección principal</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Dirección</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Dirección</span>
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.address
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">
+                                                <span class="subtitle1 text-uppercase bold pl-3">
                                                     Descripción de Dirección
                                                 </span>
-                                                <span class="body1">{{
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.address
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Codigo Postal</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Codigo Postal</span>
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.postal_code
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Departamento</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Departamento</span>
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.country
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Municipio</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Municipio</span>
+                                                <span class="body1 pr-3">{{
                                                     addressServicio?.city | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Barrio</span>
-                                                <span class="body1"> -- </span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">Barrio</span>
+                                                <span class="body1 pr-3"> -- </span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Telefono / Movil</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Telefono / Movil</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.phone
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
@@ -2424,60 +2501,62 @@
                                             "
                                         >
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Nombre de Dirección</span>
-                                                <span class="body1">Dirección principal</span>
+                                                <span class="subtitle1 text-uppercase bold pl-3"
+                                                    >Nombre de Dirección</span
+                                                >
+                                                <span class="body1 pr-3">Dirección principal</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Dirección</span>
-                                                <span class="body1 text-right">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Dirección</span>
+                                                <span class="body1 text-right pr-3">{{
                                                     addressPrincipal?.address
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">
+                                                <span class="subtitle1 text-uppercase bold pl-3">
                                                     Descripción de Dirección
                                                 </span>
-                                                <span class="body1">{{
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.address
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Codigo Postal</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Codigo Postal</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.postal_code
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Departamento</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Departamento</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.country
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Municipio</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Municipio</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.city | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Barrio</span>
-                                                <span class="body1"> -- </span>
+                                                <span class="subtitle1 text-uppercase bold pl-3">Barrio</span>
+                                                <span class="body1 pr-3"> -- </span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">
+                                                <span class="subtitle1 text-uppercase bold pl-3">
                                                     Nombre de quien lo va a recibir
                                                 </span>
-                                                <span class="body1">{{
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.name | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
                                             </div>
                                             <div class="d-flex justify-space-between mb-2">
-                                                <span class="subtitle1 text-uppercase bold">Telefono / Movil</span>
-                                                <span class="body1">{{
+                                                <span class="subtitle1 text-uppercase bold pl-3">Telefono / Movil</span>
+                                                <span class="body1 pr-3">{{
                                                     addressPrincipal?.phone
                                                         | filtroParaOcultarInfo(mostrarDatosServicio)
                                                 }}</span>
@@ -2532,60 +2611,60 @@
                                             :items="langSelectItems"
                                         />
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Nombre de Dirección</span>
-                                            <span class="body1">Dirección principal</span>
+                                            <span class="subtitle1 text-uppercase bold pl-3">Nombre de Dirección</span>
+                                            <span class="body1 pr-3">Dirección principal</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Dirección</span>
-                                            <span class="body1 text-right">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Dirección</span>
+                                            <span class="body1 text-right pr-3">{{
                                                 addressPrincipal?.address
                                                     | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">
+                                            <span class="subtitle1 text-uppercase bold pl-3">
                                                 Descripción de Dirección
                                             </span>
-                                            <span class="body1">{{
+                                            <span class="body1 pr-3">{{
                                                 addressPrincipal?.address
                                                     | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Codigo Postal</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Codigo Postal</span>
+                                            <span class="body1 pr-3">{{
                                                 addressPrincipal?.postal_code
                                                     | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Departamento</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Departamento</span>
+                                            <span class="body1 pr-3">{{
                                                 addressPrincipal?.country
                                                     | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Municipio</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Municipio</span>
+                                            <span class="body1 pr-3">{{
                                                 addressPrincipal?.city | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Barrio</span>
-                                            <span class="body1"> -- </span>
+                                            <span class="subtitle1 text-uppercase bold pl-3">Barrio</span>
+                                            <span class="body1 pr-3"> -- </span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">
+                                            <span class="subtitle1 text-uppercase bold pl-3">
                                                 Nombre de quien lo va a recibir
                                             </span>
-                                            <span class="body1">{{
+                                            <span class="body1 pr-3">{{
                                                 addressPrincipal?.name | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                             }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
-                                            <span class="subtitle1 text-uppercase bold">Telefono / Movil</span>
-                                            <span class="body1">{{
+                                            <span class="subtitle1 text-uppercase bold pl-3">Telefono / Movil</span>
+                                            <span class="body1 pr-3">{{
                                                 addressPrincipal?.phone | filtroParaOcultarInfo(mostrarDatosFacturacion)
                                             }}</span>
                                         </div>
@@ -2769,7 +2848,8 @@ export default {
             selectedAddressServicio: {},
             selectedAddressEnvio: {},
             typeAddress: "shipping",
-            useDefaultAddress1: false,
+            useDefaultAddress1: true,
+            // useDefaultAddress1: false,
             useDefaultAddress2: false,
             profileSelectedForEdit: {},
             profileDialogShow: false,
@@ -3246,8 +3326,8 @@ export default {
 
 .checkmark {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 40px;
+    left: 15px;
     height: 25px;
     width: 25px;
     background-color: #eee;
@@ -3446,6 +3526,8 @@ export default {
 
 .icono-cantidad {
     background: white;
+    border: 1px solid #e7e7e7;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3460,10 +3542,12 @@ export default {
 .barra-inferior {
     position: fixed;
     bottom: 0;
-    width: 75%;
     background-color: transparent;
     backdrop-filter: blur(5px);
     margin-bottom: 0 !important;
+    @media screen and (min-width: 820px) {
+        width: 75%;
+    }
 }
 
 .detalles-final {
@@ -3487,5 +3571,26 @@ export default {
     .boton-continuar {
         width: 100%;
     }
+}
+
+.gap {
+    gap: 5px;
+    @media screen and (min-width: 440px) {
+        gap: 25px;
+    }
+}
+
+.gap-1 {
+    gap: 25px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    @media screen and (min-width: 440px) {
+        gap: 70px;
+    }
+}
+
+.bold {
+    font-weight: bold;
 }
 </style>

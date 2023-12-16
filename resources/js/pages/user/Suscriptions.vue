@@ -11,9 +11,9 @@
                         :date="item?.date"
                         colorStatus="red"
                         :descriptionStatus="item.orders[0]?.payment_status"
-                        icon1="la-download"
-                        icon2="la-eye"
-                        icon3="la-print"
+                        icon1="compartir"
+                        icon2="ojo"
+                        icon3="renovar"
                     />
                 </v-col>
             </v-row>
@@ -32,6 +32,7 @@
 
 <script>
 import SuscriptionHistory from "../../components/global/SuscriptionHistory.vue";
+import CustomButton from "../../components/global/CustomButton.vue";
 
 export default {
     data: () => ({
@@ -42,7 +43,8 @@ export default {
         selectedOrder: {}
     }),
     components: {
-        SuscriptionHistory
+        SuscriptionHistory,
+        CustomButton
     },
     computed: {
         headers() {

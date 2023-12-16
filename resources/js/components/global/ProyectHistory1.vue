@@ -1,12 +1,40 @@
 <template>
     <div class="product-box-cart">
         <div class="product-box-cart-body">
-            <div class="product-box-cart-info">
-                <p class="product-box-cart-brand-name mb-0">01 PLAN</p>
-                <h6 class="product-box-cart-name">Orden de pedido # {{ order }}</h6>
-            </div>
+                <v-row>
+                    <v-col cols="3" md="1" class="d-flex justify-center justify-md-end align-center pr-0">
+                        <custom-button
+                                plain
+                                :to="{ name: 'Proyects', params: { code: order } }"
+                            >
+                            <i class="las la-angle-left" style="font-size: 25px;"></i>
+                            </custom-button>
+                    </v-col>
+                    <v-col cols="1" class="d-flex justify-center align-center pl-0">
+                        <v-divider vertical/>
+                    </v-col>
+                    <v-col cols="12" md="5" class="align-center justify-center justify-md-start" style="display: grid;">
+                        <div class="product-box-cart-info pl-0">
+                            <p class="product-box-cart-brand-name mb-0">CDD0097{{ order }}</p>
+                            <h6 style="font-weight: bold;">NOMBRE DE LA COLECCION</h6>
+                        </div>
+                    </v-col>
+                    <v-col cols="1" class="d-none d-md-flex justify-center align-center pl-0">
+                        <v-divider vertical/>
+                    </v-col>
+                    <v-col cols="12" class="d-flex d-md-none justify-center align-center">
+                        <v-divider />
+                    </v-col>
+                    <v-col cols="12" md="4">
+                        <div class="product-box-cart-info pl-0 justify-center justify-md-start" style="display: grid;">
+                            <p class="d-flex justify-center justify-md-start" style="font-weight: bold;">ADQUIRIDO</p>
+                            <p class="mb-0">Fecha 02 de Julio, 1:30pm</p>
+                        </div>
+                    </v-col>
+                </v-row>
         </div>
-        <div class="product-box-cart-actions">
+
+        <div class="d-none d-md-flex product-box-cart-actions">
             <div class="product-box-cart-actions-icons d-md-flex">
                 <v-tooltip bottom color="black">
                     <template v-slot:activator="{ on, attrs }">
@@ -22,51 +50,85 @@
                     </template>
                     <span>Compartir</span>
                 </v-tooltip>
-                
-                <v-tooltip bottom color="black">
-                    <template v-slot:activator="{ on, attrs }">
-                        <div v-bind="attrs" v-on="on">
-                            <custom-button
-                                v-if="icon2"
-                                plain
-                                :to="{ name: 'SuscriptionDetails', params: { code: order } }"
-                            >
-                                <Ojo />
-                            </custom-button>
-                        </div>
-                    </template>
-                    <span>Ver detalles</span>
-                </v-tooltip>
                 <v-tooltip bottom color="black">
                     <template v-slot:activator="{ on, attrs }">
                         <div v-bind="attrs" v-on="on">
                             <custom-button
                                 v-if="icon3"
-                                plain
-                                :icon="icon3"
+                                plain 
                                 :to="{ name: 'OrderDetails', params: { code: order } }"
                             >
-
+                            <Favorito />
                             </custom-button>
                         </div>
                     </template>
-                    <span>Renovar plan</span>
+                    <span>Añadir a favoritos</span>
                 </v-tooltip>
             </div>
         </div>
+
+        <div class="d-flex d-md-none justify-end align-center">
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                            v-bind="attrs"
+                            v-on="on"
+                            style="box-shadow: none; background-color: transparent;"
+                            >
+                            <Ellipsis />
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item class="pa-0">
+                                <v-list-item-action class="mr-0">
+                                    <custom-button
+                                        v-if="icon1"
+                                        plain
+                                        :to="{ name: 'OrderDetails', params: { code: order } }"
+                                    >
+                                        <Compartir /><p class="mb-0 pl-1">Compartir</p>
+                                    </custom-button>
+                                    
+                                </v-list-item-action>
+                            </v-list-item>
+
+                            <v-list-item class="pa-0">
+                                <v-list-item-action class="mr-0">
+                                    <custom-button
+                                        v-if="icon3"
+                                        plain 
+                                        :to="{ name: 'OrderDetails', params: { code: order } }"
+                                    >
+                                    <Favorito /><p class="mb-0 pl-2">Favorito</p>
+                                    </custom-button>
+                                </v-list-item-action>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
+                </div>
+        
     </div>
 </template>
 
 <script>
 import CustomButton from "./CustomButton.vue";
+import Favorito from "../../components/icons/Favorito.vue";
 import Compartir from "../../components/icons/Compartir.vue";
-import Ojo from "../../components/icons/Ojo.vue";
+import Ellipsis from "../../components/icons/EllipsisIcon.vue";
 
 export default {
+    data: () => ({
+      items: [
+        { icono: 'la-download', title: 'Descargar' },
+        { icono: 'la-share-alt-square', title: 'Compartir' },
+        { icono: 'la-print', title: 'Imprimir' },
+      ],
+    }),
     components: {
         CustomButton,
+        Favorito,
         Compartir,
-        Ojo
+        Ellipsis
     },
     props: {
         order: String,
@@ -85,9 +147,9 @@ export default {
     display: grid;
     align-items: stretch;
     grid-template-columns: 10fr 2fr;
-
+    border: 1px solid #eceded;
     border-radius: 10px;
-    background-color: #f5f5f5;
+    background-color: #fafcfc !important;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     box-sizing: border-box;
@@ -185,7 +247,8 @@ export default {
 
     &-brand-name {
         font-family: "Roboto", sans-serif;
-        font-size: var(--font-size-body1);
+        // font-size: var(--font-size-body1);
+        font-size: 10px;
         line-height: 24px;
         letter-spacing: 0;
     }
@@ -349,4 +412,6 @@ export default {
     display: flex;
     gap: 8px;
 }
+
+
 </style>

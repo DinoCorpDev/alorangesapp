@@ -1,26 +1,51 @@
 <template>
-    <v-container>
+    <v-container class="px-0 px-md-3">
         <v-row>
             <v-col cols="12 invoice-div">
-                <SuscriptionHistory
+                <SuscriptionHistory1
                     style="background-color: #f5f5f5;"
                     :order="order?.code"
                     :date="order?.date"
                     colorStatus="red"
                     :descriptionStatus="order.orders[0].payment_status"
                     icon1="la-download"
-                    icon2="la-eye"
                     icon3="la-print"
                 />
             </v-col>
         </v-row>
+
+        <div class="form">
+            <v-row>
+                <v-col cols="12" md="6">
+                    <v-row>
+                        <v-col cols="6">
+                            <p>COBERTURA</p>
+                        </v-col>
+                        <v-col cols="6">
+                            <p>Nacional</p>
+                        </v-col>
+                        <v-col cols="6">
+                            <p>GARANTIA</p>
+                        </v-col>
+                        <v-col cols="6">
+                            <p>3 Meses</p>
+                        </v-col><v-col cols="6">
+                            <p>JORNADAS DE SERVICIO</p>
+                        </v-col>
+                        <v-col cols="6">
+                            <p>7 am-11 am y 1 pm-5 pm</p>
+                        </v-col>
+                    </v-row>    
+                </v-col>
+            </v-row>
+        </div>
         <v-divider class="mt-6 mb-3"></v-divider>
         <Summary :order-details="order" />
     </v-container>
 </template>
 
 <script>
-import SuscriptionHistory from "../../components/global/SuscriptionHistory.vue";
+import SuscriptionHistory1 from "../../components/global/SuscriptionHistory1.vue";
 import Summary from "../../components/order/Summary.vue";
 
 export default {
@@ -31,7 +56,7 @@ export default {
         };
     },
     components: {
-        SuscriptionHistory,
+        SuscriptionHistory1,
         Summary
     },
     methods: {
@@ -58,8 +83,14 @@ export default {
 .container {
     background-color: #ffffff;
 }
-
 .invoice-div {
     padding: 8px 10px 0 10px;
+}
+
+.form {
+    border: 1px solid #f5f5f5;
+    border-radius: 10px;
+    padding: 10px;
+    background: #f5f5f5;
 }
 </style>

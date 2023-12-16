@@ -1,26 +1,25 @@
 <template>
-    <v-container>
+    <v-container class="px-0 px-md-3">
         <v-row>
             <v-col cols="12 invoice-div">
-                <ProyectHistory
+                <ProyectHistory1
                     style="background-color: #f5f5f5;"
                     :order="order?.code"
                     :date="order?.date"
                     colorStatus="red"
                     :descriptionStatus="order.orders[0].payment_status"
                     icon1="la-download"
-                    icon2="la-eye"
                     icon3="la-print"
                 />
             </v-col>
         </v-row>
         <v-divider class="mt-6 mb-3"></v-divider>
-        <Summary :order-details="order" />
+        <Summary :order-details="order" ></Summary>
     </v-container>
 </template>
 
 <script>
-import ProyectHistory from "../../components/global/ProyectHistory.vue";
+import ProyectHistory1 from "../../components/global/ProyectHistory1.vue";
 import Summary from "../../components/order/Summary.vue";
 
 export default {
@@ -31,7 +30,7 @@ export default {
         };
     },
     components: {
-        ProyectHistory,
+        ProyectHistory1,
         Summary
     },
     methods: {
@@ -56,7 +55,7 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-    background-color: #ffffff;
+    background-color: #fafcfc;
 }
 
 .invoice-div {

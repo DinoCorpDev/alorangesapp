@@ -2,9 +2,9 @@
     <div class="product-box-cart">
         <div class="product-box-cart-body">
             <div class="product-box-cart-info">
-                <p class="product-box-cart-brand-name mb-0">CDD0097</p>
-                <h6 class="product-box-cart-name">{{ order }}</h6>
-            </div>
+                <p class="product-box-cart-brand-name mb-0">CDD0097{{ order }}</p>
+                <h6 class="product-box-cart-name">NOMBRE DE LA COLECCION</h6>
+            </div>     
         </div>
         <div class="product-box-cart-actions">
             <div class="product-box-cart-actions-icons d-md-flex">
@@ -29,7 +29,7 @@
                             <custom-button
                                 v-if="icon2"
                                 plain
-                                :to="{ name: 'OrderDetails', params: { code: order } }"
+                                :to="{ name: 'ProyectDetails', params: { code: order } }"
                             >
                             <Ojo />
                             </custom-button>

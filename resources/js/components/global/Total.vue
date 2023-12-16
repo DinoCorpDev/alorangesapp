@@ -2,7 +2,7 @@
     <div class="inicio d-flex justify-center">
         <div class="div_total">
             <div class="cuerpo" style="display: flex; align-items: end">
-                <span class="text-uppercase bold title" style="padding-right: 21px">SUBTOTAL </span>
+                <span class="text-uppercase bold title pr-1 pr-sm-5">SUBTOTAL</span>
                 <span class="text-uppercase price"> {{ format_price(getCartPrice) }} COP</span>
             </div>
         </div>

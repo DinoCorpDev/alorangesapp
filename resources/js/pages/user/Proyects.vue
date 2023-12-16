@@ -1,7 +1,7 @@
 <template>
     <v-row class="proyects">
         <v-col cols="12">
-            <h5 class="proyects-title">PROYECTOS</h5>
+            <h5 class="proyects-title">COLECCIONES</h5>
             <v-divider class="my-3" />
             <v-row v-if="orders.length > 0" no-gutters class="proyects-items" style="max-width: 95%; max-height: 450px; overflow-y: scroll;">
                 <v-col cols="12" v-for="(item, i) in orders" :key="i">
@@ -11,9 +11,9 @@
                         :date="item?.date"
                         colorStatus="red"
                         :descriptionStatus="item.orders[0]?.payment_status"
-                        icon1="la-share-alt-square"
-                        icon2="la-eye"
-                        icon3="la-print"
+                        icon1="compartir"
+                        icon2="ojo"
+                        icon3="favorito"
                     />
                 </v-col>
             </v-row>
@@ -33,6 +33,7 @@
 <script>
 import ProyectHistory from "../../components/global/ProyectHistory.vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import CustomButton from "../../components/global/CustomButton.vue";
 
 
 export default {
@@ -44,7 +45,8 @@ export default {
         selectedOrder: {}
     }),
     components: {
-        ProyectHistory
+        ProyectHistory,
+        CustomButton
     },
     async created() {
         await this.getUser();
