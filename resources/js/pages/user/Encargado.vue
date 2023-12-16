@@ -13,22 +13,16 @@
                 <v-col cols="12">
                     <span class="subtitle1 text-uppercase bold">TELÉFONO / CELULAR</span>
                 </v-col>
-                <v-col cols="3" md="3">
-                    <CustomInput
-                        v-model="formEncargadoModelo.indicativo"
-                        name="indicativo"
-                        required
-                        placeholder="+XX"
-                    />
-                </v-col>
 
-                <v-col cols="9" md="9" sm="9">
-                    <CustomInput
+                <v-col cols="12">
+                    <vue-tel-input
                         v-model="formEncargadoModelo.encargado_telefono"
-                        name="encargado_telefono"
-                        required
-                        placeholder="TELEFONO"
-                    />
+                        :onlyCountries="availableCountries"
+                        aria-placeholder="NUMERO DE TELEFONO"
+                        mode="international"
+                        inputOptions.placeholder=""
+                    >
+                    </vue-tel-input>
                 </v-col>
 
                 <v-col cols="4">
@@ -43,13 +37,16 @@
     </v-form>
 </template>
 <script>
+import { VueTelInput } from "vue-tel-input";
+import { mapGetters } from "vuex";
 import CustomButton from "../../components/global/CustomButton.vue";
 import CustomInput from "../../components/global/CustomInput.vue";
 
 export default {
     components: {
         CustomButton,
-        CustomInput
+        CustomInput,
+        VueTelInput
     },
     data() {
         return {
@@ -59,6 +56,9 @@ export default {
                 encargado_telefono: null
             }
         };
+    },
+    computed: {
+        ...mapGetters("app", ["availableCountries"])
     },
     methods: {
         submitEncargado() {

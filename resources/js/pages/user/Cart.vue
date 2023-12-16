@@ -301,7 +301,7 @@
                                 <v-col cols="12">
                                     <h5 class="fw-600">Dirección de envío</h5>
                                     <v-divider class="my-4" />
-                                    <div class="form mb-5">
+                                    <div class="form mb-5" v-if="!addDialogShow">
                                         <v-row>
                                             <v-col cols="11">
                                                 <SelectCustom
@@ -330,18 +330,12 @@
                                             </v-col>
                                         </v-row>
                                         <v-divider class="my-3" />
-                                        <SelectCustom
-                                            :dark="darkBoxes"
-                                            label="Usuario Principal"
-                                            :items="addressesParaEnvio"
-                                            @input="changeAddress($event, 0)"
-                                            item-text="address"
-                                            item-value="id"
-                                            placeholder="Seleccione una opcion"
-                                        />
                                         <div class="d-flex justify-space-between mb-2">
                                             <span class="subtitle1 text-uppercase bold">Nombre de Dirección</span>
-                                            <span class="body1">--</span>
+                                            <span class="body1">{{
+                                                selectedAddressEnvio?.name ||
+                                                "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
+                                            }}</span>
                                         </div>
                                         <div class="d-flex justify-space-between mb-2">
                                             <span class="subtitle1 text-uppercase bold">Dirección</span>
@@ -413,6 +407,14 @@
                                             @click="openAdress('shipping')"
                                         />
                                     </div>
+                                    <template v-if="addDialogShow">
+                                        <AddressDialog
+                                            :typeAddress="typeAddress"
+                                            :show="addDialogShow"
+                                            @close="addressDialogClosed"
+                                            :old-address="selectedAddressEnvio"
+                                        />
+                                    </template>
                                     <div class="form">
                                         <CustomButton
                                             v-if="formEncargadoVacio"
@@ -438,8 +440,7 @@
                                             </div>
                                             <div class="d-flex justify-space-between mb-3">
                                                 <span class="subtitle1 text-uppercase bold">TELÉFONO / CELULAR</span>
-                                                <span class="body1"
-                                                    >{{ datosFormEncargado.indicativo || "--" }}
+                                                <span class="body1">
                                                     {{ datosFormEncargado.encargado_telefono || "--" }}</span
                                                 >
                                             </div>
@@ -456,12 +457,6 @@
                             </v-row>
                         </v-col>
                         <v-col cols="12" md="6">
-                            <AddressDialog
-                                :typeAddress="typeAddress"
-                                :show="addDialogShow"
-                                @close="addressDialogClosed"
-                                :old-address="addressSelectedForEdit"
-                            />
                             <ProfileDialog
                                 :show="profileDialogShow"
                                 @close="profileDialogClosed"
@@ -471,7 +466,7 @@
                                 <v-col cols="12">
                                     <h5 class="fw-600">Dirección de servicio</h5>
                                     <v-divider class="my-3" />
-                                    <div class="form">
+                                    <div class="form" v-if="!addDialogShow">
                                         <div
                                             v-if="
                                                 Object.entries(addressServicio).length !== 0 &&
@@ -597,6 +592,14 @@
                                             @click="openAdress('service')"
                                         />
                                     </div>
+                                    <template v-if="addDialogShow">
+                                        <AddressDialog
+                                            :typeAddress="typeAddress"
+                                            :show="addDialogShow"
+                                            @close="addressDialogClosed"
+                                            :old-address="addressServicio"
+                                        />
+                                    </template>
                                     <!-- <h5 class="fw-600">Costo logístico</h5>
                                     <v-divider class="my-4" />
                                     <div class="form">
