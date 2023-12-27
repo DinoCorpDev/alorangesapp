@@ -289,6 +289,7 @@
                                         :to="{ name: 'Shop' }"
                                     />
                                 </div>
+                                1
                             </div>
                         </v-col>
                     </v-row>
@@ -304,7 +305,7 @@
                                         <v-row>
                                             <v-col cols="11">
                                                 <SelectCustom
-                                                    dark="true"
+                                                    :dark="darkBoxes"
                                                     label="Usuario Principal"
                                                     :items="addressesParaEnvio"
                                                     @input="changeAddress($event, 0)"
@@ -478,7 +479,7 @@
                                 <v-col cols="12">
                                     <h5 class="fw-600">Dirección de servicio</h5>
                                     <v-divider class="my-3" />
-                                    <div class="form" v-if="!addDialogShow">
+                                    <div class="form" v-if="!addDialogShowService">
                                         <div
                                             v-if="
                                                 Object.entries(addressServicio).length !== 0 &&
@@ -1133,6 +1134,7 @@
                                             class="selector"
                                             label="Usuario Principal"
                                             :items="langSelectItems"
+                                            :dark="darkBoxes"
                                         />
                                     </v-col>
                                     <v-col cols="1" class="pl-0 ojo">
@@ -2837,6 +2839,7 @@ export default {
             cartItems: [],
             priceTotal: 0,
             addDialogShow: false,
+            addDialogShowService: false,
             addressSelectedForEdit: {},
             addressPrincipal: {},
             addressServicio: {},
@@ -3006,19 +3009,33 @@ export default {
         changeQty(i) {
             this.getCart();
         },
+        closeDialog() {
+            if (this.typeAddress === "service") {
+                this.addDialogShowService = false;
+            } else {
+                this.addDialogShow = false;
+            }
+        },
+        openDialog() {
+            if (this.typeAddress === "service") {
+                this.addDialogShowService = true;
+            } else {
+                this.addDialogShow = true;
+            }
+        },
         addressDialogClosed() {
             this.addressSelectedForEdit = {};
-            this.addDialogShow = false;
+            this.closeDialog();
             this.getAddresses();
         },
         editAddress(address, type) {
             this.typeAddress = type;
             this.addressSelectedForEdit = address;
-            this.addDialogShow = true;
+            this.openDialog();
         },
         openAdress(type) {
             this.typeAddress = type;
-            this.addDialogShow = true;
+            this.openDialog();
         },
         editProfile() {
             this.profileSelectedForEdit = this.currentUser;

@@ -205,13 +205,16 @@ export default {
     },
     watch: {
         oldAddress(newVal, oldVal) {
-            console.log(newVal);
             if (newVal && !this.is_empty_obj(newVal)) {
                 this.processOldAddress(newVal);
             } else {
                 this.resetData();
             }
         }
+    },
+    created() {
+        console.log(this.oldAddress);
+        this.processOldAddress(this.oldAddress);
     },
     computed: {
         ...mapGetters("app", ["availableCountries"]),

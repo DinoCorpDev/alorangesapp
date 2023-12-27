@@ -1,6 +1,7 @@
 <template>
     <div class="px-5 py-3">
         <address-dialog
+            v-if="addDialogShow"
             :typeAddress="typeAddress"
             :show="addDialogShow"
             @close="addressDialogClosed"
@@ -241,7 +242,13 @@
                         </v-row>
                         <v-row>
                             <v-col cols="4">
-                                <custom-button block class="mt-5" text="< Cancelar" @click="editarUser = false;" color="grey" />
+                                <custom-button
+                                    block
+                                    class="mt-5"
+                                    text="< Cancelar"
+                                    @click="editarUser = false"
+                                    color="grey"
+                                />
                             </v-col>
                             <v-col></v-col>
                             <v-col cols="4" style="display: grid; align-items: end">
@@ -1925,23 +1932,22 @@
 
         <v-row>
             <v-col cols="12" md="6">
-                <h5 class="fw-600" style="width: 100%;">Contraseña</h5>
+                <h5 class="fw-600" style="width: 100%">Contraseña</h5>
                 <v-divider class="my-4" />
                 <v-card
-                        elevation="0"
-                        class="mb-6 form-border rounded-lg pa-5"
-                        style="background-color: white; border-color: white"
-                    >
-                <v-row v-if="changePassword">
-                    <v-col cols="12" class="pb-0">
-                        <h5 class="fw-600">Cambiar contraseña</h5>
+                    elevation="0"
+                    class="mb-6 form-border rounded-lg pa-5"
+                    style="background-color: white; border-color: white"
+                >
+                    <v-row v-if="changePassword">
+                        <v-col cols="12" class="pb-0">
+                            <h5 class="fw-600">Cambiar contraseña</h5>
 
-                        <v-divider class="ma-4" />
-                    </v-col>
-                    <v-col cols="12" md="12" class="pt-0">
-                    
-                        <span class="black--text body-2 text-uppercase"> CONTRASEÑA ACTUAL </span>
-                        <!-- <v-text-field
+                            <v-divider class="ma-4" />
+                        </v-col>
+                        <v-col cols="12" md="12" class="pt-0">
+                            <span class="black--text body-2 text-uppercase"> CONTRASEÑA ACTUAL </span>
+                            <!-- <v-text-field
                             v-model="formContrasena.oldPassword"
                             placeholder="Ingresar contraseña"
                             :error-messages="olddPasswordErrors"
@@ -1956,86 +1962,85 @@
                             @click:append="passwordOldShow = !passwordOldShow"
                             style="background: #f5f5f5;"
                         ></v-text-field> -->
-                        <CustomInput
-                                        
-                            v-model="formContrasena.oldPassword"
-                            placeholder="Ingresar contraseña"
-                            :error-messages="olddPasswordErrors"
-                            @blur="$v.formContrasena.oldPassword.$touch()"
-                            :type="passwordOldShow ? 'text' : 'password'"
-                            :append-icon="passwordOldShow ? 'las la-eye' : 'las la-eye-slash'"
-                            class="input-group--focused place-holder"
-                            hide-details="auto"
-                            required
-                            dense
-                            outlined
-                            @click:append="passwordOldShow = !passwordOldShow"
-                            style="background: #f5f5f5;"
-                                    />
-                    </v-col>
-                    <v-col cols="12" md="12">
-                        <span class="black--text body-2 text-uppercase"> NUEVA CONTRASEÑA </span>
-                        <CustomInput
-                            v-model="formContrasena.newPassword"
-                            placeholder="Ingresar contraseña"
-                            :error-messages="newPasswordErrors"
-                            @blur="$v.formContrasena.newPassword.$touch()"
-                            :type="passwordNewShow ? 'text' : 'password'"
-                            :append-icon="passwordNewShow ? 'las la-eye' : 'las la-eye-slash'"
-                            class="input-group--focused place-holder"
-                            hide-details="auto"
-                            required
-                            dense
-                            outlined
-                            @click:append="passwordNewShow = !passwordNewShow"
-                            style="background: #f5f5f5;"
-                        />
-                    </v-col>
+                            <CustomInput
+                                v-model="formContrasena.oldPassword"
+                                placeholder="Ingresar contraseña"
+                                :error-messages="olddPasswordErrors"
+                                @blur="$v.formContrasena.oldPassword.$touch()"
+                                :type="passwordOldShow ? 'text' : 'password'"
+                                :append-icon="passwordOldShow ? 'las la-eye' : 'las la-eye-slash'"
+                                class="input-group--focused place-holder"
+                                hide-details="auto"
+                                required
+                                dense
+                                outlined
+                                @click:append="passwordOldShow = !passwordOldShow"
+                                style="background: #f5f5f5"
+                            />
+                        </v-col>
+                        <v-col cols="12" md="12">
+                            <span class="black--text body-2 text-uppercase"> NUEVA CONTRASEÑA </span>
+                            <CustomInput
+                                v-model="formContrasena.newPassword"
+                                placeholder="Ingresar contraseña"
+                                :error-messages="newPasswordErrors"
+                                @blur="$v.formContrasena.newPassword.$touch()"
+                                :type="passwordNewShow ? 'text' : 'password'"
+                                :append-icon="passwordNewShow ? 'las la-eye' : 'las la-eye-slash'"
+                                class="input-group--focused place-holder"
+                                hide-details="auto"
+                                required
+                                dense
+                                outlined
+                                @click:append="passwordNewShow = !passwordNewShow"
+                                style="background: #f5f5f5"
+                            />
+                        </v-col>
 
-                    <v-col cols="12" md="12">
-                        <span class="black--text body-2 text-uppercase"> REPETIR NUEVA CONTRASEÑA </span>
-                        <v-text-field
-                            v-model="formContrasena.reptyPassword"
-                            placeholder="Ingresar contraseña"
-                            :error-messages="reptyPasswordErrors"
-                            @blur="$v.formContrasena.reptyPassword.$touch()"
-                            :type="passwordReptyShow ? 'text' : 'password'"
-                            :append-icon="passwordReptyShow ? 'las la-eye' : 'las la-eye-slash'"
-                            class="input-group--focused place-holder"
-                            hide-details="auto"
-                            required
-                            dense
-                            outlined
-                            @click:append="passwordReptyShow = !passwordReptyShow"
-                            style="background: #f5f5f5;"
-                        ></v-text-field>
-                    </v-col>
-                    
-                    <v-row>
-                        <v-col cols="4" md="4">
-                            <custom-button
-                                block
-                                class="mt-4"
-                                text="< Cancelar"
-                                type="button"
-                                color="grey2"
-                                @click="cancelChangePassword()"
-                            />
+                        <v-col cols="12" md="12">
+                            <span class="black--text body-2 text-uppercase"> REPETIR NUEVA CONTRASEÑA </span>
+                            <v-text-field
+                                v-model="formContrasena.reptyPassword"
+                                placeholder="Ingresar contraseña"
+                                :error-messages="reptyPasswordErrors"
+                                @blur="$v.formContrasena.reptyPassword.$touch()"
+                                :type="passwordReptyShow ? 'text' : 'password'"
+                                :append-icon="passwordReptyShow ? 'las la-eye' : 'las la-eye-slash'"
+                                class="input-group--focused place-holder"
+                                hide-details="auto"
+                                required
+                                dense
+                                outlined
+                                @click:append="passwordReptyShow = !passwordReptyShow"
+                                style="background: #f5f5f5"
+                            ></v-text-field>
                         </v-col>
-                        <v-col cols="4" md="4" style="margin-left: 33%">
-                            <custom-button
-                                block
-                                class="mt-4"
-                                text="Guardar >"
-                                type="submit"
-                                color="grey2"
-                                @click="saveChangePassword()"
-                                :disabled="infoUpdateLoading"
-                                :loading="infoUpdateLoading"
-                            />
-                        </v-col>
+
+                        <v-row>
+                            <v-col cols="4" md="4">
+                                <custom-button
+                                    block
+                                    class="mt-4"
+                                    text="< Cancelar"
+                                    type="button"
+                                    color="grey2"
+                                    @click="cancelChangePassword()"
+                                />
+                            </v-col>
+                            <v-col cols="4" md="4" style="margin-left: 33%">
+                                <custom-button
+                                    block
+                                    class="mt-4"
+                                    text="Guardar >"
+                                    type="submit"
+                                    color="grey2"
+                                    @click="saveChangePassword()"
+                                    :disabled="infoUpdateLoading"
+                                    :loading="infoUpdateLoading"
+                                />
+                            </v-col>
+                        </v-row>
                     </v-row>
-                </v-row>
                 </v-card>
 
                 <v-card elevation="0" class="mb-6 form-border rounded-lg pa-5" v-if="!changePassword">
@@ -2050,44 +2055,67 @@
                 <v-card elevation="0" class="mb-6 form-border rounded-lg pa-5">
                     <div class="tyc mb-3">
                         <div class="custom-checkbox" style="margin-left: -9px !important">
-                            <input type="checkbox" v-model="currentUser.offersConsent" v-on:click="offersConsent" class="checkbox-profile" style="width: 100px !important; margin-right: 20px !important;">
+                            <input
+                                type="checkbox"
+                                v-model="currentUser.offersConsent"
+                                v-on:click="offersConsent"
+                                class="checkbox-profile"
+                                style="width: 100px !important; margin-right: 20px !important"
+                            />
 
                             <label>
-                                Acepto recibir comunicaciones comerciales personalizadas de idovela a través de email y otros medios.
-                            <a href="#">Conocer newsletter.</a>
-                            </label> 
+                                Acepto recibir comunicaciones comerciales personalizadas de idovela a través de email y
+                                otros medios.
+                                <a href="#">Conocer newsletter.</a>
+                            </label>
                         </div>
 
                         <div class="custom-checkbox">
-                            <input type="checkbox" v-model="currentUser.policiesAndCookiesConsent" v-on:click="policiesAndCookiesConsent" class="checkbox-profile">
+                            <input
+                                type="checkbox"
+                                v-model="currentUser.policiesAndCookiesConsent"
+                                v-on:click="policiesAndCookiesConsent"
+                                class="checkbox-profile"
+                            />
 
                             <label>
                                 He podido leer y entiendo la <a href="#">Política de privacidad y cookies.</a>
-                            </label> 
+                            </label>
                         </div>
 
                         <div class="custom-checkbox">
-                            <input type="checkbox" v-model="currentUser.termsCondTrade" v-on:click="termsCondTrade" class="checkbox-profile">
+                            <input
+                                type="checkbox"
+                                v-model="currentUser.termsCondTrade"
+                                v-on:click="termsCondTrade"
+                                class="checkbox-profile"
+                            />
 
                             <label>
                                 Acepto los <a href="#">Términos y condiciones para la compra con Idovela.</a>
-                            </label> 
+                            </label>
                         </div>
 
                         <div class="custom-checkbox">
-                            <input type="checkbox" v-model="currentUser.guaranteePolicies" v-on:click="guaranteePolicies" class="checkbox-profile">
+                            <input
+                                type="checkbox"
+                                v-model="currentUser.guaranteePolicies"
+                                v-on:click="guaranteePolicies"
+                                class="checkbox-profile"
+                            />
 
-                            <label>
-                                Acepto las <a href="#">Pólizas de garantía.</a>
-                            </label> 
+                            <label> Acepto las <a href="#">Pólizas de garantía.</a> </label>
                         </div>
 
                         <div class="custom-checkbox">
-                            <input type="checkbox" v-model="currentUser.termsLogistics" v-on:click="termsLogistics" class="checkbox-profile">
+                            <input
+                                type="checkbox"
+                                v-model="currentUser.termsLogistics"
+                                v-on:click="termsLogistics"
+                                class="checkbox-profile"
+                            />
 
-                            <label>
-                                 Acepto los términos de <a href="#">La logística de envió.</a> 
-                            </label> 
+                            <label> Acepto los términos de <a href="#">La logística de envió.</a> </label>
                         </div>
 
                         <!--<CustomCheckbox v-model="form.offersConsent">
@@ -3148,13 +3176,10 @@ export default {
                     color: "red"
                 });
             }
-            
         },
-        async offersConsent(){
-            if(this.currentUser.offersConsent)
-                this.currentUser.offersConsent = 0;
-            else
-                this.currentUser.offersConsent = 1;
+        async offersConsent() {
+            if (this.currentUser.offersConsent) this.currentUser.offersConsent = 0;
+            else this.currentUser.offersConsent = 1;
 
             const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
 
@@ -3168,70 +3193,61 @@ export default {
                     color: "red"
                 });
             }
-        }, 
-        async policiesAndCookiesConsent(){
-            if(this.currentUser.policiesAndCookiesConsent)
-                this.currentUser.policiesAndCookiesConsent = 0;
-            else
-                this.currentUser.policiesAndCookiesConsent = 1;
-
-            const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
-
-            if (res.data.success) {
-                this.getAddressUser();
-
-                this.snack({ message: res.data.message });
-            } else {
-                this.snack({
-                    message: this.$i18n.t("something_went_wrong"),
-                    color: "red"
-                });
-            }
-        }, 
-        async termsCondTrade(){
-            if(this.currentUser.termsCondTrade)
-                this.currentUser.termsCondTrade = 0;
-            else
-                this.currentUser.termsCondTrade = 1;
-
-            const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
-
-            if (res.data.success) {
-                this.getAddressUser();
-
-                this.snack({ message: res.data.message });
-            } else {
-                this.snack({
-                    message: this.$i18n.t("something_went_wrong"),
-                    color: "red"
-                });
-            }
-            
-        }, 
-        async guaranteePolicies(){
-            if(this.currentUser.guaranteePolicies)
-                this.currentUser.guaranteePolicies = 0;
-            else
-                this.currentUser.guaranteePolicies = 1;
-
-            const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
-
-            if (res.data.success) {
-                this.getAddressUser();
-
-                this.snack({ message: res.data.message });
-            } else {
-                this.snack({
-                    message: this.$i18n.t("something_went_wrong"),
-                    color: "red"
-                });
-            } 
         },
-        async termsLogistics(){
-            if(this.currentUser.termsLogistics)
-                this.currentUser.termsLogistics = 0;
-            else
-                this.currentUser.termsLogistics = 1;
+        async policiesAndCookiesConsent() {
+            if (this.currentUser.policiesAndCookiesConsent) this.currentUser.policiesAndCookiesConsent = 0;
+            else this.currentUser.policiesAndCookiesConsent = 1;
+
+            const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
+
+            if (res.data.success) {
+                this.getAddressUser();
+
+                this.snack({ message: res.data.message });
+            } else {
+                this.snack({
+                    message: this.$i18n.t("something_went_wrong"),
+                    color: "red"
+                });
+            }
+        },
+        async termsCondTrade() {
+            if (this.currentUser.termsCondTrade) this.currentUser.termsCondTrade = 0;
+            else this.currentUser.termsCondTrade = 1;
+
+            const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
+
+            if (res.data.success) {
+                this.getAddressUser();
+
+                this.snack({ message: res.data.message });
+            } else {
+                this.snack({
+                    message: this.$i18n.t("something_went_wrong"),
+                    color: "red"
+                });
+            }
+        },
+        async guaranteePolicies() {
+            if (this.currentUser.guaranteePolicies) this.currentUser.guaranteePolicies = 0;
+            else this.currentUser.guaranteePolicies = 1;
+
+            const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
+
+            if (res.data.success) {
+                this.getAddressUser();
+
+                this.snack({ message: res.data.message });
+            } else {
+                this.snack({
+                    message: this.$i18n.t("something_went_wrong"),
+                    color: "red"
+                });
+            }
+        },
+        async termsLogistics() {
+            if (this.currentUser.termsLogistics) this.currentUser.termsLogistics = 0;
+            else this.currentUser.termsLogistics = 1;
 
             const res = await this.call_api("post", "user/info/updateTerms", this.currentUser);
 
@@ -3493,7 +3509,7 @@ export default {
     background: #dfdfdf;
     border: 1px solid #e2e2e2;
 }
-.checkbox-profile{
+.checkbox-profile {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3506,10 +3522,10 @@ export default {
     background-color: #f5f5f5;
 }
 .checkbox-profile:checked {
-  accent-color: black;
+    accent-color: black;
 }
 
-.custom-checkbox{
+.custom-checkbox {
     display: flex;
     align-items: center;
     position: relative;
@@ -3520,13 +3536,13 @@ export default {
     min-height: 38px;
 }
 
-.custom-checkbox label{
+.custom-checkbox label {
     font-family: "Roboto", sans-serif;
     font-size: var(--font-size-body1);
     cursor: pointer;
 }
 
-.custom-checkbox label a{
+.custom-checkbox label a {
     text-decoration: underline;
     font-weight: 700;
 }
