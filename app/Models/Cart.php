@@ -12,6 +12,7 @@ class Cart extends Model
         'product_id',
         'product_variation_id',
         'collection_id',
+        'collection_variation_id',
         'service_id',
         'quantity',
     ];
@@ -23,7 +24,11 @@ class Cart extends Model
 
     public function variation()
     {
-        return $this->belongsTo(ProductVariation::class, 'product_variation_id');
+        if (!is_null($this->product_id)) {
+            return $this->belongsTo(ProductVariation::class, 'product_variation_id');
+        } elseif (!is_null($this->collection_id)) {
+            return $this->belongsTo(CollectionVariation::class, 'collection_variation_id');
+        }
     }
 
     public function collection()

@@ -15,10 +15,12 @@ return new class extends Migration
     {
         Schema::table('carts', function (Blueprint $table) {
             $table->integer('collection_id')->after('product_variation_id')->nullable();
+            $table->integer('collection_variation_id')->after('collection_id')->nullable();
         });
 
         Schema::table('order_details', function (Blueprint $table) {
             $table->integer('collection_id')->after('product_variation_id')->nullable();
+            $table->integer('collection_variation_id')->after('collection_id')->nullable();
         });
 
         Schema::table('reviews', function (Blueprint $table) {
@@ -39,10 +41,12 @@ return new class extends Migration
     {
         Schema::table('carts', function (Blueprint $table) {
             $table->dropColumn('collection_id');
+            $table->dropColumn('collection_variation_id');
         });
 
         Schema::table('order_details', function (Blueprint $table) {
             $table->dropColumn('collection_id');
+            $table->dropColumn('collection_variation_id');
         });
 
         Schema::table('reviews', function (Blueprint $table) {

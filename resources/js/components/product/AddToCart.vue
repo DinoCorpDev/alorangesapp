@@ -3,7 +3,7 @@
         <v-col cols="12" md="7">
             <ProductGallery
                 :is-loading="isLoading"
-                :galleryImages="productDetails.photos"
+                :galleryImages="gallery"
                 :galleryVideos="productDetails.videos"
                 :dataSheet="productDetails.data_sheet"
             />
@@ -121,7 +121,8 @@ import FavoriteIcon from "../../components/icons/Favorite.vue";
 export default {
     props: {
         isLoading: { type: Boolean, required: true, default: true },
-        productDetails: { type: Object, required: true, default: {} }
+        productDetails: { type: Object, required: true, default: {} },
+        productType: { type: String, required: true, default: "product" }
     },
     data: () => ({
         cartQuantity: 1,
@@ -157,6 +158,18 @@ export default {
         ...mapGetters("cart", ["isThisInCart", "findCartItemByVariationId"]),
         discount() {
             return this.discount_percent(this.productDetails.base_price, this.productDetails.base_discounted_price);
+        },
+        gallery() {
+            if (!this.is_empty_obj(this.productDetails)) {
+                const thumbnailImage = {
+                    src: this.productDetails.thumbnail_image,
+                    type: "image"
+                };
+
+                return this.productDetails.photos.length ? this.productDetails.photos : [thumbnailImage];
+            }
+
+            return [];
         }
     },
     methods: {
@@ -208,6 +221,7 @@ export default {
             }
 
             this.addToCart({
+                [`${this.productType}_id`]: this.productDetails[`${this.productType}_id`],
                 variation_id: this.selectedVariation.id,
                 qty: this.cartQuantity
             });

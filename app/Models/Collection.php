@@ -28,6 +28,11 @@ class Collection extends Model
         return $this->hasMany(OrderDetail::class);
     }
 
+    public function getTaxesAttribute()
+    {
+        return []; // Fake taxes
+    }
+
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class);

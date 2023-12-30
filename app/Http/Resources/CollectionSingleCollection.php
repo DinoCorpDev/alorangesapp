@@ -14,9 +14,9 @@ class CollectionSingleCollection extends JsonResource
      */
     public function toArray($request)
     {
-        // dd($this->variations);
         return [
             'id' => (int) $this->id,
+            'collection_id' => (int) $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
             'metaTitle' => $this->meta_title,
@@ -32,10 +32,10 @@ class CollectionSingleCollection extends JsonResource
             'stock' => (int) $this->stock,
             'discount' => $this->discount,
             'discount_type' => $this->discount_type,
-            'base_price' => (float) product_base_price($this, false),
-            'highest_price' => (float) product_highest_price($this, false),
-            'base_discounted_price' => (float) product_discounted_base_price($this, false),
-            'highest_discounted_price' => (float) product_discounted_highest_price($this, false),
+            'base_price' => (float) product_base_price($this),
+            'highest_price' => (float) product_highest_price($this),
+            'base_discounted_price' => (float) product_discounted_base_price($this),
+            'highest_discounted_price' => (float) product_discounted_highest_price($this),
             'standard_delivery_time' => (int) $this->standard_delivery_time,
             'express_delivery_time' => (int) $this->express_delivery_time,
             'is_variant' => $this->is_variant,
@@ -64,8 +64,10 @@ class CollectionSingleCollection extends JsonResource
     {
         $result = array();
 
-        foreach (explode(',', $this->photos) as $item) {
-            array_push($result, api_asset_new($item));
+        if (!empty($this->photos)) {
+            foreach (explode(',', $this->photos) as $item) {
+                array_push($result, api_asset_new($item));
+            }
         }
 
         return $result;

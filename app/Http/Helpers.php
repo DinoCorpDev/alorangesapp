@@ -123,13 +123,11 @@ if (!function_exists('product_base_price')) {
         $price = $product->lowest_price;
         $tax = 0;
 
-        if ($with_tax) {
-            foreach ($product->taxes as $product_tax) {
-                if ($product_tax->tax_type == 'percent') {
-                    $tax += ($price * $product_tax->tax) / 100;
-                } elseif ($product_tax->tax_type == 'flat') {
-                    $tax += $product_tax->tax;
-                }
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $tax += ($price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'flat') {
+                $tax += $product_tax->tax;
             }
         }
 
@@ -145,13 +143,11 @@ if (!function_exists('product_highest_price')) {
         $price = $product->highest_price;
         $tax = 0;
 
-        if ($with_tax) {
-            foreach ($product->taxes as $product_tax) {
-                if ($product_tax->tax_type == 'percent') {
-                    $tax += ($price * $product_tax->tax) / 100;
-                } elseif ($product_tax->tax_type == 'flat') {
-                    $tax += $product_tax->tax;
-                }
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $tax += ($price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'flat') {
+                $tax += $product_tax->tax;
             }
         }
 
@@ -186,13 +182,11 @@ if (!function_exists('product_discounted_base_price')) {
             }
         }
 
-        if ($with_tax) {
-            foreach ($product->taxes as $product_tax) {
-                if ($product_tax->tax_type == 'percent') {
-                    $tax += ($price * $product_tax->tax) / 100;
-                } elseif ($product_tax->tax_type == 'flat') {
-                    $tax += $product_tax->tax;
-                }
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $tax += ($price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'flat') {
+                $tax += $product_tax->tax;
             }
         }
 
@@ -232,13 +226,11 @@ if (!function_exists('product_discounted_highest_price')) {
             }
         }
 
-        if ($with_tax) {
-            foreach ($product->taxes as $product_tax) {
-                if ($product_tax->tax_type == 'percent') {
-                    $tax += ($price * $product_tax->tax) / 100;
-                } elseif ($product_tax->tax_type == 'flat') {
-                    $tax += $product_tax->tax;
-                }
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $tax += ($price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'flat') {
+                $tax += $product_tax->tax;
             }
         }
 
@@ -335,13 +327,11 @@ if (!function_exists('variation_discounted_price')) {
             }
         }
 
-        if ($with_tax) {
-            foreach ($product->taxes as $product_tax) {
-                if ($product_tax->tax_type == 'percent') {
-                    $tax += ($price * $product_tax->tax) / 100;
-                } elseif ($product_tax->tax_type == 'flat') {
-                    $tax += $product_tax->tax;
-                }
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $tax += ($price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'flat') {
+                $tax += $product_tax->tax;
             }
         }
 

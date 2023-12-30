@@ -333,16 +333,15 @@ export default {
                 }
             }
         },
-        async addToCart({ commit, getters, dispatch }, { variation_id, qty }) {
+        async addToCart({ commit, getters, dispatch }, payload) {
             let temp_user_id = getters.getTempUserId;
             if (!this.getters["auth/isAuthenticated"] && !temp_user_id) {
                 temp_user_id = Math.floor(Math.random() * 10000) + new Date().getTime();
                 commit("setTempUserId", temp_user_id);
             }
             const res = await Mixin.methods.call_api("post", `carts/add`, {
-                variation_id: variation_id,
-                qty: qty,
-                temp_user_id: temp_user_id
+                ...payload,
+                temp_user_id
             });
 
             if (res.data.success) {

@@ -527,8 +527,6 @@ class CollectionController extends Controller
         $collection->variations()->delete();
         $collection->collection_categories()->delete();
         $collection->carts()->delete();
-        $collection->attributes()->delete();
-        $collection->attribute_values()->delete();
 
         if (Collection::destroy($id)) {
             flash(translate('Collection has been deleted successfully'))->success();

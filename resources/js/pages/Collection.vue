@@ -6,7 +6,7 @@
                     :is-loading="detailsLoading"
                     :product-details="collectionDetails"
                     :products="products"
-                    type-detail="collection"
+                    product-type="collection"
                 />
             </v-col>
         </v-row>

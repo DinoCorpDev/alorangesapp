@@ -123,7 +123,6 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
 
     Route::post('carts', [CartController::class, 'index']);
     Route::post('carts/add', [CartController::class, 'add']);
-    // Route::post('carts/addCollection', [CartController::class, 'addCollection']);
     Route::post('carts/change-quantity', [CartController::class, 'changeQuantity']);
     Route::post('carts/destroy', [CartController::class, 'destroy']);
 

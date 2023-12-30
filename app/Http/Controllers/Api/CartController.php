@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\CollectionProduct;
+use App\Models\CollectionVariation;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\Shop;
@@ -24,7 +25,7 @@ class CartController extends Controller
                 ->where('user_id', auth('api')->user()->id)
                 ->whereNotNull('product_id')
                 ->get();
-            $collection_carts = Cart::with(['collection'])
+            $collection_carts = Cart::with(['collection', 'variation'])
                 ->where('user_id', auth('api')->user()->id)
                 ->whereNotNull('collection_id')
                 ->get();
@@ -33,7 +34,7 @@ class CartController extends Controller
                 ->where('temp_user_id', $request->temp_user_id)
                 ->whereNotNull('product_id')
                 ->get();
-            $collection_carts = Cart::with(['collection'])
+            $collection_carts = Cart::with(['collection', 'variation'])
                 ->where('temp_user_id', $request->temp_user_id)
                 ->whereNotNull('collection_id')
                 ->get();
@@ -42,23 +43,16 @@ class CartController extends Controller
             $collection_carts = collect();
         }
 
-        // dd($collection_carts);
-
         $product_carts = $product_carts->filter(function ($cart_item) {
             return $cart_item->variation && $cart_item->product;
         });
 
         $carts = $product_carts->merge($collection_carts);
 
-        // dd($carts);
-
         $product_shops = $product_carts->pluck('product.shop_id')->unique()->toArray();
         $collection_shops = $collection_carts->pluck('collection.shop_id')->unique()->toArray();
 
         $shops = array_unique(array_merge($product_shops, $collection_shops));
-
-        // dd($shops);
-        // dd($collection_shops);
 
         return response()->json([
             'success' => true,
@@ -74,7 +68,14 @@ class CartController extends Controller
 
     public function add(Request $request)
     {
-        $product_variation = ProductVariation::with(['product.shop', 'combinations.attribute', 'combinations.attribute_value'])->findOrFail($request->variation_id);
+        $product_type = 'product';
+
+        if ($request->collection_id) {
+            $product_variation = CollectionVariation::with(['collection.shop'])->findOrFail($request->variation_id);
+            $product_type = 'collection';
+        } else {
+            $product_variation = ProductVariation::with(['product.shop', 'combinations.attribute', 'combinations.attribute_value'])->findOrFail($request->variation_id);
+        }
 
         $user_id = (auth('api')->check()) ? auth('api')->user()->id : null;
         $temp_user_id = $request->temp_user_id;
@@ -82,48 +83,37 @@ class CartController extends Controller
         $cart = Cart::updateOrCreate([
             'user_id' => $user_id,
             'temp_user_id' => $temp_user_id,
-            'product_id' => $product_variation->product->id,
-            'product_variation_id' => $product_variation->id
+            $product_type . '_id' => $product_variation->$product_type->id,
+            $product_type . '_variation_id' => $product_variation->id
         ], [
             'quantity' => DB::raw('quantity + ' . $request->qty)
         ]);
 
-        $product = [
+        $item = [
             'cart_id' => (int) $cart->id,
-            'product_id' => (int) $cart->product_id,
-            'shop_id' => (int) $product_variation->product->shop_id,
-            'earn_point' => (float) $cart->product->earn_point,
-            'variation_id' => (int) $cart->product_variation_id,
-            'name' => $product_variation->product->name,
+            $product_type . '_id' => (int) $cart[$product_type . '_id'],
+            'shop_id' => (int) $product_variation->$product_type->shop_id,
+            'earn_point' => (float) $cart->$product_type->earn_point,
+            'variation_id' => (int) $cart[$product_type . '_variation_id'],
+            'name' => $product_variation->$product_type->name,
             'combinations' => filter_variation_combinations($product_variation->combinations),
-            'thumbnail' => api_asset($product_variation->product->thumbnail_img),
-            'regular_price' => (float) variation_price($product_variation->product, $product_variation),
-            'dicounted_price' => (float) variation_discounted_price($product_variation->product, $product_variation),
-            'tax' => (float) product_variation_tax($product_variation->product, $product_variation),
+            'thumbnail' => api_asset($product_variation->$product_type->thumbnail_img),
+            'regular_price' => (float) variation_price($product_variation->$product_type, $product_variation, false),
+            'dicounted_price' => (float) variation_discounted_price($product_variation->$product_type, $product_variation),
+            'tax' => (float) product_variation_tax($product_variation->$product_type, $product_variation),
             'stock' => (int) $product_variation->stock,
-            'min_qty' => (int) $product_variation->product->min_qty,
-            'max_qty' => (int) $product_variation->product->max_qty,
-            'standard_delivery_time' => (int) $product_variation->product->standard_delivery_time,
-            'express_delivery_time' => (int) $product_variation->product->express_delivery_time,
+            'min_qty' => (int) $product_variation->$product_type->min_qty,
+            'max_qty' => (int) $product_variation->$product_type->max_qty,
+            'standard_delivery_time' => (int) $product_variation->$product_type->standard_delivery_time,
+            'express_delivery_time' => (int) $product_variation->$product_type->express_delivery_time,
             'qty' => (int) $request->qty,
         ];
 
         return response()->json([
             'success' => true,
-            'data' => $product,
-            'shop' => new ShopResource($product_variation->product->shop),
-            'message' => translate('Product added to cart successfully'),
-        ], 200);
-    }
-
-    public function addCollection(Request $request)
-    {
-        $collection = Collection::findOrFail($request->variation_id);
-        $user_id = (auth('api')->check()) ? auth('api')->user()->id : null;
-
-        return response()->json([
-            'success' => true,
-            'message' => translate('Collection added to cart successfully'),
+            'data' => $item,
+            'shop' => new ShopResource($product_variation->$product_type->shop),
+            'message' => translate(ucfirst($product_type) . ' added to cart successfully'),
         ], 200);
     }
 

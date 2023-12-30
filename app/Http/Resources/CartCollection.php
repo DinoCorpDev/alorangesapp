@@ -22,13 +22,16 @@ class CartCollection extends ResourceCollection
                     'cart_id' => (int) $data->id,
                     'shop_id' => (int) $data->$objectType->shop_id,
                     'earn_point' => (float) $data->$objectType->earn_point,
+                    'variation_id' => (int) $data[$objectType . '_variation_id'],
                     'name' => $data->$objectType->name,
                     'brand' => [
                         'name' => optional($data->$objectType->brand)->getTranslation('name'),
                         'slug' => optional($data->$objectType->brand)->slug,
                     ],
-                    'thumbnail' => $data->variation ? api_asset($data->variation->img) : api_asset($data->$objectType->thumbnail_img),
-                    'stock' => $data->variation ? (int) $data->variation->stock : (int) $data->$objectType->stock,
+                    'thumbnail' => $data->variation->img ? api_asset($data->variation->img) : api_asset($data->$objectType->thumbnail_img),
+                    'regular_price' => (float) variation_price($data->$objectType, $data->variation),
+                    'dicounted_price' => (float) variation_discounted_price($data->$objectType, $data->variation),
+                    'stock' => (int) $data->variation->stock,
                     'min_qty' => (int) $data->$objectType->min_qty,
                     'max_qty' => (int) $data->$objectType->max_qty,
                     'standard_delivery_time' => (int) $data->$objectType->standard_delivery_time,
@@ -39,16 +42,11 @@ class CartCollection extends ResourceCollection
                 ];
 
                 if ($data->product_id) {
-                    $newData['variation_id'] = (int) $data->product_variation_id;
                     $newData['product_id'] = (int) $data->product_id;
                     $newData['combinations'] = filter_variation_combinations($data->variation->combinations);
-                    $newData['regular_price'] = (float) variation_price($data->$objectType, $data->variation);
-                    $newData['discounted_price'] = (float) variation_discounted_price($data->$objectType, $data->variation);
                     $newData['tax'] = (float) product_variation_tax($data->$objectType, $data->variation);
                 } elseif ($data->collection_id) {
                     $newData['collection_id'] = (int) $data->collection_id;
-                    $newData['regular_price'] = (float) product_base_price($data->$objectType, false);
-                    $newData['discounted_price'] = (float) product_discounted_base_price($data->$objectType, false);
                 } elseif ($data->service_id) {
                     $newData['service_id'] = (int) $data->service_id;
                 }
