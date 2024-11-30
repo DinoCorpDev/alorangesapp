@@ -2,7 +2,6 @@ let Error404 = () => import("../pages/errors/404");
 let Error500 = () => import("../pages/errors/500");
 let CustomPage = () => import("../pages/CustomPage");
 let ComparedProductList = () => import("../pages/ComparedProductList");
-let mobileHome =()=>import("../pages/MobileVersion/HomeMobile.vue");
 
 export default [
     // {
@@ -33,12 +32,6 @@ export default [
         path: "*",
         component: Error404,
         name: "NotFound",
-        meta: { requiresAuth: false }
-    },
-    {
-        path: "/mobileHome",
-        component: mobileHome,
-        name: "mobileHome",
         meta: { requiresAuth: false }
     }
 ];
