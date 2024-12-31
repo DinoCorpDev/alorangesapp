@@ -372,10 +372,10 @@
                                                 "No registra" | filtroParaOcultarInfo(mostrarDatosEnvio)
                                             }}</span>
                                         </div>
-                                        <div class="d-flex justify-space-between mb-2">
+                                        <!-- <div class="d-flex justify-space-between mb-2">
                                             <span class="subtitle1 bold pl-3">Localidad</span>
                                             <span class="body1 pr-3"> -- </span>
-                                        </div>
+                                        </div> -->
                                         <div class="d-flex justify-space-between mb-2">
                                             <span class="subtitle1 bold pl-3">Barrio</span>
                                             <span class="body1 pr-3">

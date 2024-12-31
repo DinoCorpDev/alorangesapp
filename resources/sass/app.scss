@@ -97,7 +97,8 @@ h6 {
 
 .body1,
 .body2 {
-    font-family: "Roboto";
+    font-family: var(--font-size-body1);
+    overflow-x: hidden;
 }
 
 .body1,

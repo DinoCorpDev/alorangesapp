@@ -56,7 +56,7 @@
                                 {{ translate('Login') }}
                             </button>
                         </form>
-                        @if (env("DEMO_MODE") == "On")
+                        <!-- @if (env("DEMO_MODE") == "On")
                             <div class="mt-4">
                                 <table class="table table-bordered">
                                     <tbody>
@@ -73,7 +73,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                        @endif
+                        @endif -->
                     </div>
                 </div>
             </div>

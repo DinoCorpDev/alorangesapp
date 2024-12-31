@@ -2,10 +2,10 @@
     <v-app class="d-flex flex-column">
         <Navbar display="position: fixed; top: 0px" v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
         <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" @toggleMenu="toggleMenu" />
-        
-
+    
         <v-main class="aiz-main-wrap">
             <Breadcrumb />
+            
             <!-- prettier-ignore -->
             <v-navigation-drawer v-model="userNavDrawerActive" fixed temporary right style="z-index: 999">
                 <SideMenu class="pa-3" />
@@ -42,7 +42,7 @@ export default {
     },
     data(){
         return{
-            userNavDrawerActive: false
+            userNavDrawerActive: false,
         }
     },
     components: {
@@ -95,7 +95,7 @@ export default {
                 this.fetchWislistServices();
                 this.fetchWislistBrands();
             }
-        }
+        },
     },
     async created() {
         this.changeRTL();

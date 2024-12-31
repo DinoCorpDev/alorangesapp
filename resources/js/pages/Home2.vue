@@ -2,12 +2,14 @@
     <v-container style="background-color: white">
         <v-row class="main mx-2 my-2 mx-sm-6 bg-orange-ligth border-style-banner" align="center" tag="main">
             <v-col class="pa-6 pa-sm-8" cols="12" sm="7" md="7">
-                <h1 class="home-main-title mb-6 mb-sm-8">
-                    ¡Suministros de papelería, aseo, cafetería, cartonería y seguridad industrial para empresas!
+                <h1 class="home-main-title mb-8 mb-sm-8">
+                    ¡Tu proveedor de suministros de papelería, aseo, cafetería, cartonería, tecnología, seguridad industrial y mucho mas para tu empresa!
                 </h1>
+                <!-- <h1 class="home-main-title mb-6 mb-sm-8">¡Todo en un solo lugar, rápido, fácil y seguro!</h1> -->
                 <!-- <p class="home-main-description mb-6 d-none d-sm-block">
-                    Ofrecemos múltiples alternativas de compra y pago para que nuestros clientes obtengan todo lo que
-                    desee de una forma fácil
+                    Tu proveedor de suministros favoritos de <b>P</b>apelería, <b>A</b>seo, <b>C</b>afetería, <b>B</b>otiquín, <b>T</b>ecnología,
+                    <b>C</b>artonería, <b>S</b>eguridad industrial y mucho más está a solo un clic de distancia. </br>Estamos aquí para
+                        hacer tu vida más fácil y divertida.</br><b>¡Explora y disfruta!</b>
                 </p> -->
                 <SearchInput class="search-menu" :showInput="true" :placeholder="'Escribe lo que buscas'" />
             </v-col>
@@ -33,8 +35,8 @@
                                         contain
                                         class="mb-5"
                                     />
-                                    <h3>Domicilios gratis</h3>
-                                    <p class="preambulo-text">En compras mínimas</p>
+                                    <h3 style="text-align: center">Domicilios gratis</h3>
+                                    <p class="preambulo-text" style="text-align: center">En compras mínimas</p>
                                 </v-col>
                                 <v-col class="center-flex" cols="3">
                                     <v-img
@@ -64,7 +66,7 @@
                                         class="mb-5"
                                     />
                                     <h3>Devoluciones</h3>
-                                    <p class="preambulo-text">Cambios de productos</p>
+                                    <p class="preambulo-text" style="text-align: center">Cambios de productos</p>
                                 </v-col>
                             </v-row>
                         </v-col>
@@ -88,15 +90,20 @@
                     id="be-there"
                     icon="/public/assets/img/home/icon-be-there.svg"
                     preamble="Escuchar, Comprender y Percibir al Usuario"
-                    title="Utilizamos la tecnología para facilitar tus procesos"
+                    title="¡Facilitamos tus procesos con un toque de tecnología!"
                     image="/public/assets/img/banner2home.png"
                     style="max-width: 99%"
                 >
                     <template v-slot:description>
-                        En <b>Aloranges,</b> nos especializamos en solucionar las necesidades de las empresas para
-                        facilitar la compra de los suministros de
-                        <b>Papelería, Cartonería, Cafetería, Aseo, Tecnología y Botiquería.</b>
-                        Nos adaptamos a la nueva era digital y ahora puedes adquirir tus productos desde nuestra app.
+                        En <b>Aloranges,</b> nos dedicamos a hacerte la vida más fácil. Somos expertos en satisfacer las
+                        necesidades de tu empresa con <b>suministros de papelería, cartonería, cafetería, aseo, tecnología y
+                        botiquín y mucho mas.</b>
+                        ¡Y ahora, gracias a nuestra app, puedes adquirir todo lo que necesitas con solo un clic! Nos
+                        adaptamos a la nueva era digital para que tus compras sean rápidas y sencillas.
+                        ¡Únete a la diversión y simplifica tu día a día con Aloranges!
+                        <br>
+                        Somos tu proveedor de suministros favorito, siempre estamos a solo un clic de distancia. <br>Estamos aquí para
+                        hacer tu vida más fácil y divertida.<br><b>¡Explora y disfruta!</b>
                     </template>
                 </PresentationBanner>
             </v-col>
@@ -106,7 +113,7 @@
             <div style="width: 95%; border-radius: 24px; background-color: #f4f9ec">
                 <v-row>
                     <v-col cols="12" class="d-flex d-sm-none justify-start">
-                        <div class="ml-7 mt-7 mt-sm-0 d-flex  flex-column justify-start align-start">
+                        <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-start align-start">
                             <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
                             <CustomButton class="mb-5" color="orange" :width="200">Descargar App</CustomButton>
                         </div>

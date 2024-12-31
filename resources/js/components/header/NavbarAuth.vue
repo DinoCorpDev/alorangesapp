@@ -63,8 +63,8 @@
                                                 align-items: center;
                                             "
                                         >
-                                            <img style="width: 200px" src="./Logo Aloranges.png" />
-                                            <h3
+                                        <LogoAlorange />
+                                        <h3
                                                 class="pa-12"
                                                 style="
                                                     font-size: 35px;

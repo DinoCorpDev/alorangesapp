@@ -674,7 +674,7 @@
                             </v-row>
 
                             <v-row>
-                                <v-col cols="12" md="6">
+                                <!-- <v-col cols="12" md="6">
                                     <span class="black--text body-2 text-uppercase">Localidad</span>
                                     <SelectCustom
                                         :items="filteredLocalidad"
@@ -683,9 +683,9 @@
                                         @blur="$v.mainAddress.localidad.$touch()"
                                         :error-messages="localidadErrors"
                                     />
-                                </v-col>
+                                </v-col> -->
 
-                                <v-col cols="12" md="6">
+                                <v-col cols="12" md="12">
                                     <span class="black--text body-2 text-uppercase">Barrio ( Opcional )</span>
                                     <CustomInput
                                         class="place-holder"
@@ -863,7 +863,7 @@ export default {
             countries: [],
             filteredStates: [],
             filteredCities: [],
-            filteredLocalidad: [],
+            // filteredLocalidad: [],
             documentTypes: [
                 { text: "(C.C) Cedula de ciudadanía", value: "C.C" },
                 { text: "(C.E) Cédula de Extranjería", value: "C.E" },
@@ -935,7 +935,7 @@ export default {
                 state: "",
                 city: "",
                 neighborhood: "",
-                localidad: "",
+                // localidad: "",
                 postal_code: "",
                 phone: "",
                 type: "shipping"
@@ -975,7 +975,7 @@ export default {
             details: { required },
             country: { required },
             state: { required },
-            localidad: { required },
+            // localidad: { required },
             city: { required },
             // postal_code: { required }
         }
@@ -1142,12 +1142,12 @@ export default {
             !this.$v.mainAddress.city.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
             return errors;
         },
-        localidadErrors() {
-            const errors = [];
-            if (!this.$v.mainAddress.localidad.$dirty) return errors;
-            !this.$v.mainAddress.localidad.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
-            return errors;
-        },
+        // localidadErrors() {
+        //     const errors = [];
+        //     if (!this.$v.mainAddress.localidad.$dirty) return errors;
+        //     !this.$v.mainAddress.localidad.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
+        //     return errors;
+        // },
         // postalCodeErros() {
         //     const errors = [];
         //     if (!this.$v.mainAddress.postal_code.$dirty) return errors;
@@ -1379,16 +1379,16 @@ export default {
         async stateChanged(stateid) {
             const res = await this.call_api("get", `cities/${stateid}`);
 
-            const res2 = await this.call_api("get", `localidades/${stateid}`);
+            // const res2 = await this.call_api("get", `localidades/${stateid}`);
 
             if (res.data.success) {
                 this.filteredCities = res.data.data;
                 this.form.city = "";
 
-                if (res2.data.success) {
-                    this.filteredLocalidad = res2.data.data;
-                    this.form.localidad = "";
-                }
+                // if (res2.data.success) {
+                //     this.filteredLocalidad = res2.data.data;
+                //     this.form.localidad = "";
+                // }
 
             } else {
                 this.snack({
@@ -1437,7 +1437,8 @@ export default {
                     this.form.email == "" ||
                     this.form.password == "" ||
                     this.form.confirmPassword == "" ||
-                    this.form.password != this.form.confirmPassword
+                    this.form.password != this.form.confirmPassword||
+                    this.$v.form.password.$invalid
                 ) {
                     this.$v.form.$touch();
                     return;

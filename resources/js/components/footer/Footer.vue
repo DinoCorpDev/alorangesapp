@@ -3,11 +3,14 @@
         <v-row class="pt-5">
             <!-- <v-col md="1"/> -->
             <v-col cols="12" md="5" class="d-flex justify-start justify-md-center align-center">
-                <div style="max-width: 320px" class="pl-md-5 mr-md-16">
+                <div style="max-width: 480px" class="pl-md-5 mr-md-16">
                     <LogoAlorange class="mb-1" />
                     <p style="font-size: 15px">
-                        Compras telefónicas horarios de atención es de lunes a Domingo & Festivos de 7:00 am a 7:00 pm,
-                        cotizaciones y orden de compra dirigirse a contáctanos
+                        <b>¡Estamos aquí para ayudarte!</b><br>¿Tienes compras, cotizaciones, preguntas o inquietudes? ¡No dudes
+                        en llamarnos o escribirnos! Nuestro equipo de agentes comerciales está listo para atenderte de
+                        lunes a viernes, de 8:00 am a 6:00 pm.<br>¿Fuera de horario? ¡No hay problema! Déjanos tu mensaje
+                        por WhatsApp o envíanos un correo a ventas5@aloranges.com, y te responderemos en un abrir y
+                        cerrar de ojos.<br><b>¡Tu satisfacción es nuestra misión!</b>
                     </p>
                     <div style="display: flex; gap: 10px; justify-content: flex-start">
                         <a href="#"><img src="../icons/facebook.svg" alt="Facebook" style="width: 50px" /></a>
@@ -26,7 +29,7 @@
                 <router-link to="#">Regístrate</router-link>
                 <router-link to="#">¿Olvidó su clave?</router-link>
             </v-col>
-            <v-col cols="12" class="d-none d-md-flex align-center" style="justify-content: space-around">
+            <v-col cols="12" class="d-none d-md-flex align-center" style="justify-content: space-around" >
                 <img src="../icons/Logo_fondo_Emprender_blanco.png" alt="" style="max-width: 266px; height: auto" />
                 <p style="font-size: 13px; margin-bottom: 0">
                     <b>Copyright © 2022 Aloranges.com.</b> Todos los derechos reservados.
