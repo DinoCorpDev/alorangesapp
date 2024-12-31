@@ -20,14 +20,14 @@
                 </div>
             </v-col>
             <v-col cols="12" md="4" class="list-footer align-start pb-0 pb-md-3 pl-md-11">
-                <a href="#">Politica de Protección de datos</a>
-                <a href="#">Cambios y Devoluciones</a>
-                <a href="#">Tiempo y costo de envío</a>
+                <router-link to="/information/proteccionDatos">Política de Protección de Datos</router-link>
+                <router-link to="/information/cambiosDevoluciones">Cambios y Devoluciones</router-link>
+                <router-link to="/information/tiempoEnvios">Tiempo y costo de envío</router-link>
             </v-col>
             <v-col cols="12" md="3" class="list-footer align-start pt-0 pt-md-3 pl-md-16">
-                <a href="https://www.aloranges.com/user/profile">Mi cuenta</a>
-                <a href="#">Regístrate</a>
-                <a href="#">¿Olvidó su clave?</a>
+                <router-link to="#">Mi cuenta</router-link>
+                <router-link to="#">Regístrate</router-link>
+                <router-link to="#">¿Olvidó su clave?</router-link>
             </v-col>
             <v-col cols="12" class="d-none d-md-flex align-center" style="justify-content: space-around" >
                 <img src="../icons/Logo_fondo_Emprender_blanco.png" alt="" style="max-width: 266px; height: auto" />
@@ -35,7 +35,7 @@
                     <b>Copyright © 2022 Aloranges.com.</b> Todos los derechos reservados.
                 </p>
                 <p class="d-flex align-center mb-0">
-                    Powered by <img src="../icons/dinolabslogo1.png" style="max-width: 60px" />
+                    Powered by <img src="../icons/DinoLabs-logo.svg" style="max-width: 60px" />
                 </p>
             </v-col>
             <v-col cols="12" class="d-flex d-md-none pa-0">
@@ -54,7 +54,7 @@
                     </v-col>
                     <v-col cols="6" class="d-flex align-center justify-end pr-5 pt-0">
                         <p class="mb-0 align-center justify-center" style="display: flex">
-                            Powered by <img src="../icons/dinolabslogo1.png" style="max-width: 60px" />
+                            Powered by <img src="../icons/DinoLabs-logo.svg" style="max-width: 60px" />
                         </p>
                     </v-col>
                 </v-row>
