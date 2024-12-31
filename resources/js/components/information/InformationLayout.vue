@@ -2,16 +2,16 @@
     <div class="user-layout">
         <v-container fluid>
             <v-row>
-                <v-col lg="3" class="user-layout-sidebar d-lg-block">
+                <!-- <v-col lg="3" class="user-layout-sidebar d-lg-block">
                     <SideMenu2 class="d-none d-sm-block" />
                     <div class="d-sm-none btn-menu">
                         <CustomButton @click="drawer = !drawer" dark text="MENU" icon="la-ellipsis-v" />
                     </div>
-                </v-col>
-                <v-col cols="12" lg="9" class="user-layout-content">
+                </v-col> -->
+                <v-col cols="12" lg="12" class="user-layout-content">
                     <router-view />
                 </v-col>
-                <v-navigation-drawer v-model="drawer" class="drawerNot list-cont" absolute temporary right>
+                <!-- <v-navigation-drawer v-model="drawer" class="drawerNot list-cont" absolute temporary right>
                     <v-list class="list-cont" center vertical v-model="tab">
                         <v-list-item class="data-user">
                             <div class="div-img">
@@ -75,7 +75,7 @@
                             />
                         </v-list-item>
                     </v-list>
-                </v-navigation-drawer>
+                </v-navigation-drawer> -->
             </v-row>
         </v-container>
     </div>
