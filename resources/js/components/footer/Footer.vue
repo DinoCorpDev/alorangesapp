@@ -9,7 +9,7 @@
                         <b>¡Estamos aquí para ayudarte!</b><br>¿Tienes compras, cotizaciones, preguntas o inquietudes? ¡No dudes
                         en llamarnos o escribirnos! Nuestro equipo de agentes comerciales está listo para atenderte de
                         lunes a viernes, de 8:00 am a 6:00 pm.<br>¿Fuera de horario? ¡No hay problema! Déjanos tu mensaje
-                        por WhatsApp <a style="font-weight: 700; color: white; font-size: 17px; text-decoration: underline;" href="https://wa.me/573174420109" target="_blank">3174420109</a> o envíanos un correo a ventas5@aloranges.com, y te responderemos en un abrir y
+                        por Teléfono o WhatsApp <a style="font-weight: 700; color: white; font-size: 17px; text-decoration: underline;" href="https://wa.me/573174420109" target="_blank">+57 3174420109</a> o envíanos un correo a ventas5@aloranges.com, y te responderemos en un abrir y
                         cerrar de ojos.<br><b>¡Tu satisfacción es nuestra misión!</b>
                     </p>
                     <div style="display: flex; gap: 10px; justify-content: flex-start">
