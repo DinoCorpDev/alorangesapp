@@ -26,7 +26,7 @@
 
                 <!-- WhatsApp Links -->
                 <a
-                    href="https://wa.me/573174420109"
+                    href="https://api.whatsapp.com/send/?phone=573174420109&text=Hola+%2AAloranges%2A+me+gustar%C3%ADa+recibir+m%C3%A1s+informaci%C3%B3n+sobre&type=phone_number&app_absent=0"
                     target="_blank"
                     rel="noreferrer"
                     class="col-12 box-wha"
@@ -157,7 +157,7 @@ export default {
   background-size: contain;
   width: 58px;
   height: 58px;
-  bottom: 35px;
+  bottom: 15px;
   background-repeat: no-repeat;
   right: 40px;
   background-image: url('/public/images/WhatsappIcon.png');
@@ -172,7 +172,7 @@ export default {
   background-size: cover;
   width: 165px;
   height: 43px;
-  bottom: 44px;
+  bottom: 22px;
   background-color: #fff;
   background-repeat: no-repeat;
   right: 109px;
@@ -275,7 +275,7 @@ export default {
 
   .float {
     right: 35px;
-    bottom: 60px;
+    bottom: 30px;
   }
 
   .float:focus {
@@ -283,7 +283,7 @@ export default {
     bottom: 60px;
   }
   .float-message {
-    bottom: 65px;
+    bottom: 35px;
   }
 }
 

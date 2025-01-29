@@ -135,10 +135,17 @@
                         >
                             {{ $t("track_order") }}
                         </router-link> -->
-                        <!-- <v-divider vertical class="mx-4" /> -->
                         <a
                             :href="'tel:' + $optional('data.helpline')"
-                            style="color: white;"
+                            style="color: gray;"
+                        >
+                            <i class="las la-truck" />
+                            <span>Envíos a toda Colombia</span>
+                        </a>
+                        <v-divider vertical class="mx-4" />
+                        <a
+                            :href="'tel:' + $optional('data.helpline')"
+                            style="color: gray;"
                         >
                             <i class="la la-phone" />
                             <span>+57 3174420109</span>
@@ -158,7 +165,7 @@
                         </router-link> -->
                         <a
                             :href="'mailto:' + $optional('data.helpline')"
-                            style="color: white;"
+                            style="color: gray;"
                         >
                             <i class="las la-envelope" />
                             <span>ventas5@aloranges.com</span>
@@ -243,7 +250,6 @@ export default {
 .topbar {
     position: relative;
     z-index: 2;
-    background-color: #52ae51;
-    color: #fff;
+    background-color: #fff;
 }
 </style>
