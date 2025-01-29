@@ -25,7 +25,7 @@
                 <i class="las la-times ts-10" />
             </v-btn>
         </div>
-        <v-container class="fs-13 py-0 px-0 px-md-3">
+        <v-container class="fs-13 py-0 px-0 px-md-3 mr-2">
             <v-row align="center" class="my-0 d-none d-md-flex">
                 <v-col cols="6" class="py-2">
                     <div class="d-flex align-center">
@@ -129,20 +129,19 @@
                 </v-col>
                 <v-col cols="6" class="py-2">
                     <div class="d-flex align-center justify-end">
-                        <router-link
+                        <!-- <router-link
                             :to="{ name: 'TrackOrder' }"
                             class="text-reset opacity-60"
                         >
                             {{ $t("track_order") }}
-                        </router-link>
-                        <v-divider vertical class="mx-4" />
+                        </router-link> -->
+                        <!-- <v-divider vertical class="mx-4" /> -->
                         <a
                             :href="'tel:' + $optional('data.helpline')"
-                            class="text-reset opacity-60"
+                            style="color: white;"
                         >
                             <i class="la la-phone" />
-                            <span>{{ $t("help_line") }}</span>
-                            <span>{{ $optional("data.helpline") }}</span>
+                            <span>+57 3174420109</span>
                         </a>
                         <v-divider vertical class="mx-4" />
                         <!-- <router-link
@@ -151,22 +150,19 @@
                         >
                             <span class="">Compare (0)</span>
                         </router-link> -->
-                        <router-link
+                        <!-- <router-link
                             :to="{ name: 'ComparedList' }"
                             class="text-reset opacity-60 me-3"
                         v-if="generalSettings.product_comparison==1">
                             <span class="">{{ $t("compare") }} ({{ getTotalComparedList }})</span>
-                        </router-link>
-                        <router-link
-                            :to="{ name: 'Wishlist' }"
-                            class="text-reset opacity-60"
+                        </router-link> -->
+                        <a
+                            :href="'mailto:' + $optional('data.helpline')"
+                            style="color: white;"
                         >
-                            <span class=""
-                            >{{ $t("wishlist") }} ({{
-                                getTotalWishlisted
-                            }})</span
-                            >
-                        </router-link>
+                            <i class="las la-envelope" />
+                            <span>ventas5@aloranges.com</span>
+                        </a>
                     </div>
                 </v-col>
             </v-row>
@@ -247,6 +243,7 @@ export default {
 .topbar {
     position: relative;
     z-index: 2;
-    background-color: #fff;
+    background-color: #52ae51;
+    color: #fff;
 }
 </style>

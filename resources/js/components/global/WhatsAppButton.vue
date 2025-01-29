@@ -12,24 +12,21 @@
             <div class="row row-wha">
                 <div class="col-12 header-wha">
                     <div class="row header-row">
-                        <div class="col-2">
-                            <div class="modal-whats"></div>
+                        <div class="col-3">
+                            <div class="header-logo"></div>
                         </div>
-                        <div class="col-10 text-left title-header">
-                            Iniciar Conversación <br /><br />
+                        <div class="col-9 text-left title-header">
+                            ¡Háblanos por WhatsApp! <br /><br />
                             <span class="sub-header">
-                                Hola, haga clic en uno de los agentes e inicie una conversación vía <b>WhatsApp</b>
+                              Te atienden <b>humanos de verdad,</b> rápidos, amables y sin respuestas de robot.
                             </span>
                         </div>
                     </div>
                 </div>
-                <div class="boxtitle">
-                    <span class="sub-boxtitle"> Usualmente nuestro equipo responde en pocos minutos. </span>
-                </div>
 
                 <!-- WhatsApp Links -->
                 <a
-                    href="https://api.whatsapp.com/send?phone=8613247506579&text=Hola."
+                    href="https://wa.me/573174420109"
                     target="_blank"
                     rel="noreferrer"
                     class="col-12 box-wha"
@@ -39,42 +36,8 @@
                             <div class="modal-whats"></div>
                         </div>
                         <div class="col-10 text-center">
-                            Transporte de carga internacional <br />
-                            <span class="sub-box"> Carga aérea - Maritimo - Multimodal </span>
-                        </div>
-                    </div>
-                </a>
-
-                <a
-                    href="https://api.whatsapp.com/send?phone=8618520296413&text=Hola."
-                    target="_blank"
-                    rel="noreferrer"
-                    class="col-12 box-wha"
-                >
-                    <div class="row items-box">
-                        <div class="col-2">
-                            <div class="modal-whats"></div>
-                        </div>
-                        <div class="col-10 text-center">
-                            Agente de compras <br />
-                            <span class="sub-box"> Consultoría - Inspección - Verificación </span>
-                        </div>
-                    </div>
-                </a>
-
-                <a
-                    href="https://api.whatsapp.com/send?phone=8618520981493&text=Hola."
-                    target="_blank"
-                    rel="noreferrer"
-                    class="col-12 box-wha-final"
-                >
-                    <div class="row items-box">
-                        <div class="col-2">
-                            <div class="modal-whats"></div>
-                        </div>
-                        <div class="col-10 text-center">
-                            Almacenamiento <br />
-                            <span class="sub-box"> Bodega - Reempaque - Distribución </span>
+                            Eduardo Ramirez<br />
+                            <span class="sub-box"> +57 3174420109 </span>
                         </div>
                     </div>
                 </a>
@@ -102,7 +65,7 @@ export default {
 /* whats */
 
 .row-wha {
-  padding: 0px 15px;
+  padding: 0px 12px;
 }
 
 .div-what {
@@ -252,7 +215,7 @@ export default {
 .response {
   position: fixed;
   width: 25%;
-  height: 322px;
+  height: 145px;
   bottom: 115px;
   right: 40px;
   background-color: #fff;
@@ -279,7 +242,7 @@ export default {
   width: 100px;
   height: 50px;
   background-repeat: no-repeat;
-  /* background-image: url("../images/Blanco.png"); */
+  background-image: url('/public/images/AlorangesWhite2.png');
 }
 
 .btn-close {

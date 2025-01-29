@@ -1,6 +1,10 @@
 <template>
     <v-app class="d-flex flex-column">
-        <Navbar display="position: fixed; top: 0px" v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
+        <TopBar
+            :loading="loading"
+            :data="data"
+        />
+        <Navbar display="position: fixed; top: 10px" v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
         <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" @toggleMenu="toggleMenu" />
     
         <v-main class="aiz-main-wrap">
@@ -35,6 +39,7 @@ import SnackBar from "./inc/SnackBar";
 import Breadcrumb from "./header/Breadcrumb.vue";
 import WhatsAppButton from "./global/WhatsAppButton.vue";
 import SideMenu from "./user/SideMenu";
+import TopBar from "./header/TopBar.vue";
 
 export default {
     metaInfo() {
@@ -46,6 +51,8 @@ export default {
     data(){
         return{
             userNavDrawerActive: false,
+            loading: true,
+            data: {},
         }
     },
     components: {
@@ -57,7 +64,8 @@ export default {
         Navbar,
         NavbarAuth,
         SideMenu,
-        SnackBar
+        SnackBar,
+        TopBar
     },
     watch: {
         $route(to, from) {
