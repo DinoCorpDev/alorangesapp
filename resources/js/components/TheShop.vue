@@ -14,6 +14,8 @@
         </v-main>
 
         <Footer v-if="$route.meta.hasFooter" :class="[{ 'd-none': routerLoading }]" />
+        
+        <WhatsAppButton />
 
         <AddToCartDialog />
         <LoginDialog v-if="!isAuthenticated" />
@@ -31,6 +33,7 @@ import Navbar from "./header/Navbar.vue";
 import NavbarAuth from "./header/NavbarAuth.vue";
 import SnackBar from "./inc/SnackBar";
 import Breadcrumb from "./header/Breadcrumb.vue";
+import WhatsAppButton from "./global/WhatsAppButton.vue";
 import SideMenu from "./user/SideMenu";
 
 export default {
@@ -48,6 +51,7 @@ export default {
     components: {
         AddToCartDialog,
         Footer,
+        WhatsAppButton,
         LoginDialog,
         Breadcrumb,
         Navbar,
