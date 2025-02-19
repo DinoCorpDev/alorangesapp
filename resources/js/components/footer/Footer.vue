@@ -6,16 +6,29 @@
                 <div style="max-width: 480px" class="pl-md-5 mr-md-16">
                     <LogoAlorange class="mb-1" />
                     <p style="font-size: 15px">
-                        <b>¡Estamos aquí para ayudarte!</b><br>¿Tienes compras, cotizaciones, preguntas o inquietudes? ¡No dudes
-                        en llamarnos o escribirnos! Nuestro equipo de agentes comerciales está listo para atenderte de
-                        lunes a viernes, de 8:00 am a 6:00 pm.<br>¿Fuera de horario? ¡No hay problema! Déjanos tu mensaje
-                        por Teléfono o WhatsApp <a style="font-weight: 700; color: white; font-size: 17px; text-decoration: underline;" href="https://wa.me/573174420109" target="_blank">+57 3174420109</a> o envíanos un correo a ventas5@aloranges.com, y te responderemos en un abrir y
-                        cerrar de ojos.<br><b>¡Tu satisfacción es nuestra misión!</b>
+                        <b>¡Estamos aquí para ayudarte!</b><br />¿Tienes compras, cotizaciones, preguntas o inquietudes?
+                        ¡No dudes en llamarnos o escribirnos! Nuestro equipo de agentes comerciales está listo para
+                        atenderte de lunes a viernes, de 8:00 am a 6:00 pm.<br />¿Fuera de horario? ¡No hay problema!
+                        Déjanos tu mensaje por Teléfono o WhatsApp
+                        <a
+                            style="font-weight: 700; color: white; font-size: 17px; text-decoration: underline"
+                            href="https://wa.me/573174420109"
+                            target="_blank"
+                            >+57 3174420109</a
+                        >
+                        o envíanos un correo a ventas5@aloranges.com, y te responderemos en un abrir y cerrar de
+                        ojos.<br /><b>¡Tu satisfacción es nuestra misión!</b>
                     </p>
                     <div style="display: flex; gap: 10px; justify-content: flex-start">
-                        <a href="#"><img src="../icons/facebook.svg" alt="Facebook" style="width: 50px" /></a>
-                        <a href="#"><img src="../icons/whatsapp.svg" alt="whatsapp" style="width: 50px" /></a>
-                        <a href="#"><img src="../icons/instagram.svg" alt="instagram" style="width: 50px" /></a>
+                        <a href="https://www.facebook.com/share/15iCZJt5Dq/?mibextid=wwXIfr" target="_blank"
+                            ><img class="redes" src="../icons/facebook.svg" alt="Facebook"
+                        /></a>
+                        <a href="https://wa.me/573174420109" target="_blank"
+                            ><img class="redes" src="../icons/whatsapp.svg" alt="whatsapp"
+                        /></a>
+                        <a href="https://www.instagram.com/aloranges_?igsh=bnQzMGU0MTQycndo" target="_blank"
+                            ><img class="redes" src="../icons/instagram.svg" alt="instagram"
+                        /></a>
                     </div>
                 </div>
             </v-col>
@@ -29,7 +42,7 @@
                 <router-link to="#">Regístrate</router-link>
                 <router-link to="#">¿Olvidó su clave?</router-link>
             </v-col>
-            <v-col cols="12" class="d-none d-md-flex align-center" style="justify-content: space-around" >
+            <v-col cols="12" class="d-none d-md-flex align-center" style="justify-content: space-around">
                 <img src="../icons/Logo_fondo_Emprender_blanco.png" alt="" style="max-width: 266px; height: auto" />
                 <p style="font-size: 13px; margin-bottom: 0">
                     <b>Copyright © 2022 Aloranges.com.</b> Todos los derechos reservados.
@@ -84,6 +97,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.redes {
+    width: 50px;
+    &:hover {
+        opacity: 0.5;
+    }
+}
+
 p {
     color: white;
     font-weight: 100;
@@ -173,4 +193,5 @@ p {
         }
     }
 }
+
 </style>
