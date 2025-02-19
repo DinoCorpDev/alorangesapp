@@ -115,7 +115,7 @@
                     <v-col cols="12" class="d-flex d-sm-none justify-start">
                         <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-start align-start">
                             <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
-                            <CustomButton class="mb-5" color="orange" :width="200">Descargar App</CustomButton>
+                            <CustomButton class="mb-5" color="orange" width="200">Descargar App</CustomButton>
                         </div>
                     </v-col>
                     <v-col cols="12" sm="6" class="d-flex align-items-center" style="justify-content: center">
@@ -124,7 +124,7 @@
                     <v-col cols="12" sm="6" class="justify-center d-none d-sm-flex">
                         <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-center align-start">
                             <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
-                            <CustomButton class="mb-5" color="orange" :width="200">Descargar App</CustomButton>
+                            <CustomButton class="mb-5" color="orange" width="200">Descargar App</CustomButton>
                             <div class="Wrapper-AppStore">
                                 <a href="#"><img class="imgsize-btn-dwn" src="public/assets/img/Grupo12233.png" /></a>
                                 <a href="#"
