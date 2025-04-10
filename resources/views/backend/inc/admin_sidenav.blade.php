@@ -2,13 +2,9 @@
     <div class="aiz-sidebar left c-scrollbar">
         <div class="aiz-side-nav-logo-wrap">
             <a href="{{ route('admin.dashboard') }}" class="d-block text-left">
-                @if (get_setting('system_logo_white') != null)
-                    <img class="mw-100" src="{{ uploaded_asset(get_setting('system_logo_white')) }}"
-                        class="brand-icon" alt="{{ get_setting('site_name') }}">
-                @else
-                    <img class="mw-100" src="{{ static_asset('assets/img/logo-white.png') }}"
-                        class="brand-icon" alt="{{ get_setting('site_name') }}">
-                @endif
+                
+                <img class="mw-100" src="{{ static_asset('assets/img/Logo_alorange_white.png') }}"
+                    class="brand-icon" alt="{{ get_setting('site_name') }}" style="height: 80px;">
             </a>
         </div>
 
