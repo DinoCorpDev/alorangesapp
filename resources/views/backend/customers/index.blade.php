@@ -40,7 +40,7 @@
                     @foreach ($customers as $key => $user)
                         <tr>
                             <td>{{ $key + 1 + ($customers->currentPage() - 1) * $customers->perPage() }}</td>
-                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->first_name }} {{$user->first_lastname}}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->phone }}</td>
                             <td>{{ format_price($user->balance) }}</td>

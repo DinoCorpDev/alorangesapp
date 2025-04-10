@@ -19,7 +19,7 @@
                                 class="bg-white pr-3">{{ translate('Account Information') }}</span></h6>
                         <p class="text-muted">
                             <strong>{{ translate('Full Name') }} :</strong>
-                            <span class="ml-2">{{ $user->name }}</span>
+                            <span class="ml-2">{{ $user->first_name }} {{ $user->second_name }} {{ $user->first_lastname }} {{ $user->second_lastname }}</span>
                         </p>
                         <p class="text-muted"><strong>{{ translate('Email') }} :</strong>
                             <span class="ml-2">

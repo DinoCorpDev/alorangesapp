@@ -41,7 +41,7 @@
                             <div>
                                 <div class="fs-15 fw-600 mb-2">{{ translate('Customer info') }}</div>
                                 <div><span class="opacity-80 mr-2 ml-0">{{ translate('Name') }}:</span>
-                                    {{ $order->user->name ?? '' }}</div>
+                                    {{ $order->user->first_name ?? '' }} {{ $order->user->first_lastname ?? '' }}</div>
                                 <div><span class="opacity-80 mr-2 ml-0">{{ translate('Email') }}:</span>
                                     {{ $order->user->email ?? '' }}</div>
                                 <div><span class="opacity-80 mr-2 ml-0">{{ translate('Phone') }}:</span>
@@ -68,7 +68,7 @@
                                     <tr>
                                         <td class="">{{ translate('Payment method') }}:</td>
                                         <td class="text-right fw-700">
-                                            {{ ucfirst(str_replace('_', ' ', $order->payment_type)) }}</td>
+                                            {{ ucfirst(str_replace('_', ' ', $order->metodo_pago_contraentrega)) }}</td>
                                     </tr>
                                     @if ($order->manual_payment == 1 && $order->manual_payment_data !== null)
                                         @php
@@ -153,10 +153,10 @@
                             @endphp
                             <h5 class="fs-14 mb-3">{{ translate('Shipping address') }}</h5>
                             <address class="">
-                                {{ $shipping_address->phone }}<br>
-                                {{ $shipping_address->address }}<br>
-                                {{ $shipping_address->city }}, {{ $shipping_address->postal_code }}<br>
-                                {{ $shipping_address->state }}, {{ $shipping_address->country }}
+                                @if(!empty($shipping_address->phone)){{ $shipping_address->phone }}<br>@endif
+                                @if(!empty($shipping_address->address)){{ $shipping_address->address }}<br>@endif
+                                @if(!empty($shipping_address->city) || !empty($shipping_address->postal_code)){{ $shipping_address->city }}, {{ $shipping_address->postal_code }}<br>@endif
+                                @if(!empty($shipping_address->state) || !empty($shipping_address->country)){{ $shipping_address->state }}, {{ $shipping_address->country }}@endif
                             </address>
                         </div>
                         <div class="col-md-auto w-md-250px">
@@ -165,10 +165,10 @@
                             @endphp
                             <h5 class="fs-14 mb-3">{{ translate('Billing address') }}</h5>
                             <address class="">
-                                {{ $billing_address->phone }}<br>
-                                {{ $billing_address->address }}<br>
-                                {{ $billing_address->city }}, {{ $billing_address->postal_code }}<br>
-                                {{ $billing_address->state }}, {{ $billing_address->country }}
+                                @if(!empty($billing_address->phone)){{ $billing_address->phone }}<br>@endif
+                                @if(!empty($billing_address->address)){{ $billing_address->address }}<br>@endif
+                                @if(!empty($billing_address->city) || !empty($billing_address->postal_code)){{ $billing_address->city }}, {{ $billing_address->postal_code }}<br>@endif
+                                @if(!empty($billing_address->state) || !empty($billing_address->country)){{ $billing_address->state }}, {{ $billing_address->country }}@endif
                             </address>
                         </div>
                     </div>
@@ -192,8 +192,9 @@
                                     <td>{{ $key + 1 }}</td>
                                     <td>
                                         @if ($orderDetail->product != null)
+                                        @php $product = \App\Models\Product::where('id',$orderDetail->product->id)->first(); @endphp
                                             <div class="media">
-                                                <img src="{{ uploaded_asset($orderDetail->product->thumbnail_img) }}"
+                                                <img src="{{ $product->thumbnail_img }}"
                                                     class="size-60px mr-3">
                                                 <div class="media-body">
                                                     <h4 class="fs-14 fw-400">{{ $orderDetail->product->name }}</h4>
