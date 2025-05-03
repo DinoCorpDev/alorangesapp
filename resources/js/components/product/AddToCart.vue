@@ -64,7 +64,9 @@
                         color="orange"
                         text="Agregar a Compras"
                     />
-                    <CustomButton text="Consultar a un Asesor" color="grey" />
+                    <a href="https://wa.me/573174420109" target="_blank"
+                        ><CustomButton text="Consultar a un Asesor" color="grey" />
+                    </a>
                 </div>
             </div>
 

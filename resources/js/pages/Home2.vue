@@ -115,7 +115,6 @@
                     <v-col cols="12" class="d-flex d-sm-none justify-start">
                         <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-start align-start">
                             <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
-                            <CustomButton class="mb-5" color="orange" width="200">Descargar App</CustomButton>
                         </div>
                     </v-col>
                     <v-col cols="12" sm="6" class="d-flex align-items-center" style="justify-content: center">
@@ -124,10 +123,9 @@
                     <v-col cols="12" sm="6" class="justify-center d-none d-sm-flex">
                         <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-center align-start">
                             <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
-                            <CustomButton class="mb-5" color="orange" width="200">Descargar App</CustomButton>
                             <div class="Wrapper-AppStore">
-                                <a href="#"><img class="imgsize-btn-dwn" src="public/assets/img/Grupo12233.png" /></a>
-                                <a href="#"
+                                <a href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share" target="_blank"><img class="imgsize-btn-dwn" src="public/assets/img/Grupo12233.png" /></a>
+                                <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank"
                                     ><img class="imgsize-btn-dwn ml-5" src="public/assets/img/Grupo12234.png"
                                 /></a>
                             </div>
@@ -137,7 +135,7 @@
                         <div class="Wrapper-AppStore-responsive mb-7 mb-sm-0">
                             <v-row>
                                 <v-col cols="6" class="pr-1 pl-10 pb-0">
-                                    <a href="#"
+                                    <a href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share" target="_blank"
                                         ><img
                                             class="imgsize-btn-dwn"
                                             style="width: 100%; height: auto"
@@ -145,7 +143,7 @@
                                     /></a>
                                 </v-col>
                                 <v-col cols="6" class="pl-1 pr-10 pb-0">
-                                    <a href="#"
+                                    <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank"
                                         ><img
                                             class="imgsize-btn-dwn"
                                             style="width: 100%; height: auto"

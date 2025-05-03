@@ -26,7 +26,7 @@
                         <a href="https://wa.me/573174420109" target="_blank"
                             ><img class="redes" src="../icons/whatsapp.svg" alt="whatsapp"
                         /></a>
-                        <a href="https://www.instagram.com/aloranges_?igsh=bnQzMGU0MTQycndo" target="_blank">
+                        <a href="https://www.instagram.com/aloranges.co?igsh=bnQzMGU0MTQycndo" target="_blank">
                             <img class="redes" src="../icons/instagram.svg" alt="instagram"/>
                         </a>
                     </div>

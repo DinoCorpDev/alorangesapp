@@ -107,25 +107,7 @@
                 </v-row>
             </v-col>
         </v-row>
-
         <v-divider class="my-4" />
-
-        <v-row>
-            <p style="font-size: 0.7rem; color: #b4b5b5; padding-left: 1.2rem; text-align: left">
-                Lorem ipsum odor amet, consectetuer adipiscing elit. Urna curabitur aliquet condimentum facilisis ex nec
-                morbi porta laoreet. Tempus fusce et mollis dolor est augue cursus. Fusce et nisi venenatis ad neque
-                tincidunt dapibus. Condimentum maximus in leo mollis nascetur dignissim. Curae leo odio morbi efficitur
-                sociosqu metus. Magnis feugiat hac conubia non torquent commodo sit. Euismod metus hac ullamcorper
-                tristique feugiat ut. Praesent turpis magnis himenaeos quis adipiscing. Fusce sodales morbi dictum felis
-                feugiat. Pellentesque condimentum nisl integer tincidunt ac urna nascetur ante fermentum. Montes nec
-                integer sagittis eu accumsan orci lacus orci sociosqu. Cras etiam augue non fermentum finibus sed.
-                Cursus primis ridiculus in faucibus velit ultricies lectus. Amet tempus quam sollicitudin aenean
-                imperdiet accumsan imperdiet. Enim himenaeos rhoncus montes sollicitudin lacinia dis mus commodo. Etiam
-                vitae senectus phasellus hendrerit pretium mi adipiscing. Dui libero montes; ante elementum augue
-                lectus. Hac phasellus felis feugiat nulla ante. Interdum malesuada sem finibus, etiam penatibus gravida
-                molestie ante faucibus? Ipsum in metus nibh faucibus dapibus proin suspendisse eget.
-            </p>
-        </v-row>
     </div>
 </template>
 

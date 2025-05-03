@@ -41,7 +41,7 @@ export default {
                 purchase: [
                     { label: "Carrito", link: "Cart" },
                     { label: "Mi lista", link: "Wishlist" },
-                    { label: "Facturas", link: "PurchaseHistory" },
+                    { label: "Pedidos", link: "PurchaseHistory" },
                     //{ label: "Suscripciones", link: "Suscriptions" },
                     //{ label: "Proyectos", link: "Proyects" }
                 ],
