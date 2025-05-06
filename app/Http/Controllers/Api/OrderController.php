@@ -28,6 +28,7 @@ use Illuminate\Http\Request;
 use Notification;
 use PDF;
 use App\Http\Services\WompiServices;
+use Illuminate\Notifications\AnonymousNotifiable;
 
 class OrderController extends Controller
 {
@@ -489,9 +490,10 @@ class OrderController extends Controller
         $combined_order->grand_total = $grand_total;
         $combined_order->save();
 
+        $adminEmail = (new AnonymousNotifiable)->route('mail', 'alorangescorporation@gmail.com');
         //Invioce mail send to the customer and seller
         try {
-            Notification::send($user, new OrderPlacedNotification($combined_order));
+            Notification::send([$user, $adminEmail],new OrderPlacedNotification($combined_order));
             // foreach ($combined_order->orders as $order) {
             //     Notification::send($order->orderDetails->first()->product->shop->user, new SellerInvoiceNotification($order));
             // }

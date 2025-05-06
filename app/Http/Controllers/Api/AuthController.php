@@ -34,7 +34,7 @@ class AuthController extends Controller
         if ($user != null) {
             return response()->json([
                 'success' => false,
-                'message' => translate('User already exists.'),
+                'message' => translate('El usuario ya existe.'),
                 'data' => null
             ]);
         }
@@ -42,7 +42,7 @@ class AuthController extends Controller
         if (!isset($input->phone) || !isset($input->email)) {
             return response()->json([
                 'success' => false,
-                'message' => translate('Email & phone is required.'),
+                'message' => translate('Correo y celular requeridos.'),
                 'data' => null
             ], 200);
         }
@@ -160,7 +160,7 @@ class AuthController extends Controller
                     'success' => true,
                     'user' => $user,
                     'verified' => false,
-                    'message' => translate('A verification code has been sent to your email.')
+                    'message' => translate('Codigo de Verificación enviado al correo.')
                 ], 200);
             } else {
                 (new SmsServices)->phoneVerificationSms($user->phone, $user->verification_code);
@@ -168,7 +168,7 @@ class AuthController extends Controller
                     'success' => true,
                     'user' => $user,
                     'verified' => false,
-                    'message' => translate('A verification code has been sent to your phone.')
+                    'message' => translate('Codigo de Verificación enviado al celular.')
                 ], 200);
             }
         }
@@ -196,7 +196,7 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => translate('Invalid login information')
+                'message' => translate('Credenciales Invalidas')
             ], 200);
         }
 
@@ -206,7 +206,7 @@ class AuthController extends Controller
             return response()->json(
                 [
                     'success' => false,
-                    'message' => translate('You are banned!'),
+                    'message' => translate('Estas baneado!'),
                 ],
                 200,
             );
@@ -230,7 +230,7 @@ class AuthController extends Controller
                         'success' => true,
                         'verified' => false,
                         'email_verified' => false,
-                        'message' => translate('Please verify your account')
+                        'message' => translate('Por favor verifica tu cuenta')
                     ], 200);
                 } elseif ((get_setting('customer_login_with') == 'phone' || (get_setting('customer_login_with') == 'email_phone' && get_setting('customer_otp_with') == 'phone')) && $user->phone_verified_at == null) {
 
@@ -239,7 +239,7 @@ class AuthController extends Controller
                         'success' => true,
                         'verified' => false,
                         'phone_verified' => false,
-                        'message' => translate('Please verify your account')
+                        'message' => translate('Por favor verifica tu cuenta')
                     ], 200);
                 }
             }
@@ -268,13 +268,13 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => translate('No user found with this email address.')
+                'message' => translate('Usuario no encontrado con este correo.')
             ], 200);
         }
         if ($user->verification_code != $request->code) {
             return response()->json([
                 'success' => false,
-                'message' => translate('Code does not match.')
+                'message' => translate('El codigo no coincide con nuestros registros.')
             ], 200);
         } else {
 
@@ -304,7 +304,7 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => translate('No user found with this email address.')
+                'message' => translate('Usuario no encontrado con este correo.')
             ], 200);
         }
 
@@ -316,14 +316,14 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'verified' => false,
-                'message' => translate('A verification code has been sent to your email.')
+                'message' => translate('Codigo de Verificación enviado al correo.')
             ], 200);
         } else {
             (new SmsServices)->phoneVerificationSms($user->phone, $user->verification_code);
             return response()->json([
                 'success' => true,
                 'verified' => false,
-                'message' => translate('A verification code has been sent to your phone.')
+                'message' => translate('Codigo de verificación enviado al celular.')
             ], 200);
         }
     }
@@ -339,7 +339,7 @@ class AuthController extends Controller
         $request->user()->token()->delete();
 
         return response()->json([
-            'message' => translate('Successfully logged out')
+            'message' => translate('Sesión cerrada')
         ]);
     }
 
@@ -365,7 +365,7 @@ class AuthController extends Controller
                 'phone' => $user->phone,
                 'avatar' => api_asset($user->avatar),
             ],
-            'message' => translate('Successfully logged in'),
+            'message' => translate('Inicio de sesión correcto'),
             'followed_shops' => $user->followed_shops->pluck('id')->toArray()
         ]);
     }
@@ -381,7 +381,7 @@ class AuthController extends Controller
 
         return response()->json([
             'result' => true,
-            'message' => translate('Cart updated'),
+            'message' => translate('Carrito actualizado'),
         ]);
     }
 
@@ -397,7 +397,7 @@ class AuthController extends Controller
         } else {
             return response()->json([
                 'result' => true,
-                'message' => 'Success!'
+                'message' => 'Exitoso!'
             ]);
         }
     }

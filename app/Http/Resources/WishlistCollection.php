@@ -18,7 +18,7 @@ class WishlistCollection extends ResourceCollection
                         'slug' => optional($data->product->brand)->slug,
                     ],
                     'slug' => $data->product->slug,
-                    'thumbnail_image' => api_asset($data->product->thumbnail_img),
+                    'thumbnail_image' => $data->product->thumbnail_img,
                     'base_price' => (float) product_base_price($data->product),
                     'base_discounted_price' => (float) product_discounted_base_price($data->product),
                     'stock' => $data->product->stock,
