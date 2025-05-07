@@ -29,19 +29,22 @@ use Notification;
 use PDF;
 use App\Http\Services\WompiServices;
 use Illuminate\Notifications\AnonymousNotifiable;
+use App\Jobs\ConsultarEstadoPagoWompi;
 
 class OrderController extends Controller
 {
     public function index()
     {
-        $order = new OrderCollection(CombinedOrder::where('user_id', auth('api')->user()->id)->latest()->paginate(12)); 
-        foreach ($order as $key => $item) {    
-            $wompiResult = (new WompiServices)->wompiGetTransactionFacturas($item['code']);
-            foreach ($item['orders'] as $key => $itemOrdes) {
-                $itemOrdes['payment_status'] = $wompiResult;
-            }
+        $ordersQuery = CombinedOrder::where('user_id', auth('api')->user()->id)->latest()->paginate(12);
+        $orders = new OrderCollection($ordersQuery);
+
+        // Despacha jobs por cada orden
+        foreach ($ordersQuery as $combinedOrder) {
+            ConsultarEstadoPagoWompi::dispatch($combinedOrder->id);
         }
-        return $order;
+
+        // Devuelve la orden SIN esperar el resultado de Wompi
+        return $orders;
     }
 
     public function getResultTransactionPSE($reference){
