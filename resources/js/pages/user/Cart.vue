@@ -2556,134 +2556,142 @@ export default {
         },
         async proceedCheckout() {
             if (Object.entries(this.dataCheckout).length === 0) {
+            // Función para generar la referencia de pago
+            const generateReference = () => {
                 const date = new Date();
                 const formattedDate = date.toISOString().slice(0, 10).replace(/-/g, "");
                 const formattedTime = date.toTimeString().slice(0, 8).replace(/:/g, "");
                 const randomNum = Math.floor(10 + Math.random() * 90);
-                let referenceToPayment = formattedDate + "" + formattedTime + "" + randomNum;
-                this.referenceToPayment = referenceToPayment;
-                let result;
-                if (this.priceTotal > 0) {
-                    this.checkoutLoading = true;
-                    if(this.pick === 2){
-                        let totalPrice = this.priceTotal.toString();
-                        let mountToPass = parseInt( totalPrice.replace(/[^\w\s]/gi, '') );
-                        let total = parseInt(`${mountToPass}00`);
-                        let data = {
-                            mount: total,
-                            currency: 'COP',
-                            reference: referenceToPayment,
-                            customer_email: this.userData.email,
-                            customer_data: {
-                                phone_number: this.userData.phone ? this.userData.phone : this.addressPrincipal.phone ? this.addressPrincipal.phone : '+573007819686',
-                                full_name: this.userData.name,
-                                legal_id: this.userData.documentNumber,
-                                legal_id_type: this.userData.documentType.replace(/[^\w\s]/gi, ''),
-                            },
-                            shipping_address:{
-                                address_line_1: this.selectedAddressEnvio.address,
-                                country: "CO",
-                                region: this.selectedAddressEnvio.state,
-                                city: this.selectedAddressEnvio.city,
-                                name: this.userData.name,
-                                phone_number: this.userData.phone ? this.userData.phone : this.addressPrincipal.phone ? this.addressPrincipal.phone : '+573007819686',
-                                postal_code: this.selectedAddressEnvio.postal_code
-                            },
-                            cardData: this.formCard,
-                        };
-                        result = await this.call_api('POST','product/payment-card-wompi',data);
-                        if(result.data.success){
-                            let formData = this.processToSendStore(this.referenceToPayment);
-                            const res = await this.call_api("post", "checkout/order/store", formData);
-                            this.numberPag = 4;
-                            this.dataCheckout = res.data;
-                        }else{
-                            this.snack({
-                                message: 'Algo ha salido mal, Revisa la información e intenta nuevamente',
-                                color: "red"
-                            });
-                        }
-                    }else if (this.pick === 1){
-                        let totalPrice = this.priceTotal.toString();
-                        let mountToPass = parseInt( totalPrice.replace(/[^\w\s]/gi, '') );
-                        let total = parseInt(`${mountToPass}00`);
-                        let data = {
-                            mount: total,
-                            currency: 'COP',
-                            reference: referenceToPayment,
-                            customer_email: this.userData.email,
-                            customer_data: {
-                                phone_number: this.userData.phone ? this.userData.phone : this.addressPrincipal.phone ? this.addressPrincipal.phone : '+573007819686',
-                                full_name: this.userData.name,
-                                legal_id: this.userData.documentNumber,
-                                legal_id_type: this.userData.documentType.replace(/[^\w\s]/gi, ''),
-                            },
-                            shipping_address:{
-                                address_line_1: this.selectedAddressEnvio.address,
-                                country: "CO",
-                                region: this.selectedAddressEnvio.state,
-                                city: this.selectedAddressEnvio.city,
-                                name: this.userData.name,
-                                phone_number: this.userData.phone ? this.userData.phone : this.addressPrincipal.phone ? this.addressPrincipal.phone : '+573007819686',
-                                postal_code: this.selectedAddressEnvio.postal_code
-                            },
-                            payment_method: {
-                                type: "PSE",
-                                user_type: this.personTypeSelected, // Tipo de persona, natural (0) o jurídica (1)
-                                user_legal_id_type: this.userData.documentType.replace(/[^\w\s]/gi, ''), // Tipo de documento, CC o NIT
-                                user_legal_id: this.userData.documentNumber, // Número de documento
-                                financial_institution_code: this.bancoSelected, // Código (`code`) de la institución financiera
-                                payment_description: 'Pago de productos de aloranges',
-                            },
-                        }
-                        try {
-                            result = await this.call_api('POST','product/payment-wompi-pse',data);
-                            let idTransaction = result.data.PaymentResult.data.id;
-                            if(idTransaction){
-                                let dataToTransaction = {
-                                    id: idTransaction,
-                                };   
-                                let resultURL = await this.verifyStatusPayment(dataToTransaction);
-                                if (typeof resultURL === 'string') {
-                                    this.urlPagoPSE = resultURL;
-                                    let formData = this.processToSendStore(referenceToPayment);
-                                    const res = await this.call_api("post", "checkout/order/store", formData);
-                                    this.dataCheckout = res.data;
-                                }
-                            }                            
-                        } catch (error) {
-                            this.snack({
-                                message: 'Algo ha salido mal, intenta nuevamente mas tarde',
-                                color: "red"
-                            });  
-                            console.log(error); 
-                        }
-                    }else if(this.pick === 5){
-                        if(this.isEfectivo == false && this.isDatafono == false){
-                            this.snack({
-                                message: 'Debe elegir un medio de pago "Pago con Efectivo" o "Pago con Datafono" ',
-                                color: "red"
-                            });
+                return `${formattedDate}${formattedTime}${randomNum}`;
+            };
 
-                            this.checkoutLoading = false;
-                        }else{
-                            let formData = this.processToSendStore(referenceToPayment);
-                            const res = await this.call_api("post", "checkout/order/store", formData);
-                            this.dataCheckout = res.data;
-                            this.numberPag = 4;
-                        }   
-                    }
-                    else{
-                        let formData = this.processToSendStore(referenceToPayment);
-                        const res = await this.call_api("post", "checkout/order/store", formData);
-                        this.dataCheckout = res.data;
-                        this.numberPag = 4;
-                    }
-                    this.checkoutLoading = false;
+            const referenceToPayment = generateReference();
+            this.referenceToPayment = referenceToPayment;
+
+            // Helper para convertir el precio
+            const getTotal = () => {
+                let totalPrice = this.priceTotal.toString();
+                let mountToPass = parseInt(totalPrice.replace(/[^\w\s]/gi, ""));
+                return parseInt(`${mountToPass}00`);
+            };
+
+            // Datos comunes para la transacción
+            const customerData = {
+                phone_number:
+                this.userData.phone ||
+                this.addressPrincipal.phone ||
+                "+573007819686",
+                full_name: this.userData.name,
+                legal_id: this.userData.documentNumber,
+                legal_id_type: this.userData.documentType.replace(/[^\w\s]/gi, ""),
+            };
+
+            const shippingAddress = {
+                address_line_1: this.selectedAddressEnvio.address,
+                country: "CO",
+                region: this.selectedAddressEnvio.state,
+                city: this.selectedAddressEnvio.city,
+                name: this.userData.name,
+                phone_number:
+                this.userData.phone ||
+                this.addressPrincipal.phone ||
+                "+573007819686",
+                postal_code: this.selectedAddressEnvio.postal_code,
+            };
+
+            // Función para procesar el guardado del pedido
+            const processOrderStore = async (ref) => {
+                const formData = this.processToSendStore(ref);
+                const res = await this.call_api("post", "checkout/order/store", formData);
+                this.dataCheckout = res.data;
+                this.numberPag = 4;
+            };
+
+            let result;
+            if (this.priceTotal > 0) {
+                this.checkoutLoading = true;
+                if (this.pick === 2) {
+                // Caso: pago con tarjeta (Wompi)
+                const data = {
+                    mount: getTotal(),
+                    currency: "COP",
+                    reference: referenceToPayment,
+                    customer_email: this.userData.email,
+                    customer_data: customerData,
+                    shipping_address: shippingAddress,
+                    cardData: this.formCard,
+                };
+
+                result = await this.call_api("POST", "product/payment-card-wompi", data);
+                if (result.data.success) {
+                    await processOrderStore(referenceToPayment);
+                } else {
+                    this.snack({
+                    message:
+                        "Algo ha salido mal, Revisa la información e intenta nuevamente",
+                    color: "red",
+                    });
                 }
-            } else {
-                this.step = 4;
+                } else if (this.pick === 1) {
+                // Caso: pago con PSE (Wompi)
+                const data = {
+                    mount: getTotal(),
+                    currency: "COP",
+                    reference: referenceToPayment,
+                    customer_email: this.userData.email,
+                    customer_data: customerData,
+                    shipping_address: shippingAddress,
+                    payment_method: {
+                    type: "PSE",
+                    user_type: this.personTypeSelected,
+                    user_legal_id_type: customerData.legal_id_type,
+                    user_legal_id: this.userData.documentNumber,
+                    financial_institution_code: this.bancoSelected,
+                    payment_description: "Pago de productos de aloranges",
+                    },
+                };
+
+                try {
+                    result = await this.call_api("POST", "product/payment-wompi-pse", data);
+                    const idTransaction = result.data.PaymentResult.data.id;
+                    if (idTransaction) {
+                    const resultURL = await this.verifyStatusPayment({ id: idTransaction });
+                    if (typeof resultURL === "string") {
+                        this.urlPagoPSE = resultURL;
+                        // Abre la URL de pago automáticamente en una nueva pestaña
+                        window.open(this.urlPagoPSE, "_blank");
+                        await processOrderStore(referenceToPayment);
+                    }
+                    }
+                } catch (error) {
+                    this.snack({
+                    message: "Algo ha salido mal, intenta nuevamente mas tarde",
+                    color: "red",
+                    });
+                    console.log(error);
+                }
+                } else if (this.pick === 5) {
+                // Caso: métodos mixtos, validando medios de pago
+                if (!this.isEfectivo && !this.isDatafono) {
+                    this.snack({
+                    message:
+                        'Debe elegir un medio de pago "Pago con Efectivo" o "Pago con Datafono"',
+                    color: "red",
+                    });
+                    this.checkoutLoading = false;
+                } else {
+                    await processOrderStore(referenceToPayment);
+                }
+                } else {
+                // Caso por defecto: solo guardar la orden
+                await processOrderStore(referenceToPayment);
+                }
+                this.checkoutLoading = false;
             }
+            } else {
+            this.step = 4;
+            }
+
         },
         fileSelected(evt) {
             evt.preventDefault();
