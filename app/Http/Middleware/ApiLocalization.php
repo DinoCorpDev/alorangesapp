@@ -26,7 +26,7 @@ class ApiLocalization
             $locale = env('DEFAULT_LANGUAGE');
         }
         else{
-            $locale = 'en';
+            $locale = 'es';
         }
 
         // set laravel localization
