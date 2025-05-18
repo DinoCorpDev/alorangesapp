@@ -1,24 +1,20 @@
 <template>
     <v-app class="d-flex flex-column">
-        <TopBar
-            :loading="loading"
-            :data="data"
-        />
-        <Navbar display="position: fixed; top: 10px" v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
+        <Navbar v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
         <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" @toggleMenu="toggleMenu" />
-    
+
         <v-main class="aiz-main-wrap">
             <Breadcrumb />
-            
-            <!-- prettier-ignore -->
             <v-navigation-drawer v-model="userNavDrawerActive" fixed temporary right style="z-index: 999">
                 <SideMenu class="pa-3" />
             </v-navigation-drawer>
-            <router-view :key="['ShopDetails','ShopCoupons','ShopProducts'].includes($route.name) ? null : $route.path"></router-view>
+            <router-view
+                :key="['ShopDetails', 'ShopCoupons', 'ShopProducts'].includes($route.name) ? null : $route.path"
+            ></router-view>
         </v-main>
 
         <Footer v-if="$route.meta.hasFooter" :class="[{ 'd-none': routerLoading }]" />
-        
+
         <WhatsAppButton />
 
         <AddToCartDialog />
@@ -39,21 +35,17 @@ import SnackBar from "./inc/SnackBar";
 import Breadcrumb from "./header/Breadcrumb.vue";
 import WhatsAppButton from "./global/WhatsAppButton.vue";
 import SideMenu from "./user/SideMenu";
-import TopBar from "./header/TopBar.vue";
 
 export default {
     metaInfo() {
         return {
-            title: this.appMetaTitle,
-            
+            title: this.appMetaTitle
         };
     },
-    data(){
-        return{
-            userNavDrawerActive: false,
-            loading: true,
-            data: {},
-        }
+    data() {
+        return {
+            userNavDrawerActive: false
+        };
     },
     components: {
         AddToCartDialog,
@@ -64,8 +56,7 @@ export default {
         Navbar,
         NavbarAuth,
         SideMenu,
-        SnackBar,
-        TopBar
+        SnackBar
     },
     watch: {
         $route(to, from) {
@@ -89,7 +80,7 @@ export default {
                 this.$vuetify.rtl = false;
             }
         },
-        toggleMenu(){
+        toggleMenu() {
             this.userNavDrawerActive = !this.userNavDrawerActive;
         },
         async getTempCartData() {
@@ -107,7 +98,7 @@ export default {
                 this.fetchWislistServices();
                 this.fetchWislistBrands();
             }
-        },
+        }
     },
     async created() {
         this.changeRTL();

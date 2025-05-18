@@ -3,26 +3,11 @@
         <v-container class="py-0">
             <div class="d-flex align-center justify-center py-2">
                 <template v-if="loading">
-                    <v-skeleton-loader
-                        type="text"
-                        class="w-100px px-3 mt-2"
-                    ></v-skeleton-loader>
-                    <v-skeleton-loader
-                        type="text"
-                        class="w-100px px-3 mt-2"
-                    ></v-skeleton-loader>
-                    <v-skeleton-loader
-                        type="text"
-                        class="w-100px px-3 mt-2"
-                    ></v-skeleton-loader>
-                    <v-skeleton-loader
-                        type="text"
-                        class="w-100px px-3 mt-2"
-                    ></v-skeleton-loader>
-                    <v-skeleton-loader
-                        type="text"
-                        class="w-100px px-3 mt-2"
-                    ></v-skeleton-loader>
+                    <v-skeleton-loader type="text" class="w-100px px-3 mt-2"></v-skeleton-loader>
+                    <v-skeleton-loader type="text" class="w-100px px-3 mt-2"></v-skeleton-loader>
+                    <v-skeleton-loader type="text" class="w-100px px-3 mt-2"></v-skeleton-loader>
+                    <v-skeleton-loader type="text" class="w-100px px-3 mt-2"></v-skeleton-loader>
+                    <v-skeleton-loader type="text" class="w-100px px-3 mt-2"></v-skeleton-loader>
                 </template>
                 <template v-else>
                     <v-list class="d-flex py-0">
@@ -87,17 +72,12 @@
                             </v-list-item-title>
                         </v-list-item> -->
                         <v-list-item
-                            v-for="(link, label, i) in $optional(
-                                'data.header_menu'
-                            )"
+                            v-for="(link, label, i) in $optional('data.header_menu')"
                             :key="i"
                             class="flex-grow-0 flex-fill"
                         >
                             <v-list-item-title>
-                                <dynamic-link
-                                    :to="link"
-                                    append-class="text-reset fs-13 fw-700 opacity-80"
-                                >
+                                <dynamic-link :to="link" append-class="text-reset fs-13 fw-700 opacity-80">
                                     {{ label }}
                                 </dynamic-link>
                             </v-list-item-title>
@@ -116,8 +96,8 @@ export default {
         loading: { type: Boolean, required: true, default: true },
         data: {
             type: Object,
-            default: {},
-        },
-    },
+            default: {}
+        }
+    }
 };
 </script>
