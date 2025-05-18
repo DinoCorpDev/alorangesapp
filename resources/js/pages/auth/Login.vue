@@ -3,10 +3,7 @@
         <v-container class="flex-grow-1 pa-0" fluid>
             <v-row class="wrap" no-gutters>
                 <v-col cols="12" lg="6">
-                    <CarouselLogin
-                        :slides="sliderItems"
-                        title=""
-                    />
+                    <CarouselLogin :slides="sliderItems" title="" />
                 </v-col>
                 <v-col cols="12" lg="6" class="pt-lg-0">
                     <div class="login-content h-100 pa-lg-5 pa-3 pt-lg-8">
@@ -52,13 +49,11 @@
                                     ></v-text-field>
                                 </div>
                                 <div class="d-flex">
-                                <p class="black--text" style="font-size: 13px; margin-right: 15px;">¿Has olvidado tu contraseña?</p>
-                                    
+                                    <p class="black--text mr-4" style="font-size: 13px">¿Has olvidado tu contraseña?</p>
                                     <a @click="showModalRecuperarPass" class="login-link">
                                         <b>Ir a recuperar contraseña</b>
                                     </a>
                                 </div>
-
                                 <CustomButton
                                     :disabled="loading"
                                     :loading="loading"
@@ -72,14 +67,14 @@
                                 />
                             </v-form>
                             <div class="d-flex">
-                                <p class="black--text link-forgot" style="font-size: 13px; margin-right: 15px;">¿No tienes ninguna cuenta?</p>
-                                    
-                                    <a @click="showModalRegister" class="login-link">
-                                        <b>Registrarse</b>
-                                    </a>
+                                <p class="black--text link-forgot mr-4" style="font-size: 13px">
+                                    ¿No tienes ninguna cuenta?
+                                </p>
+                                <a @click="showModalRegister" class="login-link">
+                                    <b>Registrarse</b>
+                                </a>
                             </div>
-                            
-                                
+
                             <!-- <a @click="showModalRegister" class="black--text link-custom">
                                 ¿No tienes ninguna cuenta?
                             </a>
@@ -146,7 +141,7 @@ export default {
             {
                 src: "/public/assets/img/login2.png",
                 type: "image"
-            },
+            }
         ]
     }),
     validations: {
@@ -185,47 +180,57 @@ export default {
         ...mapActions("cart", ["fetchCartProducts"]),
         ...mapMutations("cart", ["removeTempUserId"]),
         ...mapMutations("auth", ["updateChatWindow", "showLoginDialog"]),
+
         async login() {
             this.$v.form.$touch();
+
             if (this.$v.form.$anyError) {
                 return;
             }
+
             if (this.getTempUserId) {
                 this.form.temp_user_id = this.getTempUserId;
             }
-            this.loading = true;
-            const res = await this.call_api("post", "auth/login", this.form);
-            if (res.data.success) {
-                if (res.data.verified == true || this.authSettings.customer_otp_with == "disabled") {
-                    if (this.getTempUserId) {
-                        this.removeTempUserId();
-                    }
-                    this.actionLogin(res.data);
-                    this.showLoginDialog(false);
-                    this.updateChatWindow(false);
-                    this.fetchWislistProducts();
-                    this.fetchProductQuerries();
-                    this.fetchCartProducts();
-                    this.$router.push(this.$route.query.redirect || { name: "Cart" });
-                } else {
-                    if (this.authSettings.customer_login_with == "email") {
-                        this.$router.push({
-                            name: "VerifyAccount",
-                            params: { email: this.form.email }
-                        });
-                    }
-                }
 
+            this.loading = true;
+
+            try {
+                const res = await this.call_api("post", "auth/login", this.form);
+
+                if (res.data.success) {
+                    if (res.data.verified === true || this.authSettings.customer_otp_with === "disabled") {
+                        if (this.getTempUserId) {
+                            this.removeTempUserId();
+                        }
+
+                        this.actionLogin(res.data);
+                        this.showLoginDialog(false);
+                        this.updateChatWindow(false);
+                        this.fetchWislistProducts();
+                        this.fetchProductQuerries();
+                        this.fetchCartProducts();
+                        this.$router.push(this.$route.query.redirect || { name: "Cart" });
+                    } else {
+                        if (this.authSettings.customer_login_with === "email") {
+                            this.$router.push({
+                                name: "VerifyAccount",
+                                params: { email: this.form.email }
+                            });
+                        }
+                    }
+
+                    this.snack({ message: res.data.message });
+                } else {
+                    this.snack({ message: res.data.message, color: "red" });
+                }
+            } catch (error) {
                 this.snack({
-                    message: res.data.message
-                });
-            } else {
-                this.snack({
-                    message: res.data.message,
+                    message: "Error inesperado. Intenta de nuevo.",
                     color: "red"
                 });
+            } finally {
+                this.loading = false;
             }
-            this.loading = false;
         },
         async showModalRegister() {
             this.showLoginDialog(false);
@@ -240,8 +245,7 @@ export default {
 </script>
 
 <style lang="scss">
-
-*{
+* {
     &::-webkit-scrollbar {
         width: 3px;
     }
@@ -260,7 +264,6 @@ export default {
         background: #5a5a5a;
     }
 }
-
 </style>
 
 <style lang="scss" scoped>
@@ -305,6 +308,7 @@ export default {
             visibility: visible;
             font-style: italic;
         }
+
         &:not(.v-input--has-state) {
             .v-input__slot fieldset {
                 color: #dfdfdf;
@@ -337,10 +341,12 @@ export default {
     letter-spacing: 0.4px;
     text-transform: uppercase;
 }
+
 .link-custom1 {
     font-size: var(--font-size-caption);
     letter-spacing: 0.4px;
 }
+
 .link-forgot {
     font-size: var(--font-size-caption);
     letter-spacing: 0.4px;
@@ -372,10 +378,12 @@ export default {
         }
     }
 }
-.login-link{
+
+.login-link {
     font-size: 13px;
     color: #f58634;
-    &:hover{
+
+    &:hover {
         color: #fbd6bb;
     }
 }

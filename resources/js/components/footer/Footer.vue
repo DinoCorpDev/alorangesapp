@@ -14,20 +14,21 @@
                             style="font-weight: 700; color: white; font-size: 17px; text-decoration: underline"
                             href="https://wa.me/573174420109"
                             target="_blank"
-                            >+57 3174420109</a
                         >
+                            +57 3174420109
+                        </a>
                         o envíanos un correo a ventas5@aloranges.com, y te responderemos en un abrir y cerrar de
                         ojos.<br /><b>¡Tu satisfacción es nuestra misión!</b>
                     </p>
                     <div style="display: flex; gap: 10px; justify-content: flex-start">
-                        <a href="https://www.facebook.com/share/15iCZJt5Dq/?mibextid=wwXIfr" target="_blank"
-                            ><img class="redes" src="../icons/facebook.svg" alt="Facebook"
-                        /></a>
-                        <a href="https://wa.me/573174420109" target="_blank"
-                            ><img class="redes" src="../icons/whatsapp.svg" alt="whatsapp"
-                        /></a>
+                        <a href="https://www.facebook.com/share/15iCZJt5Dq/?mibextid=wwXIfr" target="_blank">
+                            <img class="redes" src="../icons/facebook.svg" alt="Facebook" />
+                        </a>
+                        <a href="https://wa.me/573174420109" target="_blank">
+                            <img class="redes" src="../icons/whatsapp.svg" alt="whatsapp" />
+                        </a>
                         <a href="https://www.instagram.com/aloranges.co?igsh=bnQzMGU0MTQycndo" target="_blank">
-                            <img class="redes" src="../icons/instagram.svg" alt="instagram"/>
+                            <img class="redes" src="../icons/instagram.svg" alt="instagram" />
                         </a>
                     </div>
                 </div>
@@ -38,9 +39,9 @@
                 <router-link to="/information/tiempoEnvios">Tiempo y costo de envío</router-link>
             </v-col>
             <v-col cols="12" md="3" class="list-footer align-start pt-0 pt-md-3 pl-md-16">
-                <router-link to="#">Mi cuenta</router-link>
-                <router-link to="#">Regístrate</router-link>
-                <router-link to="#">¿Olvidó su clave?</router-link>
+                <a @click="showAccount">Mi cuenta</a>
+                <a @click="showModalRegister">Regístrate</a>
+                <a @click="showModalRecuperarPass">¿Olvidó su clave?</a>
             </v-col>
             <v-col cols="12" class="d-none d-md-flex align-center" style="justify-content: space-around">
                 <img src="../icons/Logo_fondo_Emprender_blanco.png" alt="" style="max-width: 266px; height: auto" />
@@ -72,26 +73,56 @@
                     </v-col>
                 </v-row>
             </v-col>
-            <v-col md="1" />
         </v-row>
+
+        <ModalRegister v-model="showRegister" />
+        <RecuperarPass v-model="showRecuperarPass" />
     </v-footer>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapGetters, mapMutations, mapState } from "vuex";
 import WorldGlobeIcon from "../icons/WorldGlobe.vue";
 import LogoAlorange from "../icons/LogoAlorange.vue";
 import DinoLabs from "../icons/DinoLabs.vue";
+import ModalRegister from "../../components/user/ModalRegister.vue";
+import RecuperarPass from "../../components/auth/RecuperarPass.vue";
 
 export default {
     name: "FooterCustom",
     components: {
         WorldGlobeIcon,
         LogoAlorange,
-        DinoLabs
+        DinoLabs,
+        ModalRegister,
+        RecuperarPass
+    },
+    data() {
+        return {
+            showRegister: false,
+            showRecuperarPass: false
+        };
     },
     computed: {
-        ...mapState("app", ["authFooterLinks"])
+        ...mapState("app", ["authFooterLinks"]),
+        ...mapGetters("auth", ["userIsLoggedIn"])
+    },
+    methods: {
+        ...mapMutations("auth", ["showLoginDialog"]),
+
+        showAccount() {
+            if (this.userIsLoggedIn) {
+                this.$router.push({ name: "Cart" });
+            } else {
+                this.showLoginDialog(true);
+            }
+        },
+        showModalRegister() {
+            this.showRegister = true;
+        },
+        showModalRecuperarPass() {
+            this.showRecuperarPass = true;
+        }
     }
 };
 </script>
@@ -99,6 +130,7 @@ export default {
 <style lang="scss" scoped>
 .redes {
     width: 50px;
+
     &:hover {
         opacity: 0.5;
     }
@@ -108,20 +140,24 @@ p {
     color: white;
     font-weight: 100;
 }
+
 .list-footer {
     display: flex;
     flex-direction: column;
     justify-content: center;
+
     a {
         margin-bottom: 15px;
         font-size: 17px;
         color: white;
         font-weight: 100;
+
         &:hover {
             text-decoration: underline;
         }
     }
 }
+
 .auth-footer {
     display: flex;
     align-items: center;
@@ -193,5 +229,4 @@ p {
         }
     }
 }
-
 </style>
