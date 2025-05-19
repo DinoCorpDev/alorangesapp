@@ -3,7 +3,8 @@
         <v-row class="main mx-2 my-2 mx-sm-6 bg-orange-ligth border-style-banner" align="center" tag="main">
             <v-col class="pa-6 pa-sm-8" cols="12" sm="7" md="7">
                 <h1 class="home-main-title mb-8 mb-sm-8">
-                    ¡Tu proveedor de suministros de papelería, aseo, cafetería, cartonería, tecnología, seguridad industrial y mucho mas para tu empresa!
+                    ¡Tu proveedor de suministros de papelería, aseo, cafetería, cartonería, tecnología, seguridad
+                    industrial y mucho mas para tu empresa!
                 </h1>
                 <!-- <h1 class="home-main-title mb-6 mb-sm-8">¡Todo en un solo lugar, rápido, fácil y seguro!</h1> -->
                 <!-- <p class="home-main-description mb-6 d-none d-sm-block">
@@ -96,14 +97,13 @@
                 >
                     <template v-slot:description>
                         En <b>Aloranges,</b> nos dedicamos a hacerte la vida más fácil. Somos expertos en satisfacer las
-                        necesidades de tu empresa con <b>suministros de papelería, cartonería, cafetería, aseo, tecnología y
-                        botiquín y mucho mas.</b>
+                        necesidades de tu empresa con
+                        <b>suministros de papelería, cartonería, cafetería, aseo, tecnología y botiquín y mucho mas.</b>
                         ¡Y ahora, gracias a nuestra app, puedes adquirir todo lo que necesitas con solo un clic! Nos
-                        adaptamos a la nueva era digital para que tus compras sean rápidas y sencillas.
-                        ¡Únete a la diversión y simplifica tu día a día con Aloranges!
-                        <br>
-                        Somos tu proveedor de suministros favorito, siempre estamos a solo un clic de distancia. <br>Estamos aquí para
-                        hacer tu vida más fácil y divertida.<br><b>¡Explora y disfruta!</b>
+                        adaptamos a la nueva era digital para que tus compras sean rápidas y sencillas. ¡Únete a la
+                        diversión y simplifica tu día a día con Aloranges!<br />Somos tu proveedor de suministros
+                        favorito, siempre estamos a solo un clic de distancia.<br />Estamos aquí para hacer tu vida más
+                        fácil y divertida.<br /><b>¡Explora y disfruta!</b>
                     </template>
                 </PresentationBanner>
             </v-col>
@@ -124,10 +124,15 @@
                         <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-center align-start">
                             <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
                             <div class="Wrapper-AppStore">
-                                <a href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share" target="_blank"><img class="imgsize-btn-dwn" src="public/assets/img/Grupo12233.png" /></a>
-                                <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank"
-                                    ><img class="imgsize-btn-dwn ml-5" src="public/assets/img/Grupo12234.png"
-                                /></a>
+                                <a
+                                    href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share"
+                                    target="_blank"
+                                >
+                                    <img class="imgsize-btn-dwn" src="public/assets/img/Grupo12233.png" />
+                                </a>
+                                <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank">
+                                    <img class="imgsize-btn-dwn ml-5" src="public/assets/img/Grupo12234.png" />
+                                </a>
                             </div>
                         </div>
                     </v-col>
@@ -135,20 +140,25 @@
                         <div class="Wrapper-AppStore-responsive mb-7 mb-sm-0">
                             <v-row>
                                 <v-col cols="6" class="pr-1 pl-10 pb-0">
-                                    <a href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share" target="_blank"
-                                        ><img
+                                    <a
+                                        href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share"
+                                        target="_blank"
+                                    >
+                                        <img
                                             class="imgsize-btn-dwn"
                                             style="width: 100%; height: auto"
                                             src="public/assets/img/Grupo12233.png"
-                                    /></a>
+                                        />
+                                    </a>
                                 </v-col>
                                 <v-col cols="6" class="pl-1 pr-10 pb-0">
-                                    <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank"
-                                        ><img
+                                    <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank">
+                                        <img
                                             class="imgsize-btn-dwn"
                                             style="width: 100%; height: auto"
                                             src="public/assets/img/Grupo12234.png"
-                                    /></a>
+                                        />
+                                    </a>
                                 </v-col>
                             </v-row>
                         </div>
@@ -211,35 +221,49 @@ export default {
             showVerifyAccount: false,
             itemsArray: [
                 {
-                    title: "Papeleria",
+                    title: "Papelería",
                     img: "/public/assets/img/Grupo12238.png",
-                    description: "Papeleria"
-                },
-                {
-                    title: "Cartonería",
-                    img: "/public/assets/img/Group 6.png",
-                    description: "Cartoneria"
-                },
-                {
-                    title: "Cafeteria",
-                    img: "/public/assets/img/Grupo12240.png",
-                    description: "Cafeteria"
+                    routeName: "ShopPapeleria"
                 },
                 {
                     title: "Aseo",
                     img: "/public/assets/img/Grupo12239.png",
-                    description: "Aseo"
+                    routeName: "ShopAseo"
                 },
-
+                {
+                    title: "Cafetería",
+                    img: "/public/assets/img/Grupo12240.png",
+                    routeName: "ShopCafeteria"
+                },
+                {
+                    title: "Botiquín",
+                    img: null,
+                    routeName: null
+                },
                 {
                     title: "Tecnología",
                     img: "/public/assets/img/Group 5.png",
-                    description: "Tecnologia"
+                    routeName: "ShopTecnologia"
                 },
                 {
-                    title: "Seguridad ind",
+                    title: "Desechables",
+                    img: null,
+                    routeName: null
+                },
+                {
+                    title: "Cartonería",
+                    img: "/public/assets/img/Group 6.png",
+                    routeName: "ShopCartoneria"
+                },
+                {
+                    title: "Dotación",
+                    img: null,
+                    routeName: null
+                },
+                {
+                    title: "Seguridad Industrial",
                     img: "/public/assets/img/Grupo12241.png",
-                    description: "Seguridad ind"
+                    routeName: "ShopSeguridadIndustrial"
                 }
             ],
             selectedCode: null,

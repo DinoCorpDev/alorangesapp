@@ -48,6 +48,34 @@
             --primary: {{ get_setting('base_color', '#e62d04') }};
             --soft-primary: {{ hex2rgba(get_setting('base_color', '#e62d04'), 0.15) }};
         }
+
+        @font-face {
+            font-family: 'Causten';
+            src: url("{{ static_asset('assets/fonts/Causten-Regular.woff2') }}") format("woff2");
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Causten';
+            src: url("{{ static_asset('assets/fonts/Causten-Medium.woff2') }}") format("woff2");
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Causten';
+            src: url("{{ static_asset('assets/fonts/Causten-SemiBold.woff2') }}") format("woff2");
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Causten';
+            src: url("{{ static_asset('assets/fonts/Causten-Bold.woff2') }}") format("woff2");
+            font-weight: 700;
+            font-style: normal;
+        }
     </style>
 
     @include('frontend.inc.pwa')

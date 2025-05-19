@@ -15,14 +15,9 @@
 
 // Theme overrides
 
-@font-face {
-    font-family: "CaustenRegular";
-    src: url("/fonts/Causten-Regular.otf") format("otf");
-    font-weight: normal;
-    font-style: normal;
-}
 .v-application {
-    font-family: "CaustenRegular", sans-serif;
+    font-family: "Causten", sans-serif;
+    font-size: 16px;
 
     &.theme--light {
         background: #fafcfc;

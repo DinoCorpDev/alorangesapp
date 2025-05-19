@@ -1,10 +1,8 @@
 <template>
     <div>
-        <v-row class="pt-2 pt-md-10 pl-0 pl-md-10 pr-2 pr-md-10">
+        <v-row class="pt-2 pt-md-10 pl-0 pl-md-10 pr-2 pr-md-10 mb-4 mb-md-8">
             <v-col cols="6">
-                <h2>
-                    <strong>{{ title }}</strong>
-                </h2>
+                <h2>{{ title }}</h2>
             </v-col>
 
             <v-col cols="6" class="d-none d-sm-block">
@@ -20,23 +18,24 @@
         </v-row>
         <div class="image-container d-block d-sm-none">
             <v-row>
-                <v-col
-                    style="display: flex; justify-content: center; align-items: center"
-                    cols="6"
-                    v-for="space in spaces"
-                    :key="`slide-space-${space.id}`"
-                >
-                    <a href="#">
-                        <img class="images-responsive" :src="space.img" :alt="space.title" />
-                        <p style="font-size: 24px; text-align: center; margin: 0; font-weight: 700;">{{ space.title }}</p>
-                    </a>
+                <v-col class="image-container-wrap" cols="6" v-for="space in spaces" :key="`slide-space-${space.id}`">
+                    <router-link :to="{ name: space.routeName }" class="text-none">
+                        <img
+                            class="image-container-image"
+                            :src="space.img || '/public/assets/img/item-placeholder.png'"
+                            :alt="space.title"
+                        />
+                        <h3 class="image-container-title">
+                            {{ space.title }}
+                        </h3>
+                    </router-link>
                 </v-col>
             </v-row>
         </div>
-        <div class="d-none d-sm-block">
+        <div class="d-none d-sm-block px-12">
             <swiper :options="swiperOptions">
                 <swiper-slide v-for="space in spaces" :key="`slide-space-${space.id}`">
-                    <space-item class="bg-trasnparent" :data="space" />
+                    <SpaceItem :data="space" />
                 </swiper-slide>
             </swiper>
         </div>
@@ -82,7 +81,7 @@ export default {
                 breakpoints: {
                     960: {
                         slidesPerView: 4,
-                        spaceBetween: 20
+                        spaceBetween: 32
                     },
                     100: {
                         slidesPerView: 3,
@@ -123,9 +122,11 @@ export default {
         height: 35px;
     }
 }
+
 .wrap-arrow:hover {
     background-color: white;
 }
+
 .wrap-arrow:active {
     background-color: white;
 }
@@ -143,6 +144,7 @@ export default {
         height: 25px;
     }
 }
+
 .next-button-orange:hover {
     background-color: black;
 }
@@ -164,9 +166,7 @@ export default {
 .prev-button-orange:hover {
     background-color: black;
 }
-.bg-trasnparent {
-    background-color: transparent;
-}
+
 .swiper-container {
     @media (max-width: 600px) {
         padding-bottom: 0 !important;
@@ -227,7 +227,26 @@ export default {
         }
     }
 }
-.images-responsive {
-    width: 150px;
+
+.image-container {
+    &-wrap {
+        display: flex;
+        justify-content: center;
+    }
+
+    &-image {
+        width: 175px;
+        aspect-ratio: 1;
+        border-radius: 100%;
+    }
+
+    &-title {
+        font-size: 25px;
+        text-align: center;
+
+        @media (max-width: 600px) {
+            font-weight: 600;
+        }
+    }
 }
 </style>
