@@ -15,14 +15,9 @@
 
 // Theme overrides
 
-@font-face {
-    font-family: 'CaustenRegular';
-    src: url('/fonts/Causten-Regular.otf') format('otf');
-    font-weight: normal;
-    font-style: normal;
-}
 .v-application {
-    font-family: "CaustenRegular", sans-serif;
+    font-family: "Causten", sans-serif;
+    font-size: 16px;
 
     &.theme--light {
         background: #fafcfc;
@@ -40,6 +35,15 @@
 .v-divider {
     border-color: #dfdfdf !important;
     // border-width: 2px 0 0;
+}
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+}
+
+.w-100 {
+    width: 100% !important;
 }
 
 .h-100 {
@@ -98,6 +102,7 @@ h6 {
 .body1,
 .body2 {
     font-family: var(--font-size-body1);
+    overflow-x: hidden;
 }
 
 .body1,

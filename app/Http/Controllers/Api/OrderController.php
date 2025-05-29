@@ -28,19 +28,23 @@ use Illuminate\Http\Request;
 use Notification;
 use PDF;
 use App\Http\Services\WompiServices;
+use Illuminate\Notifications\AnonymousNotifiable;
+use App\Jobs\ConsultarEstadoPagoWompi;
 
 class OrderController extends Controller
 {
     public function index()
     {
-        $order = new OrderCollection(CombinedOrder::where('user_id', auth('api')->user()->id)->latest()->paginate(12)); 
-        foreach ($order as $key => $item) {    
-            $wompiResult = (new WompiServices)->wompiGetTransactionFacturas($item['code']);
-            foreach ($item['orders'] as $key => $itemOrdes) {
-                $itemOrdes['payment_status'] = $wompiResult;
-            }
+        $ordersQuery = CombinedOrder::where('user_id', auth('api')->user()->id)->latest()->paginate(12);
+        $orders = new OrderCollection($ordersQuery);
+
+        // Despacha jobs por cada orden
+        foreach ($ordersQuery as $combinedOrder) {
+            ConsultarEstadoPagoWompi::dispatch($combinedOrder->id);
         }
-        return $order;
+
+        // Devuelve la orden SIN esperar el resultado de Wompi
+        return $orders;
     }
 
     public function getResultTransactionPSE($reference){
@@ -489,9 +493,10 @@ class OrderController extends Controller
         $combined_order->grand_total = $grand_total;
         $combined_order->save();
 
+        $adminEmail = (new AnonymousNotifiable)->route('mail', 'alorangescorporation@gmail.com');
         //Invioce mail send to the customer and seller
         try {
-            Notification::send($user, new OrderPlacedNotification($combined_order));
+            Notification::send([$user, $adminEmail],new OrderPlacedNotification($combined_order));
             // foreach ($combined_order->orders as $order) {
             //     Notification::send($order->orderDetails->first()->product->shop->user, new SellerInvoiceNotification($order));
             // }

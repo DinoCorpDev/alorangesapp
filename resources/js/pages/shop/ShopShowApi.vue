@@ -124,7 +124,7 @@ export default {
                 }
             }
         },
-        isList:false
+        isList:false,
     }),
     props: {
         category: { type: String, default: "" }

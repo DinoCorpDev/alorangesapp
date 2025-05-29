@@ -28,8 +28,8 @@
                         <Search class="cart-icon ml-sm-2" style="margin-bottom: 4px" />
                     </CustomButton>
                     <CustomButton color="orange3" :to="{ name: 'Shop' }">
-                        <span class="d-none d-sm-flex">Tienda</span
-                        ><Cart class="cart-icon ml-sm-2" style="margin-bottom: 4px" />
+                        <span class="d-none d-sm-flex">Tienda</span>
+                        <Cart class="cart-icon ml-sm-2" style="margin-bottom: 4px" />
                     </CustomButton>
                     <div class="layout-navbar-auth-nav">
                         <DoubleButton />
@@ -38,8 +38,8 @@
                                 <BurgerMenu />
                             </CustomButton>
                         </div>
-                        <div style="display: none;">
-                            <ToggleMenu  />
+                        <div style="display: none">
+                            <ToggleMenu />
                         </div>
                         <!-- MODAL LOGOUT START -->
                         <div class="d-none d-lg-flex" v-if="userIsLoggedIn">
@@ -63,8 +63,8 @@
                                                 align-items: center;
                                             "
                                         >
-                                        <LogoAlorange />
-                                        <h3
+                                            <LogoAlorange />
+                                            <h3
                                                 class="pa-12"
                                                 style="
                                                     font-size: 35px;
@@ -109,7 +109,6 @@
                             </v-dialog>
                         </div>
                         <!-- MODAL LOGOUT END -->
-                        
                     </div>
                 </div>
             </v-container>
@@ -118,7 +117,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from "vuex";
+import { mapGetters } from "vuex";
 
 import CustomButton from "../global/CustomButton.vue";
 import DoubleButton from "./DoubleButton.vue";
@@ -130,7 +129,6 @@ import LogoAloranges from "./LogoAloranges.vue";
 import LogoAlorange from "./LogoAlorange.vue";
 import SearchInput from "../global/SearchInput.vue";
 import ToggleMenu from "./ToggleMenu.vue";
-
 import SideMenu from "../user/SideMenu";
 
 export default {
@@ -185,8 +183,8 @@ export default {
                 console.log("Error while redirecting to home");
             });
         },
-        toggleMenu(){
-            this.$emit('toggleMenu');
+        toggleMenu() {
+            this.$emit("toggleMenu");
         }
     }
 };
@@ -290,16 +288,16 @@ export default {
     }
 }
 ::v-deep {
-        .v-overlay--active {
-            .v-overlay__scrim {
-                backdrop-filter: blur(30px);
-                background-color: rgba(0, 0, 0, 0.15) !important;
-                opacity: 1 !important;
-            }
+    .v-overlay--active {
+        .v-overlay__scrim {
+            backdrop-filter: blur(30px);
+            background-color: rgba(0, 0, 0, 0.15) !important;
+            opacity: 1 !important;
         }
     }
+}
 
-    .v-navigation-drawer {
-        box-shadow: none;
-    }
+.v-navigation-drawer {
+    box-shadow: none;
+}
 </style>

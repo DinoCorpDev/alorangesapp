@@ -214,14 +214,18 @@ export default {
             //             return (cartProduct.qty = cartProduct.qty + product.qty);
             //     });
             // } else {
-                product.selected = true;
-                product.max_qty = product.max_qty > 0 ? product.max_qty : Infinity;
-                state.cartProducts.push(product);
+            product.selected = true;
+            product.max_qty = product.max_qty > 0 ? product.max_qty : Infinity;
+            state.cartProducts.push(product);
             // }
         },
-        updateQuantity(state, { type, cart_id }) {
+        updateQuantity(state, { type, cart_id, qty }) {
             let item = state.cartProducts.find(cartProduct => cartProduct.cart_id === cart_id);
-            if (type == "plus") {
+            if (type === "set") {
+                state.cartProducts.map(cartProduct => {
+                    if (cartProduct.cart_id === cart_id) return (cartProduct.qty = qty);
+                });
+            } else if (type == "plus") {
                 state.cartProducts.map(cartProduct => {
                     if (cartProduct.cart_id === cart_id) return (cartProduct.qty = cartProduct.qty + 1);
                 });
@@ -352,7 +356,7 @@ export default {
                 dispatch("proccessCoupon");
             }
         },
-        async updateQuantity({ commit, getters, dispatch }, { type, cart_id }) {
+        async updateQuantity({ commit, getters, dispatch }, { type, cart_id, qty }) {
             let cartItem = getters.findCartItemByCartId(cart_id);
 
             if (type == "plus" && cartItem.qty + 1 > cartItem.max_qty) {
@@ -363,14 +367,23 @@ export default {
                 return;
             }
 
+            if (type === "set" && qty > cartItem.max_qty) {
+                Mixin.methods.snack({
+                    message: `${i18n.t("you_can_purchase_maximum_quantity")} ${cartItem.max_qty}.`,
+                    color: "red"
+                });
+                return;
+            }
+
             const res = await Mixin.methods.call_api("post", `carts/change-quantity`, {
                 type: type,
                 cart_id: cart_id,
+                qty: qty,
                 temp_user_id: getters.getTempUserId
             });
 
             if (res.data.success) {
-                commit("updateQuantity", { type, cart_id });
+                commit("updateQuantity", { type, cart_id, qty });
                 commit("updateCartShops");
                 dispatch("proccessCoupon");
             } else {

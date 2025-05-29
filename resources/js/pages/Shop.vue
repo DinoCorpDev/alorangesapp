@@ -9,8 +9,8 @@
                 class="text-none"
                 link
             >
-                <component :is="tab.icon" class="mb-1 mt-3 mt-sm-0 mr-sm-3" />
-                <span class="mb-1 mt-1 mt-sm-0 mb-sm-0">{{ tab.text }}</span>
+                <img :src="`/public/assets/img/${tab.icon}`" class="mr-2">
+                <span>{{ tab.text }}</span>
             </v-tab>
         </v-tabs>
 
@@ -19,32 +19,17 @@
 </template>
 
 <script>
-import Cafeteria from "../components/icons/Cafeteria.vue";
-import Cartoneria from "../components/icons/Cartoneria.vue";
-import Papeleria from "../components/icons/Papeleria.vue";
-import Aseo from "../components/icons/Aseo.vue";
-import Tecnologia from "../components/icons/Tecnologia.vue";
-import SeguridadIndustrial from "../components/icons/SeguridadIndustrial.vue";
-
 export default {
     data: () => ({
         tabs: [
-            { icon: "Papeleria", text: "Papeleria", routeName: "ShopPapeleria" },
-            { icon: "Aseo", text: "Aseo", routeName: "ShopAseo" },
-            { icon: "Cafeteria", text: "Cafeteria", routeName: "ShopCafeteria" },
-            { icon: "Cartoneria", text: "Cartoneria", routeName: "ShopCartoneria" },
-            { icon: "Tecnologia", text: "Tecnología", routeName: "ShopTecnologia" },
-            { icon: "SeguridadIndustrial", text: "Seguridad Industrial", routeName: "ShopSeguridadIndustrial" }
+            { icon: "papeleria-24x24.png", text: "Papelería", routeName: "ShopPapeleria" },
+            { icon: "aseo-24x24.png", text: "Aseo", routeName: "ShopAseo" },
+            { icon: "cafeteria-24x24.png", text: "Cafetería", routeName: "ShopCafeteria" },
+            { icon: "tecnologia-24x24.png", text: "Tecnología", routeName: "ShopTecnologia" },
+            { icon: "cartoneria-24x24.png", text: "Cartoneria", routeName: "ShopCartoneria" },
+            { icon: "seguridad-industrial-24x24.png", text: "Seguridad Industrial", routeName: "ShopSeguridadIndustrial" }
         ]
     }),
-    components: {
-        Cafeteria,
-        Cartoneria,
-        Papeleria,
-        Aseo,
-        Tecnologia,
-        SeguridadIndustrial
-    }
 };
 </script>
 
@@ -87,28 +72,19 @@ export default {
 
         .v-tab {
             background-color: #f4f5f7;
-            font-size: calc(10px + (16 - 10) * var(--screen-size));
-            font-weight: 400;
-            letter-spacing: 0.15px;
-            line-height: calc(18px + (20 - 18) * var(--screen-size));
-            color: #f58634 !important;
-            // min-width: 195px !important;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: unset;
+            color: #707780 !important;
             margin: 0 10px !important;
-            border-radius: 10px;
-            @media (max-width: 600px) {
-                flex-direction: column;
-                white-space: nowrap;
-                padding: 0 10px;
-            }
+            border-radius: 8px;
 
-            @media (min-width: 600px) {
-                font-weight: 600;
-            }
-            &--active {
+            &--active,
+            &:hover {
                 color: white !important;
                 background-color: #f58634;
-                font-size: 17px;
             }
+
             &:before,
             .v-tabs-slider {
                 background-color: transparent;

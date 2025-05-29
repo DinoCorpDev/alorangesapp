@@ -1381,10 +1381,10 @@
                                     <span class="subtitle1 fw-600">Municipio</span>
                                     <span class="body1">{{ otherAdd?.city }}</span>
                                 </div>
-                                <div class="d-flex justify-space-between mb-2">
+                                <!-- <div class="d-flex justify-space-between mb-2">
                                     <span class="subtitle1 fw-600">Localidad</span>
                                     <span class="body1">{{ otherAdd?.localidad }}</span>
-                                </div>
+                                </div> -->
 
                                 <div class="d-flex justify-space-between mb-2">
                                     <span class="subtitle1 fw-600">Barrio</span>
@@ -1471,10 +1471,10 @@
                                     <span class="subtitle1 fw-600">Municipio</span>
                                     <span class="body1">*********</span>
                                 </div>
-                                <div class="d-flex justify-space-between mb-2">
+                                <!-- <div class="d-flex justify-space-between mb-2">
                                     <span class="subtitle1 fw-600">Localidad</span>
                                     <span class="body1">**********</span>
-                                </div>
+                                </div> -->
                                 <div class="d-flex justify-space-between mb-2">
                                     <span class="subtitle1 fw-600">Barrio</span>
                                     <span class="body1"> *********** </span>
@@ -1567,7 +1567,7 @@
                                     />
                                 </div>
                                 <v-row>
-                                    <v-col cols="12" sm="6">
+                                    <!-- <v-col cols="12" sm="6">
                                         <span class="black--text body-2">Localidad</span>
                                         <SelectCustom
                                             placeholder="Seleccione localidad"
@@ -1576,8 +1576,8 @@
                                             required
                                             v-model="otherAdd.localidad"
                                         />
-                                    </v-col>
-                                    <v-col cols="12" sm="6">
+                                    </v-col> -->
+                                    <v-col cols="12" sm="12">
                                         <div class="mb-1 fs-13 fw-500">Barrio ( Opcional )</div>
                                         <CustomInput
                                             v-model="otherAdd.neighborhood"
@@ -1897,7 +1897,7 @@ export default {
         countries: [],
         filteredStates: [],
         filteredCities: [],
-        filteredLocalidad: [],
+        // filteredLocalidad: [],
         changePassword: false,
         oldpasswordShow: false,
         passwordOldShow: false,
@@ -1981,7 +1981,7 @@ export default {
             postal_code: "",
             country: "",
             neighborhood: "",
-            localidad: "",
+            // localidad: "",
             state: "",
             city: "",
             phone: "",
@@ -2070,7 +2070,7 @@ export default {
             country: { required },
             state: { required },
             city: { required },
-            localidad: { required },
+            // localidad: { required },
             phone: { required }
         },
         formEmpresa: {
@@ -2227,12 +2227,12 @@ export default {
             !this.$v.formDirection.city.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
             return errors;
         },
-        localidadErrors() {
-            const errors = [];
-            if (!this.$v.formDirection.localidad.$dirty) return errors;
-            !this.$v.formDirection.localidad.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
-            return errors;
-        },
+        // localidadErrors() {
+        //     const errors = [];
+        //     if (!this.$v.formDirection.localidad.$dirty) return errors;
+        //     !this.$v.formDirection.localidad.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
+        //     return errors;
+        // },
         phoneErrors() {
             const errors = [];
             if (!this.$v.formDirection.phone.$dirty) {
@@ -2606,7 +2606,7 @@ export default {
 
             let state = await this.stateChanged(direction.state_id);
             direction.city = direction.city_id;
-            direction.localidad = direction.localidad_id;
+            // direction.localidad = direction.localidad_id;
             direction.postal_code = parseInt(direction.postal_code);
             direction.editar = true;
         },
@@ -2691,16 +2691,16 @@ export default {
         },
         async stateChanged(stateid) {
             const res = await this.call_api("get", `cities/${stateid}`);
-            const res2 = await this.call_api("get", `localidades/${stateid}`);
+            // const res2 = await this.call_api("get", `localidades/${stateid}`);
 
             if (res.data.success) {
                 this.filteredCities = res.data.data;
                 this.form.city = "";
 
-                if (res2.data.success) {
-                    this.filteredLocalidad = res2.data.data;
-                    this.form.localidad = "";
-                }
+                // if (res2.data.success) {
+                //     this.filteredLocalidad = res2.data.data;
+                //     this.form.localidad = "";
+                // }
             } else {
                 this.snack({
                     message: this.$i18n.t("something_went_wrong"),

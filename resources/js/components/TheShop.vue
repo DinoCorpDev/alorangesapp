@@ -1,19 +1,21 @@
 <template>
     <v-app class="d-flex flex-column">
-        <Navbar display="position: fixed; top: 0px" v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
+        <Navbar v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
         <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" @toggleMenu="toggleMenu" />
-        
 
         <v-main class="aiz-main-wrap">
             <Breadcrumb />
-            <!-- prettier-ignore -->
             <v-navigation-drawer v-model="userNavDrawerActive" fixed temporary right style="z-index: 999">
                 <SideMenu class="pa-3" />
             </v-navigation-drawer>
-            <router-view :key="['ShopDetails','ShopCoupons','ShopProducts'].includes($route.name) ? null : $route.path"></router-view>
+            <router-view
+                :key="['ShopDetails', 'ShopCoupons', 'ShopProducts'].includes($route.name) ? null : $route.path"
+            ></router-view>
         </v-main>
 
         <Footer v-if="$route.meta.hasFooter" :class="[{ 'd-none': routerLoading }]" />
+
+        <WhatsAppButton />
 
         <AddToCartDialog />
         <LoginDialog v-if="!isAuthenticated" />
@@ -31,23 +33,24 @@ import Navbar from "./header/Navbar.vue";
 import NavbarAuth from "./header/NavbarAuth.vue";
 import SnackBar from "./inc/SnackBar";
 import Breadcrumb from "./header/Breadcrumb.vue";
+import WhatsAppButton from "./global/WhatsAppButton.vue";
 import SideMenu from "./user/SideMenu";
 
 export default {
     metaInfo() {
         return {
-            title: this.appMetaTitle,
-            
+            title: this.appMetaTitle
         };
     },
-    data(){
-        return{
+    data() {
+        return {
             userNavDrawerActive: false
-        }
+        };
     },
     components: {
         AddToCartDialog,
         Footer,
+        WhatsAppButton,
         LoginDialog,
         Breadcrumb,
         Navbar,
@@ -77,7 +80,7 @@ export default {
                 this.$vuetify.rtl = false;
             }
         },
-        toggleMenu(){
+        toggleMenu() {
             this.userNavDrawerActive = !this.userNavDrawerActive;
         },
         async getTempCartData() {

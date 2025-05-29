@@ -62,9 +62,9 @@ class CartController extends Controller
     public function add(Request $request)
     {
         $data = $request->product_id;
-        
+
         $productToSell = Product::findOrFail($data['id']);
-        
+
         $user_id = (auth('api')->check()) ? auth('api')->user()->id : null;
         $temp_user_id = $request->temp_user_id;
 
@@ -123,7 +123,20 @@ class CartController extends Controller
             if ($cart != null) {
                 if ((auth('api')->check() && auth('api')->user()->id == $cart->user_id) || ($request->has('temp_user_id') && $request->temp_user_id == $cart->temp_user_id)) {
 
-                    if ($request->type == 'plus' && ($cart->product->max_qty == 0 || $cart->quantity < $cart->product->max_qty)) {
+                    if ($request->type == 'set' && ($cart->product->max_qty == 0 || $cart->quantity < $cart->product->max_qty)) {
+                        $cart->update([
+                            'quantity' => $request->qty
+                        ]);
+                        return response()->json([
+                            'success' => true,
+                            'message' => translate('Cart updated')
+                        ]);
+                    } elseif ($request->type == 'set' && $cart->quantity == $cart->product->max_qty) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => translate('Max quantity reached')
+                        ]);
+                    } elseif ($request->type == 'plus' && ($cart->product->max_qty == 0 || $cart->quantity < $cart->product->max_qty)) {
                         $cart->update([
                             'quantity' => DB::raw('quantity + 1')
                         ]);
@@ -160,6 +173,7 @@ class CartController extends Controller
                 }
             }
         } else {
+            //
         }
     }
 

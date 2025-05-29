@@ -53,14 +53,14 @@
         <div>
             <v-divider class=" d-flex my-5" style="border-color: #e4e4e4 !important; border-width: 2px 0 0" />
             <button class="logout-button d-flex" style="" @click="logout">
-                {{ $t("CERRAR SESIÓN") }}
+                {{ $t("Cerrar sesión") }}
             </button>
         </div>
 
         <div>
             <v-divider class=" d-flex my-5" style="border-color: #e4e4e4 !important; border-width: 2px 0 0" />
             <button class="logout-button d-flex" style="" @click="deleteAccount">
-                {{ $t("ELIMINAR CUENTA") }}
+                {{ $t("Eliminar cuenta") }}
             </button>
         </div>
 

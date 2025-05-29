@@ -133,27 +133,38 @@ export default {
         },
         scrollToCenter() {
             // Get all <a> tags in the document
-            const links = document.querySelectorAll("a");
+            const links = document.querySelectorAll("a[href^='#']");
 
             // Add an event listener to each link
             links.forEach(link => {
                 link.addEventListener("click", e => {
+                    const targetId = link.getAttribute("href");
+
+                    // Verificar que el href no está vacío o que no sea solo "#"
+                    if (!targetId || targetId === "#") return;
+
+                    const element = document.querySelector(targetId);
+
+                    // Si el elemento no existe, no hacer nada
+                    if (!element) {
+                        console.error("Elemento no encontrado:", targetId);
+                        return;
+                    }
+
                     // Prevent the default behavior
                     e.preventDefault();
-
-                    // Get the href attribute of the link
-                    const element = document.querySelector(link.getAttribute("href"));
 
                     // Calc the size of the window
                     const windowHeight = window.innerHeight;
                     const elementHeight = element.offsetHeight;
 
                     // Calc the position of the element relative to the document
-                    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+                    const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+                    const scrollToPosition = elementPosition - windowHeight / 2 + elementHeight / 2;
 
                     // Set the scroll position to the element position minus the window height
                     window.scrollTo({
-                        top: elementPosition - windowHeight / 2 + elementHeight / 2,
+                        top: scrollToPosition,
                         behavior: "smooth" // Add smooth scrolling (optional)
                     });
                 });

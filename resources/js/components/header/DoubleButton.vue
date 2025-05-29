@@ -1,35 +1,24 @@
 <template>
     <div class="layout-navbar-nav">
-        <CustomButton
-            v-if="!userIsLoggedIn"
-            color="white"
-            class="double-button"
-            @click="showLoginDialog(true)"
-            >
+        <CustomButton v-if="!userIsLoggedIn" color="white" class="double-button" @click="showLoginDialog(true)">
             <div class="d-none d-sm-flex justify-center align-center">
                 <span class="double-button-label mr-2 mr-sm-3 pr-2 pr-sm-3">
-                {{ "Iniciar sesión" }}
+                    {{ "Iniciar sesión" }}
                 </span>
                 <div class="double-button-cart">
                     <ShopCartIcon class="mr-2 mr-sm-3" />
                     <span class="mr-2 mr-sm-3">{{ getCartCount }}</span>
                     <span class="status-indicator" :class="{ active: userShortName }"></span>
                 </div>
-            </div> 
+            </div>
             <div class="d-block d-sm-none">
                 <Profile class="mr-2 mr-sm-3" />
             </div>
         </CustomButton>
-        
-        <CustomButton
-            v-else
-            color="white"
-            class="double-button"
-            :to="{ name: 'Cart' }"
-        >
+        <CustomButton v-else color="white" class="double-button" :to="{ name: 'Cart' }">
             <div class="d-none d-sm-flex justify-center align-center pr-2 pr-sm-3">
                 <span class="double-button-label mr-2 mr-sm-3 pr-2 pr-sm-3">
-                {{ userShortName ? userShortName : "--" }}
+                    {{ userShortName ? userShortName : "--" }}
                 </span>
                 <div class="double-button-cart">
                     <ShopCartIcon class="mr-2 mr-sm-3" />
@@ -73,11 +62,11 @@ export default {
         ...mapGetters("auth", ["userIsLoggedIn"])
     },
     mounted() {
-       // window.addEventListener("resize", this.handleScroll);
+        // window.addEventListener("resize", this.handleScroll);
         //window.addEventListener("scroll", this.handleScroll, { passive: true });
     },
     methods: {
-        ...mapMutations("auth", ["showLoginDialog"]),
+        ...mapMutations("auth", ["showLoginDialog"])
         /*handleScroll() {
             const currentScroll = this.$refs.layoutNavbar.currentScroll;
             const windowWidth = window.innerWidth;

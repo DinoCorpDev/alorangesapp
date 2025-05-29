@@ -490,7 +490,7 @@ class ProductController extends Controller
                     $productStorage->slug = Str::slug($product['name'], '-') . '-' . strtolower(Str::random(5));
                     $productStorage->published = $product['status'] == 'active' ? 1 : 0;
                     
-                    if (isset($product['images'])) {
+                    if (isset($product['images']) && count($product['images']) > 0 ) {
                         $productStorage->thumbnail_img = $product['images'][0]['url'];
                     }else{
                         $productStorage->thumbnail_img = '';

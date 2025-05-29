@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
+use Cache;
 
 class WompiServices{
     private $client;
@@ -140,22 +141,36 @@ class WompiServices{
         }   
     }
 
-    public function wompiGetTransactionFacturas($reference){
-        try {
-            $response = $this->client->request('GET', $this->url.'transactions?reference='.$reference, [
-                'headers' => $this->postPrivateHeaders
-            ]);
+    public function wompiGetTransactionFacturas($reference)
+    {
+        // Usamos caché por 10 minutos
+        $cacheKey = 'wompi_transaction_' . $reference;
 
-            $res = json_decode($response->getBody()->getContents(), true);
-            $status = 'unpaid';
-            foreach ($res['data'] as $key => $wompi) {
-                $status = $wompi['status'];
+        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($reference) {
+            try {
+                $response = $this->client->request('GET', $this->url . 'transactions?reference=' . $reference, [
+                    'headers' => $this->postPrivateHeaders,
+                    'timeout' => 10, // evita que se cuelgue si Wompi está lento
+                    'connect_timeout' => 5,
+                ]);
+
+                $res = json_decode($response->getBody()->getContents(), true);
+
+                // Aseguramos que haya datos válidos
+                if (!isset($res['data']) || empty($res['data'])) {
+                    return 'unpaid';
+                }
+
+                // Obtenemos el estado más reciente
+                $lastTransaction = collect($res['data'])->sortByDesc('created_at')->first();
+                return $lastTransaction['status'] ?? 'unpaid';
+
+            } catch (\Throwable $e) {
+                // Registra el error para seguimiento
+                Log::error('Error al consultar Wompi: ' . $e->getMessage());
+                return 'error';
             }
-            return $status;
-        } catch (\Exception $e) {
-            // Manejar el error
-            return $e->getMessage();
-        }
+        });
     }
 
     public function wompiGetTransactionComplete($reference){
