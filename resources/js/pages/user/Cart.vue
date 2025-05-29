@@ -472,12 +472,12 @@
                                                 {{ currentUser.phone || "--" }}
                                             </span>
                                         </div>
-                                        <!-- <CustomButton 
+                                        <!-- <CustomButton
                                             class="mr-3 ml-3"
                                             style="width: 136px"
                                             color="grey"
-                                            text="EDITAR" 
-                                            @click="editProfile()" 
+                                            text="EDITAR"
+                                            @click="editProfile()"
                                         /> -->
                                     </div>
                                     <!-- <h5 class="fw-600">Costo logístico</h5>
@@ -567,16 +567,13 @@
                                 <v-col
                                     class="d-none d-md-flex justify-start justify-md-end align-center pl-0 pl-md-3"
                                     cols="2"
-                                    style="display: flex"
                                 >
                                     <div v-if="mostrarDetalles == false">
                                         <CustomButton text="< Volver" color="white" @click="numberPag = 1" />
                                     </div>
                                 </v-col>
-                                <v-col
-                                    cols="12"
-                                    md="8"
-                                    class="d-flex justify-center align-center gap pl-0 pl-md-3"
+                                <v-col cols="12" md="8"
+                                    class="d-flex justify-center align-center gap"
                                 >
                                     <total :total="priceTotal" />
                                     <v-divider vertical></v-divider>
@@ -635,24 +632,22 @@
                                 >
                                     <v-row>
                                         <v-col cols="6" md="0" class="d-flex d-md-none">
-                                            <div v-if="mostrarDetalles == false" class="boton-continuar">
-                                                <CustomButton
-                                                    class="boton-continuar"
-                                                    text="< Volver"
-                                                    color="nero"
-                                                    @click="numberPag = 1"
-                                                />
-                                            </div>
+                                            <CustomButton
+                                                v-if="mostrarDetalles == false"
+                                                class="boton-continuar"
+                                                text="< Volver"
+                                                color="nero"
+                                                @click="numberPag = 1"
+                                            />
                                         </v-col>
                                         <v-col cols="6" md="12" class="pl-0">
-                                            <div v-if="mostrarDetalles == false" class="boton-continuar">
-                                                <CustomButton
-                                                    class="boton-continuar"
-                                                    text="Continuar >"
-                                                    color="orange"
-                                                    @click="goStepThree"
-                                                />
-                                            </div>
+                                            <CustomButton
+                                                v-if="mostrarDetalles == false"
+                                                class="boton-continuar"
+                                                text="Continuar >"
+                                                color="orange"
+                                                @click="goStepThree"
+                                            />
                                         </v-col>
                                     </v-row>
                                 </v-col>
@@ -953,7 +948,7 @@
                                         </div>
                                         <div class="pt-4">
                                             <label>Mes / año de expiración</label>
-                                            <div class="d-flex justify-content-between">            
+                                            <div class="d-flex justify-content-between">
                                                 <CustomInput class="col-md-3" placeholder="01" card="numberCard" maxlength="2" v-model="formCard.exp_month" />
                                                 <CustomInput placeholder="29" card="numberCard" maxlength="2" v-model="formCard.exp_year" />
                                             </div>
@@ -967,7 +962,6 @@
                                         </div>
                                     </div>
                                     <div v-if="pick === 4">
-                                        
                                         <p>
                                             Despachamos el producto una vez que se envíe la transferencia y el
                                             comprobante por WhatsApp
@@ -1022,16 +1016,17 @@
                         <v-col cols="12" order="3" order-md="3" order-sm="3" class="d-flex justify-space-between">
                             <v-row class="barra-inferior">
                                 <v-col
-                                    cols="2"
                                     class="d-none d-md-flex justify-center justify-md-center align-center"
+                                    cols="2"
                                 >
                                     <div v-if="mostrarDetalles == false">
                                         <CustomButton text="< Volver" color="white" @click="numberPag = 2" />
                                     </div>
                                 </v-col>
-                                <v-col cols="12" md="8" class="gap-1 pl-md-3">
+                                <v-col cols="12" md="8"
+                                    class="d-flex justify-center align-center gap"
+                                >
                                     <TotalPago :total="priceTotal" />
-
                                     <v-divider vertical></v-divider>
                                     <!-- <CustomButton color="black" v-if="mostrarDetalles" @click="ocultarDetalle">
                                         DETALLES
@@ -1055,33 +1050,33 @@
                                         </i>
                                     </CustomButton> -->
                                 </v-col>
-
-                                <v-col cols="6" class="d-flex d-md-none">
-                                    <div v-if="mostrarDetalles == false" class="boton-continuar">
-                                        <CustomButton
-                                            class="boton-continuar"
-                                            text="< Volver"
-                                            color="nero"
-                                            @click="numberPag = 2"
-                                        />
-                                    </div>
-                                </v-col>
-
                                 <v-col
-                                    cols="6"
+                                    cols="12"
                                     md="2"
                                     style="display: flex; justify-content: flex-end; align-items: center"
                                 >
-                                    <div v-if="mostrarDetalles == false" class="boton-continuar">
-                                        <CustomButton
-                                            class="boton-continuar"
-                                            text="Continuar"
-                                            color="orange"
-                                            @click.stop="proceedCheckout()"
-                                            :loading="checkoutLoading"
-                                            :disabled="checkoutLoading"
-                                        />
-                                    </div>
+                                    <v-row>
+                                        <v-col cols="6" md="0" class="d-flex d-md-none">
+                                            <CustomButton
+                                                v-if="mostrarDetalles == false"
+                                                class="boton-continuar"
+                                                text="< Volver"
+                                                color="nero"
+                                                @click="numberPag = 2"
+                                            />
+                                        </v-col>
+                                        <v-col cols="6" md="2" class="pl-0">
+                                            <CustomButton
+                                                v-if="mostrarDetalles == false"
+                                                class="boton-continuar"
+                                                text="Finalizar"
+                                                color="orange"
+                                                @click.stop="proceedCheckout()"
+                                                :loading="checkoutLoading"
+                                                :disabled="checkoutLoading"
+                                            />
+                                        </v-col>
+                                    </v-row>
                                 </v-col>
                                 <v-col cols="12" v-if="mostrarDetalles">
                                     <div style="justify-content: center; max-height: 300px; overflow-y: scroll">
@@ -1544,8 +1539,7 @@
                             </div>
                             <v-row style="max-height: 450px; overflow-y: auto">
                                 <!-- <v-col cols="12" v-for="(product, i) in cartItems" :key="i"> -->
-                                <v-col cols="12" v-for="(product, i) in cartItemsTwo" :key="i"> 
-                                    
+                                <v-col cols="12" v-for="(product, i) in cartItemsTwo" :key="i">
                                     <ProductCart
                                         :productDetails="product"
                                         productCartType="bill"
@@ -2076,7 +2070,6 @@
                                         </div>
                                     </div>
                                 </v-col>
-                                
                             </v-row>
                         </v-col>
                         <v-col cols="12" md="6">
@@ -2343,7 +2336,7 @@ export default {
         },
         openWindow(url){
             window.open(url, '_blank', 'noopener,noreferrer');
-            this.numberPag = 4;  
+            this.numberPag = 4;
         },
         updateBreadcrumb() {
             const formattedName = this.capitalizeWords(this.currentUser.name);
@@ -2362,7 +2355,6 @@ export default {
                         color: "red"
                     });
             }
-            
         },
         capitalizeWords(name) {
             return name.replace(/\b\w/g, char => char.toUpperCase());
