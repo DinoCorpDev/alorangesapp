@@ -243,20 +243,20 @@ export default {
         emailErrors() {
             const errors = [];
             if (!this.$v.form.email.$dirty) return errors;
-            !this.$v.form.email.required && errors.push(this.$i18n.t("this_field_is_required"));
-            !this.$v.form.email.email && errors.push(this.$i18n.t("this_field_is_required_a_valid_email"));
+            !this.$v.form.email.required && errors.push(this.$i18n.t("Este campo es requerido"));
+            !this.$v.form.email.email && errors.push(this.$i18n.t("Este campo es requerido_a_valid_email"));
             return errors;
         },
         firstNameErrors() {
             const errors = [];
             if (!this.$v.form.first_name.$dirty) return errors;
-            !this.$v.form.first_name.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.first_name.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         firstLastNameErrors() {
             const errors = [];
             if (!this.$v.form.first_lastname.$dirty) return errors;
-            !this.$v.form.first_lastname.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.first_lastname.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         showRecuperarPass: {

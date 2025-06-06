@@ -97,13 +97,13 @@ export default {
         passwordErrors() {
             const errors = [];
             if (!this.$v.form.password.$dirty) return errors;
-            !this.$v.form.password.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.password.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         oldPasswordErrors() {
             const errors = [];
             if (!this.$v.form.oldPassword.$dirty) return errors;
-            !this.$v.form.oldPassword.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.oldPassword.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         }
     },

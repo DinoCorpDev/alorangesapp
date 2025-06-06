@@ -194,14 +194,14 @@ export default {
             const errors = [];
             if (!this.$v.form.refund_reasons.$dirty) return errors;
             !this.$v.form.refund_reasons.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         refundNoteErrors() {
             const errors = [];
             if (!this.$v.form.refund_note.$dirty) return errors;
             !this.$v.form.refund_note.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },

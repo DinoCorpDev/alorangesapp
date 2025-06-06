@@ -107,7 +107,7 @@ export default {
             const errors = [];
             if (!this.$v.review.comment.$dirty) return errors;
             !this.$v.review.comment.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },

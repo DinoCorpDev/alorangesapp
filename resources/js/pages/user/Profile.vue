@@ -1520,12 +1520,10 @@
                                 </div>
                                 <div class="mb-3">
                                     <div class="mb-1 fs-13 fw-500">Código postal</div>
-                                    <SelectCustom
+                                    <CustomInput
                                         class="select-style"
                                         placeholder="Seleccione codigo postal"
-                                        :items="codigoPostalTypes"
-                                        v-model="otherAdd.postal_code"
-                                        required
+                                        v-model="otherAdd.postal_code"                                        
                                     />
                                 </div>
                                 <div class="mb-3">
@@ -2066,7 +2064,6 @@ export default {
         formDirection: {
             address: { required },
             name: { required },
-            postal_code: { required },
             country: { required },
             state: { required },
             city: { required },
@@ -2193,14 +2190,6 @@ export default {
                 return errors;
             }
             !this.$v.formDirection.details.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
-            return errors;
-        },
-        postalCodeErrors() {
-            const errors = [];
-            if (!this.$v.formDirection.postal_code.$dirty) {
-                return errors;
-            }
-            !this.$v.formDirection.postal_code.required && errors.push(this.$i18n.t("*Este campo es obligatorio"));
             return errors;
         },
         countryErrors() {
@@ -2331,13 +2320,13 @@ export default {
         olddPasswordErrors() {
             const errors = [];
             if (!this.$v.formContrasena.oldPassword.$dirty) return errors;
-            !this.$v.formContrasena.oldPassword.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formContrasena.oldPassword.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         newPasswordErrors() {
             const errors = [];
             if (!this.$v.formContrasena.newPassword.$dirty) return errors;
-            !this.$v.formContrasena.newPassword.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formContrasena.newPassword.required && errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.formContrasena.newPassword.minLength &&
                 errors.push(this.$i18n.t("*La contraseña debe tener mínimo 6 carácteres"));
             !this.$v.formContrasena.newPassword.passwordStrong &&

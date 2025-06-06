@@ -87,14 +87,14 @@ export default {
             const errors = [];
             if (!this.$v.form.title.$dirty) return errors;
             !this.$v.form.title.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         messageErrors() {
             const errors = [];
             if (!this.$v.form.message.$dirty) return errors;
             !this.$v.form.message.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     }, 

@@ -295,10 +295,10 @@ export default {
             const errors = [];
             if (!this.$v.subscribeForm.email.$dirty) return errors;
             !this.$v.subscribeForm.email.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.subscribeForm.email.email &&
                 errors.push(
-                    this.$i18n.t("this_field_is_required_a_valid_email")
+                    this.$i18n.t("Este campo es requerido_a_valid_email")
                 );
             return errors;
         },

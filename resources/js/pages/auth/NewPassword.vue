@@ -153,27 +153,27 @@ export default {
         emailErrors() {
             const errors = [];
             if (!this.$v.form.email.$dirty) return errors;
-            !this.$v.form.email.requiredIf && errors.push(this.$i18n.t("this_field_is_required"));
-            !this.$v.form.email.email && errors.push(this.$i18n.t("this_field_is_required_a_valid_email"));
+            !this.$v.form.email.requiredIf && errors.push(this.$i18n.t("Este campo es requerido"));
+            !this.$v.form.email.email && errors.push(this.$i18n.t("Este campo es requerido_a_valid_email"));
             return errors;
         },
         codeErrors() {
             const errors = [];
             if (!this.$v.form.code.$dirty) return errors;
-            !this.$v.form.code.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.code.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         passwordErrors() {
             const errors = [];
             if (!this.$v.form.password.$dirty) return errors;
-            !this.$v.form.password.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.password.required && errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.password.minLength && errors.push(this.$i18n.t("password_must_be_minimum_6_characters"));
             return errors;
         },
         confirmPasswordErrors() {
             const errors = [];
             if (!this.$v.form.confirmPassword.$dirty) return errors;
-            !this.$v.form.confirmPassword.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.confirmPassword.required && errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.confirmPassword.sameAsPassword &&
                 errors.push(this.$i18n.t("password_and_confirm_password_should_match"));
             return errors;
