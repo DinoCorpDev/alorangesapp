@@ -25,14 +25,11 @@
                 </div>
                 <div class="mb-3">
                     <div class="mb-1 fs-13 fw-500">Código postal</div>
-                    <SelectCustom
-                        placeholder="Seleccione codigo postal"
+                    <CustomInput
                         class="select-placeholder"
-                        :items="codigoPostalTypes"
                         v-model="form.postal_code"
                         :error-messages="postalCodeErrors"
                         @blur="$v.form.postal_code.$touch()"
-                        required
                     />
                 </div>
                 <div class="mb-3">
@@ -106,7 +103,7 @@
                                 <div class="v-messages theme--light error--text" role="alert">
                                     <div class="v-messages__wrapper">
                                         <div class="v-messages__message">
-                                            {{ $t("this_field_is_required") }}
+                                            {{ $t("Este campo es requerido") }}
                                         </div>
                                     </div>
                                 </div>
@@ -214,7 +211,6 @@ export default {
         form: {
             address: { required },
             name: { required },
-            postal_code: { required },
             country: { required },
             state: { required },
             city: { required },
@@ -247,49 +243,43 @@ export default {
         addressErrors() {
             const errors = [];
             if (!this.$v.form.address.$dirty){ return errors; }
-            !this.$v.form.address.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.address.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         addressNameErrors() {
             const errors = [];
             if (!this.$v.form.name.$dirty){ return errors; }
-            !this.$v.form.name.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.name.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         addressDetailsErrors() {
             const errors = [];
             if (!this.$v.form.details.$dirty){ return errors; }
-            !this.$v.form.details.required && errors.push(this.$i18n.t("this_field_is_required"));
-            return errors;
-        },
-        postalCodeErrors() {
-            const errors = [];
-            if (!this.$v.form.postal_code.$dirty){ return errors; }
-            !this.$v.form.postal_code.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.details.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         countryErrors() {
             const errors = [];
             if (!this.$v.form.country.$dirty){ return errors; }
-            !this.$v.form.country.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.country.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         stateErrors() {
             const errors = [];
             if (!this.$v.form.state.$dirty){ return errors; }
-            !this.$v.form.state.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.state.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         cityErrors() {
             const errors = [];
             if (!this.$v.form.city.$dirty){ return errors; }
-            !this.$v.form.city.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.city.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         phoneErrors() {
             const errors = [];
             if (!this.$v.form.phone.$dirty){ return errors; }
-            !this.$v.form.phone.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.phone.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         }
     },

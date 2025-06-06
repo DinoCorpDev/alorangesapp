@@ -67,7 +67,7 @@
                             <div v-if="$v.form.phone.$error" class=" v-text-field__details mt-2 pl-3 " >
                                 <div class=" v-messages theme--light error--text " role="alert">
                                     <div class=" v-messages__wrapper " >
-                                        <div class=" v-messages__message " >{{ $t("this_field_is_required") }}</div>
+                                        <div class=" v-messages__message " >{{ $t("Este campo es requerido") }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -214,10 +214,10 @@ export default {
             const errors = [];
             if (!this.$v.form.email.$dirty) return errors;
             !this.$v.form.email.requiredIf &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.email.email &&
                 errors.push(
-                    this.$i18n.t("this_field_is_required_a_valid_email")
+                    this.$i18n.t("Este campo es requerido_a_valid_email")
                 );
             return errors;
         },
@@ -225,7 +225,7 @@ export default {
             const errors = [];
             if (!this.$v.form.password.$dirty) return errors;
             !this.$v.form.password.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },

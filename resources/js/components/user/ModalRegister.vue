@@ -379,7 +379,7 @@
                                                     <div class="v-messages theme--light error--text" role="alert">
                                                         <div class="v-messages__wrapper">
                                                             <div class="v-messages__message">
-                                                                {{ $t("this_field_is_required") }}
+                                                                {{ $t("Este campo es requerido") }}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -718,7 +718,7 @@
                                                 <div class="v-messages theme--light error--text" role="alert">
                                                     <div class="v-messages__wrapper">
                                                         <div class="v-messages__message">
-                                                            {{ $t("this_field_is_required") }}
+                                                            {{ $t("Este campo es requerido") }}
                                                         </div>
                                                     </div>
                                                 </div>

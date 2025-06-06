@@ -347,7 +347,7 @@
                                                 <div class="v-messages theme--light error--text" role="alert">
                                                     <div class="v-messages__wrapper">
                                                         <div class="v-messages__message">
-                                                            {{ $t("this_field_is_required") }}
+                                                            {{ $t("Este campo es requerido") }}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -500,7 +500,7 @@
                                             <div class="v-messages theme--light error--text" role="alert">
                                                 <div class="v-messages__wrapper">
                                                     <div class="v-messages__message">
-                                                        {{ $t("this_field_is_required") }}
+                                                        {{ $t("Este campo es requerido") }}
                                                     </div>
                                                 </div>
                                             </div>
@@ -942,7 +942,7 @@
                                                 <div class="v-messages theme--light error--text" role="alert">
                                                     <div class="v-messages__wrapper">
                                                         <div class="v-messages__message">
-                                                            {{ $t("this_field_is_required") }}
+                                                            {{ $t("Este campo es requerido") }}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1339,20 +1339,20 @@ export default {
         nameErrors() {
             const errors = [];
             if (!this.$v.form.name.$dirty) return errors;
-            !this.$v.form.name.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.name.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         emailErrors() {
             const errors = [];
             if (!this.$v.form.email.$dirty) return errors;
-            !this.$v.form.email.required && errors.push(this.$i18n.t("this_field_is_required"));
-            !this.$v.form.email.email && errors.push(this.$i18n.t("this_field_is_required_a_valid_email"));
+            !this.$v.form.email.required && errors.push(this.$i18n.t("Este campo es requerido"));
+            !this.$v.form.email.email && errors.push(this.$i18n.t("Este campo es requerido_a_valid_email"));
             return errors;
         },
         oldPasswordErrors() {
             const errors = [];
             if (!this.$v.form.oldPassword.$dirty) return errors;
-            !this.$v.form.oldPassword.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.oldPassword.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         passwordErrors() {
@@ -1371,157 +1371,157 @@ export default {
         firstNameErrors() {
             const errors = [];
             if (!this.$v.formUser.firstName.$dirty) return errors;
-            !this.$v.formUser.firstName.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formUser.firstName.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         secondNameErrors() {
             const errors = [];
             if (!this.$v.formUser.secondName.$dirty) return errors;
-            !this.$v.formUser.secondName.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formUser.secondName.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         firstLastnameErrors() {
             const errors = [];
             if (!this.$v.formUser.firstLastname.$dirty) return errors;
-            !this.$v.formUser.firstLastname.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formUser.firstLastname.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         secondLastnameErrors() {
             const errors = [];
             if (!this.$v.formUser.secondLastname.$dirty) return errors;
-            !this.$v.formUser.secondLastname.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formUser.secondLastname.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         documentTypeErrors() {
             const errors = [];
             if (!this.$v.formUser.documentType.$dirty) return errors;
-            !this.$v.formUser.documentType.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formUser.documentType.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         documentNumberErrors() {
             const errors = [];
             if (!this.$v.formUser.documentNumber.$dirty) return errors;
-            !this.$v.formUser.documentNumber.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formUser.documentNumber.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         addressErrors() {
             const errors = [];
             if (!this.$v.formDirection.address.$dirty){ return errors; }
-            !this.$v.formDirection.address.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.address.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         addressNameErrors() {
             const errors = [];
             if (!this.$v.formDirection.name.$dirty){ return errors; }
-            !this.$v.formDirection.name.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.name.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         addressDetailsErrors() {
             const errors = [];
             if (!this.$v.formDirection.details.$dirty){ return errors; }
-            !this.$v.formDirection.details.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.details.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         postalCodeErrors() {
             const errors = [];
             if (!this.$v.formDirection.postal_code.$dirty){ return errors; }
-            !this.$v.formDirection.postal_code.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.postal_code.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         countryErrors() {
             const errors = [];
             if (!this.$v.formDirection.country.$dirty){ return errors; }
-            !this.$v.formDirection.country.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.country.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         stateErrors() {
             const errors = [];
             if (!this.$v.formDirection.state.$dirty){ return errors; }
-            !this.$v.formDirection.state.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.state.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         cityErrors() {
             const errors = [];
             if (!this.$v.formDirection.city.$dirty){ return errors; }
-            !this.$v.formDirection.city.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.city.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         phoneErrors() {
             const errors = [];
             if (!this.$v.formDirection.phone.$dirty){ return errors; }
-            !this.$v.formDirection.phone.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formDirection.phone.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyFirstNameErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.firstName.$dirty) return errors;
-            !this.$v.formEmpresa.firstName.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.firstName.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companySecondNameErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.secondName.$dirty) return errors;
-            !this.$v.formEmpresa.secondName.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.secondName.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyFirstLastnameErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.firstLastname.$dirty) return errors;
-            !this.$v.formEmpresa.firstLastname.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.firstLastname.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companySecondLastnameErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.secondLastname.$dirty) return errors;
-            !this.$v.formEmpresa.secondLastname.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.secondLastname.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyPersonDocumentTypeErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.documentType.$dirty) return errors;
-            !this.$v.formEmpresa.documentType.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.documentType.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyPersonDocumentNumberErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.documentNumber.$dirty) return errors;
-            !this.$v.formEmpresa.documentNumber.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.documentNumber.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyRazonErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.companyRazon.$dirty) return errors;
-            !this.$v.formEmpresa.companyRazon.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.companyRazon.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyTypeErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.companyType.$dirty) return errors;
-            !this.$v.formEmpresa.companyType.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.companyType.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyDocumentTypeErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.companyDocumentType.$dirty) return errors;
-            !this.$v.formEmpresa.companyDocumentType.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.companyDocumentType.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyDocumentNumberErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.companyDocumentNumber.$dirty) return errors;
-            !this.$v.formEmpresa.companyDocumentNumber.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.companyDocumentNumber.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyActividadErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.companyActividad.$dirty) return errors;
-            !this.$v.formEmpresa.companyActividad.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.companyActividad.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyEmailErrors() {
             const errors = [];
             if (!this.$v.formEmpresa.companyEmail.$dirty) return errors;
-            !this.$v.formEmpresa.companyEmail.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.formEmpresa.companyEmail.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },
