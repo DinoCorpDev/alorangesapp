@@ -11,6 +11,8 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Permission;
 use CoreComponentRepository;
+use App\Jobs\UpdatePaymentStatusJob;
+use App\Models\CombinedOrder;
 
 class OrderController extends Controller
 {
@@ -31,6 +33,8 @@ class OrderController extends Controller
 
         $admin = User::where('user_type', 'admin')->first();
         $orders = Order::with(['combined_order'])->where('shop_id', $admin->shop_id);
+
+        UpdatePaymentStatusJob::dispatch();
 
         if ($request->has('search') && $request->search != null) {
             $sort_search = $request->search;

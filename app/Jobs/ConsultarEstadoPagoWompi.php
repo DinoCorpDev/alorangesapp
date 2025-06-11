@@ -22,6 +22,7 @@ class ConsultarEstadoPagoWompi implements ShouldQueue
      */
     public function __construct(int $combinedOrderId)
     {
+        \Log::info("Ejecutando el Job Consultar...");
         $this->combinedOrderId = $combinedOrderId;
     }
 
