@@ -34,8 +34,6 @@ class OrderController extends Controller
         $admin = User::where('user_type', 'admin')->first();
         $orders = Order::with(['combined_order'])->where('shop_id', $admin->shop_id);
 
-        UpdatePaymentStatusJob::dispatch();
-
         if ($request->has('search') && $request->search != null) {
             $sort_search = $request->search;
             $orders = $orders->whereHas('combined_order', function ($query) use ($sort_search) {
