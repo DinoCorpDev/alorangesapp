@@ -251,7 +251,7 @@ export default {
                     routeName: null
                 },
                 {
-                    title: "Cartonería",
+                    title: "Empaques",
                     img: "/public/assets/img/Group 6.png",
                     routeName: "ShopCartoneria"
                 },

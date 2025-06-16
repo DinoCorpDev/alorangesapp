@@ -26,7 +26,7 @@ export default {
             { icon: "aseo-24x24.png", text: "Aseo", routeName: "ShopAseo" },
             { icon: "cafeteria-24x24.png", text: "Cafetería", routeName: "ShopCafeteria" },
             { icon: "tecnologia-24x24.png", text: "Tecnología", routeName: "ShopTecnologia" },
-            { icon: "cartoneria-24x24.png", text: "Cartoneria", routeName: "ShopCartoneria" },
+            { icon: "cartoneria-24x24.png", text: "Empaques", routeName: "ShopCartoneria" },
             { icon: "seguridad-industrial-24x24.png", text: "Seguridad Industrial", routeName: "ShopSeguridadIndustrial" }
         ]
     }),
