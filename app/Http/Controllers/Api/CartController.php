@@ -120,58 +120,90 @@ class CartController extends Controller
 
         if ($isCollection == false) {
             $cart = Cart::find($request->cart_id);
-            if ($cart != null) {
-                if ((auth('api')->check() && auth('api')->user()->id == $cart->user_id) || ($request->has('temp_user_id') && $request->temp_user_id == $cart->temp_user_id)) {
 
-                    if ($request->type == 'set' && ($cart->product->max_qty == 0 || $cart->quantity < $cart->product->max_qty)) {
-                        $cart->update([
-                            'quantity' => $request->qty
-                        ]);
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart updated')
-                        ]);
-                    } elseif ($request->type == 'set' && $cart->quantity == $cart->product->max_qty) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => translate('Max quantity reached')
-                        ]);
-                    } elseif ($request->type == 'plus' && ($cart->product->max_qty == 0 || $cart->quantity < $cart->product->max_qty)) {
-                        $cart->update([
-                            'quantity' => DB::raw('quantity + 1')
-                        ]);
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart updated')
-                        ]);
-                    } elseif ($request->type == 'plus' && $cart->quantity == $cart->product->max_qty) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => translate('Max quantity reached')
-                        ]);
-                    } elseif ($request->type == 'minus' && $cart->quantity > $cart->product->min_qty) {
-                        $cart->update([
-                            'quantity' => DB::raw('quantity - 1')
-                        ]);
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart updated')
-                        ]);
-                    } elseif ($request->type == 'minus' && $cart->quantity == $cart->product->min_qty) {
-                        $cart->delete();
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart deleted due to minimum quantity')
-                        ]);
-                    }
+            if (!$cart) {
+                return response()->json([
+                    'success' => false,
+                    'message' => translate('Cart not found'),
+                ]);
+            }
+
+            $isOwner = (auth('api')->check() && auth('api')->user()->id == $cart->user_id);
+            $isTempOwner = $request->has('temp_user_id') && $request->temp_user_id == $cart->temp_user_id;
+
+            if (!$isOwner && !$isTempOwner) {
+                return response()->json(null, 401);
+            }
+
+            $type = $request->type;
+            $validTypes = ['set', 'plus', 'minus'];
+
+            if (!in_array($type, $validTypes)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => translate('Invalid operation type'),
+                ]);
+            }
+
+            $minQty = $cart->product->min_qty ?? 1;
+            $maxQty = $cart->product->max_qty ?? 0;
+
+            if ($type === 'set') {
+                $newQty = intval($request->qty);
+
+                if ($newQty < $minQty || ($maxQty > 0 && $newQty > $maxQty)) {
                     return response()->json([
                         'success' => false,
-                        'message' => translate('Something went wrong')
+                        'message' => translate('Invalid quantity'),
                     ]);
-                } else {
-                    return response()->json(null, 401);
+                }
+
+                $cart->update(['quantity' => $newQty]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => translate('Cart updated'),
+                ]);
+            }
+
+            if ($type === 'plus') {
+                if ($maxQty > 0 && $cart->quantity >= $maxQty) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => translate('Max quantity reached'),
+                    ]);
+                }
+
+                $cart->update(['quantity' => DB::raw('quantity + 1')]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => translate('Cart updated'),
+                ]);
+            }
+
+            if ($type === 'minus') {
+                if ($cart->quantity > $minQty) {
+                    $cart->update(['quantity' => DB::raw('quantity - 1')]);
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => translate('Cart updated'),
+                    ]);
+                } elseif ($cart->quantity == $minQty) {
+                    $cart->delete();
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => translate('Cart deleted due to minimum quantity'),
+                    ]);
                 }
             }
+
+            return response()->json([
+                'success' => false,
+                'message' => translate('Something went wrong'),
+            ]);
         } else {
             //
         }

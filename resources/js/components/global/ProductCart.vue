@@ -55,7 +55,7 @@
         </div>
         <div class="product-box-cart-quantity">
             <vue-numeric-input
-                v-model="cartQuantity"
+                v-model.number="cartQuantity"
                 :min="1"
                 :max="maxCartLimit"
                 :step="1"
@@ -244,6 +244,12 @@ export default {
             maxCartLimit: Infinity
         };
     },
+    created() {
+        this.debouncedWatcher = _.debounce(this.handleQuantityChange, 300);
+    },
+    beforeDestroy() {
+        this.debouncedWatcher.cancel();
+    },
     computed: {
         ...mapGetters("wishlist", ["isThisWishlisted"]),
         thumbnailImage() {
@@ -272,16 +278,14 @@ export default {
         },
         cartQuantity: {
             handler(newVal, oldVal) {
-                // if new value is greater than max limit then set it to max limit then updateQuantity
-                const { cart_id } = this.productDetails;
-
-                if (Math.abs(newVal - oldVal) > 1) {
-                    this.updateQuantity({ type: "set", cart_id: cart_id, qty: newVal });
-                } else if (newVal > oldVal) {
-                    this.updateQuantity({ type: "plus", cart_id: cart_id });
-                } else if (newVal < oldVal && newVal > 0) {
-                    this.updateQuantity({ type: "minus", cart_id: cart_id });
+                if (isNaN(newVal)) {
+                    this.$nextTick(() => {
+                        this.cartQuantity = this.minCartLimit;
+                    });
+                    return;
                 }
+
+                this.debouncedWatcher(newVal, oldVal);
             }
         }
     },
@@ -307,6 +311,18 @@ export default {
                         color: "red"
                     });
                 });
+        },
+        handleQuantityChange(newVal, oldVal) {
+            const { cart_id } = this.productDetails;
+            const parsedOld = isNaN(oldVal) ? 0 : oldVal;
+
+            if (parsedOld === 0 || Math.abs(newVal - parsedOld) > 1) {
+                this.updateQuantity({ type: "set", cart_id: cart_id, qty: newVal });
+            } else if (newVal > parsedOld) {
+                this.updateQuantity({ type: "plus", cart_id: cart_id });
+            } else if (newVal < parsedOld && newVal > 0) {
+                this.updateQuantity({ type: "minus", cart_id: cart_id });
+            }
         },
         formatearMoneda(valor) {
             return valor.toLocaleString("es-CO", {
