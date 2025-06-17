@@ -17,8 +17,8 @@ class OrderProductCollection extends ResourceCollection
                 return [
                     'id' => $product ? $product->id : null,
                     'name' => $product ? $product->getTranslation('name') : translate('Product has been removed'),
-                    'thumbnail' => $product ? api_asset($product->thumbnail_img) : '',
-                    'thumbnail_image' => $product ? api_asset($product->thumbnail_img) : '',
+                    'thumbnail' => $product ? $product->thumbnail_img : '',
+                    'thumbnail_image' => $product ? $product->thumbnail_img : '',
                     'combinations' => $data->variation ? filter_variation_combinations($data->variation->combinations) : [],
                     'price' => $data->price,
                     'tax' => $data->tax,

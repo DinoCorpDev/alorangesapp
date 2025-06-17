@@ -62,7 +62,7 @@ export default {
     mounted(){
         // Desordenar los productos cuando el componente se monta
         this.shuffleProducts();
-        console.log(this.shuffledProducts); // Mostrar los productos desordenados
+        // console.log(this.shuffledProducts); // Mostrar los productos desordenados
     },
     watch: {
         products: {

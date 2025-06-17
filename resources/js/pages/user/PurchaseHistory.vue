@@ -103,7 +103,6 @@ export default {
             const res = await this.call_api("get", `user/orders?page=${number}`);
             if (res.data.success) {
                 this.orders = res.data.data;
-                console.log(res.data.data);
                 this.totalPages = res.data.meta.last_page;
                 this.currentPage = res.data.meta.current_page;
             } else {
