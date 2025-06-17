@@ -1,6 +1,6 @@
 <template>
     <div style="background-color: #fafcfc;">
-        <Steps :order-details="order" />
+        <!-- <Steps :order-details="order" /> -->
         <div class="my-5">
             <h6>Lista de Pedido</h6>
             <v-divider class="my-3" />
@@ -47,7 +47,7 @@
             </div> -->
 
             <v-divider class="my-3" />
-            <v-row>
+            <!-- <v-row>
                 <v-col cols="6" sm="9" class="py-1 d-flex justify-start justify-sm-end align-center">
                     <p class="subtitle-2 text-uppercase font-weight-bold mb-0">Sub-total</p>
                 </v-col>
@@ -97,7 +97,7 @@
                     <p class="body-1 mb-0">NUMERO DE ARTICULOS</p>
                     <p class="body-2"><Cubo /> {{totalArticles}}</p>
                 </v-col>
-            </v-row>
+            </v-row> -->
             <v-divider class="my-3" />
         </div>
 

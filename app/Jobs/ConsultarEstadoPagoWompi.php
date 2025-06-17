@@ -22,7 +22,6 @@ class ConsultarEstadoPagoWompi implements ShouldQueue
      */
     public function __construct(int $combinedOrderId)
     {
-        \Log::info("Ejecutando el Job Consultar...");
         $this->combinedOrderId = $combinedOrderId;
     }
 
@@ -31,6 +30,7 @@ class ConsultarEstadoPagoWompi implements ShouldQueue
      */
     public function handle(): void
     {
+        \Log::info("Ejecutando el Job Consultar...");
         $combinedOrder = CombinedOrder::with('orders')->find($this->combinedOrderId);
 
         if (!$combinedOrder) {

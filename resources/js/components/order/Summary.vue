@@ -1,7 +1,7 @@
 <template>
     <div v-if="!is_empty_obj(orderDetails) && orderDetails.orders.length > 0">
         <v-sheet class="" color="white" elevation="0" v-for="(order, i) in orderDetails.orders" :key="i">
-            <!-- <OrderPackage :order-details="order" /> -->
+            <OrderPackage :order-details="order" />
         </v-sheet>
         <v-row>
             <v-col cols="12" md="6">
@@ -115,6 +115,7 @@
 import { mapGetters } from "vuex";
 import Regalo from "../../components/icons/Regalo.vue";
 import OrderPackage from "./OrderPackage.vue";
+import ProductCart from "../../components/global/ProductCart.vue";
 
 export default {
     data(){
@@ -125,7 +126,8 @@ export default {
     },
     components: {
         OrderPackage,
-        Regalo
+        Regalo,
+        ProductCart
     },
     computed: {
         ...mapGetters("app", ["appUrl"])
