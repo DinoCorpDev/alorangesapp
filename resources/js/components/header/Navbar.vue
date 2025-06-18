@@ -103,7 +103,7 @@ export default {
     }
 
     @media (min-width: 600px) {
-        min-height: 98px;
+        min-height: 96px;
     }
 
     .logo-container {
@@ -117,7 +117,13 @@ export default {
     &.v-app-bar--is-scrolled {
         .logo-container {
             @media (min-width: 600px) {
-                padding-top: 0.25rem;
+                padding-top: 0.5rem;
+            }
+
+            &::v-deep {
+                .logo-idovela-large {
+                    height: 40px;
+                }
             }
         }
     }
