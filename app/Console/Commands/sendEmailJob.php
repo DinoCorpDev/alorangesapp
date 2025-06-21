@@ -38,6 +38,6 @@ class sendEmailJob extends Command
      */
     public function handle()
     {
-        sendEmail::dispatch();
+        SendEmail::dispatch();
     }
 }
