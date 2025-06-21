@@ -36,12 +36,8 @@ class SendEmail implements ShouldQueue
                     \Log::warning("CombinedOrder no encontrado para el ID {$order->combined_order_id}");
                     continue;
                 }
-                $user = User::find($combinedOrder->user_id);
-                if (!$user) {
-                    \Log::warning("Usuario no encontrado para CombinedOrder ID {$combinedOrder->id}");
-                    continue;
-                }
                 try {
+                    $user = User::find($combinedOrder->user_id);
                     $emailTest = 'brayantriana22@gmail.com';
                     $emailUser = (new AnonymousNotifiable)->route('mail', $emailTest);
                     Notification::send([$emailUser, $adminEmail],new OrderPlacedNotification($combinedOrder));
