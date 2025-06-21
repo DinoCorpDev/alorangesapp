@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Jobs\sendEmail;
+use App\Jobs\SendEmail;
 
 class sendEmailJob extends Command
 {
