@@ -15,8 +15,6 @@ class ConsultarEstadoPagoWompi implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $combinedOrderId;
-
     /**
      * Create a new job instance.
      */
@@ -30,7 +28,7 @@ class ConsultarEstadoPagoWompi implements ShouldQueue
      */
     public function handle(): void
     {
-        \Log::info("Ejecutando el Job Consultar...");
+        \Log::info("Ejecutando el Job Consultar Wompi...");
         $combinedOrder = CombinedOrder::with('orders')->find($this->combinedOrderId);
 
         if (!$combinedOrder) {

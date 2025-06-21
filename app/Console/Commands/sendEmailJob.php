@@ -38,6 +38,7 @@ class sendEmailJob extends Command
      */
     public function handle()
     {
+        \Log::info("Ejecutando el Job Envio de correos...");
         SendEmail::dispatch();
     }
 }
