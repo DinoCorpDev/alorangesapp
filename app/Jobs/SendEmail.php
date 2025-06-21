@@ -42,7 +42,6 @@ class SendEmail implements ShouldQueue
                     continue;
                 }
                 try {
-                    $user = User::find($combinedOrder->user_id);
                     $emailTest = 'brayantriana22@gmail.com';
                     $emailUser = (new AnonymousNotifiable)->route('mail', $emailTest);
                     Notification::send([$emailUser, $adminEmail],new OrderPlacedNotification($combinedOrder));
