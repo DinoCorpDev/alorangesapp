@@ -44,6 +44,11 @@ class SendEmail implements ShouldQueue
                 continue;
             }
             $user = User::find($combinedOrder->user_id);
+            if (!$user) {
+                Log::warning("❌ Usuario no encontrado para CombinedOrder ID {$combinedOrder->id}");
+                continue;
+            }
+
             $recipients = [
                 $user->email,
                 'ventasonlinealoranges@gmail.com',
