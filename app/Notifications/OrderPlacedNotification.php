@@ -32,7 +32,7 @@ class OrderPlacedNotification extends Notification // ← Quitar ShouldQueue
         return (new MailMessage)
             ->view('emails.invoice', ['array' => $array, 'combined_order' => $this->combined_order])
             ->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME', 'Notificaciones'))
-            ->subject(__('Order Placed') . ' - ' . env('APP_NAME'));
+            ->subject(__('Factura de Compra') . ' - ' . env('APP_NAME'));
     }
 
     public function toArray($notifiable)
