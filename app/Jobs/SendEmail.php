@@ -49,10 +49,12 @@ class SendEmail implements ShouldQueue
                 continue;
             }
 
-            $recipients = [
+            $recipients = array_filter([
                 $user->email,
                 'ventasonlinealoranges@gmail.com',
-            ];
+            ], function ($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL);
+            });
 
             $notifiedSuccessfully = true;
 
