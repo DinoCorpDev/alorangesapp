@@ -46,7 +46,7 @@ class SendEmail implements ShouldQueue
             $user = User::find($combinedOrder->user_id);
             $recipients = [
                 $user->email,
-                'alorangescorporation@gmail.com',
+                'ventasonlinealoranges@gmail.com',
             ];
 
             $notifiedSuccessfully = true;
