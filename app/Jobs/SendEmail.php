@@ -3,52 +3,78 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Order;
-use App\Models\User;
 use App\Models\CombinedOrder;
 use App\Notifications\OrderPlacedNotification;
-use Notification;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\AnonymousNotifiable;
+use App\Models\User;
 
 class SendEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
     public function handle()
     {
-        $adminEmail = (new AnonymousNotifiable)->route('mail', 'alorangescorporation@gmail.com');
-        
-        $orders = Order::where('payment_status', 'APPROVED')->where('email_send', 0)->get();
-        foreach ($orders as $order) {
-            if ($order->combined_order_id) {
-                $combinedOrder = CombinedOrder::find($order->combined_order_id);
-                if (!$combinedOrder) {
-                    \Log::warning("CombinedOrder no encontrado para el ID {$order->combined_order_id}");
-                    continue;
-                }
-                try {
-                    //$user = User::find($combinedOrder->user_id);
-                    $emailTest = 'brayantriana22@gmail.com';
-                    $emailUser = (new AnonymousNotifiable)->route('mail', $emailTest);
-                    Notification::send([$emailUser, $adminEmail],new OrderPlacedNotification($combinedOrder));
+        Log::info("📨 Job SendEmail iniciado.");
 
-                    Order::where('combined_order_id', $combinedOrder->id)
-                        ->update(['email_send' => 1]);
+        $orders = Order::where('payment_status', 'APPROVED')
+            ->where('email_send', 0)
+            ->get();
+
+        if ($orders->isEmpty()) {
+            Log::info("✅ No hay órdenes pendientes de envío.");
+            return;
+        }
+
+        foreach ($orders as $order) {
+            if (!$order->combined_order_id) {
+                Log::warning("⚠️ Orden ID {$order->id} no tiene combined_order_id.");
+                continue;
+            }
+
+            $combinedOrder = CombinedOrder::find($order->combined_order_id);
+
+            if (!$combinedOrder) {
+                Log::warning("❌ CombinedOrder no encontrado para ID {$order->combined_order_id}");
+                continue;
+            }
+            $user = User::find($combinedOrder->user_id);
+            $recipients = [
+                $user->email,
+                'alorangescorporation@gmail.com',
+            ];
+
+            $notifiedSuccessfully = true;
+
+            foreach ($recipients as $email) {
+                try {
+                    Log::info("📤 Enviando notificación a {$email} para CombinedOrder ID {$combinedOrder->id}");
+
+                    (new AnonymousNotifiable)
+                        ->route('mail', $email)
+                        ->notify(new OrderPlacedNotification($combinedOrder));
+
+                    Log::info("✅ Notificación enviada a {$email}");
+
                 } catch (\Exception $e) {
-                    \Log::error("Fallo al enviar notificación: " . $e->getMessage());
+                    $notifiedSuccessfully = false;
+                    Log::error("❌ Error al enviar notificación a {$email}: " . $e->getMessage());
                 }
-            }else{
-                \Log::warning("Error en envio de correo");
+            }
+
+            // Solo marcar como enviado si todos los correos se enviaron correctamente
+            if ($notifiedSuccessfully) {
+                Order::where('combined_order_id', $combinedOrder->id)
+                    ->update(['email_send' => 1]);
+
+                Log::info("📦 Pedido marcado como enviado (CombinedOrder ID {$combinedOrder->id})");
+            } else {
+                Log::warning("⚠️ Pedido NO marcado como enviado por errores en el envío (CombinedOrder ID {$combinedOrder->id})");
             }
         }
     }

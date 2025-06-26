@@ -38,6 +38,7 @@ class DispatchUpdatePayments extends Command
      */
     public function handle()
     {
-        UpdatePaymentStatusJob::dispatch();
+        \Log::info("Ejecutando el Job Actualizacion metodos de pago");
+        UpdatePaymentStatusJob::dispatchSync();
     }
 }
