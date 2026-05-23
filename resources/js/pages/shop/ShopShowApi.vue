@@ -2,12 +2,12 @@
     <v-container class="pt-0" fluid>
         <v-row
             class="banner-principal"
-            style="
-                background-image: url('/public/assets/img/BannerShop.jpg');
-                background-size: cover;
-                background-repeat: no-repeat;
-                margin: 10px 0;
-            "
+            :style="{
+                backgroundImage: `url('${getBannerByCategory}')`,
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                margin: '10px 0'
+            }"
         >
             <v-col cols="6" class="d-flex justify-center align-center">
                 <div>
@@ -129,6 +129,26 @@ export default {
     props: {
         category: { type: String, default: "" }
     },
+    computed:{
+        getBannerByCategory() {
+            switch (this.category) {
+                case "Papeleria":
+                    return "/public/assets/img/banner2home.png";
+                case "Aseo":
+                    return "/public/assets/img/BannerRopa.jpg";
+                case "Cafeteria":
+                    return "/public/assets/img/BannerHogar.jpg";
+                case "Tecnologia":
+                    return "/public/assets/img/BannerHogar.jpg";
+                case "Cartoneria":
+                    return "/public/assets/img/BannerHogar.jpg";
+                case "Seguridad industrial":
+                    return "/public/assets/img/BannerHogar.jpg";
+                default:
+                    return "/public/assets/img/BannerShop.jpg";
+            }
+        }
+    },
     components: {
         CustomInput,
         Carousel,
@@ -138,7 +158,7 @@ export default {
         ProductBox,
         ShopActionCard,
         ContactDialog,
-        CarouselSwiper
+        CarouselSwiper,
     },
     mounted() {
         this.getProducts();

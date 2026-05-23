@@ -4,7 +4,7 @@
             <v-col class="pa-6 pa-sm-8" cols="12" sm="7" md="7">
                 <h1 class="home-main-title mb-8 mb-sm-8">
                     ¡Tu proveedor de suministros de papelería, aseo, cafetería, cartonería, tecnología, seguridad
-                    industrial y mucho mas para tu empresa!
+                    industrial y mucho mas para tu empresassss!
                 </h1>
                 <!-- <h1 class="home-main-title mb-6 mb-sm-8">¡Todo en un solo lugar, rápido, fácil y seguro!</h1> -->
                 <!-- <p class="home-main-description mb-6 d-none d-sm-block">
