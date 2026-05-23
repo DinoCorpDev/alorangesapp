@@ -1,8 +1,10 @@
 <template>
     <div>
+        <TopBar />
         <v-app-bar
             ref="layoutNavbar"
             class="layout-navbar-auth"
+            style="margin-top: 2.5%;"
             :color="$vuetify.theme.dark ? '#000000' : '#FAFCFC'"
             elevation="0"
             prominent
@@ -130,6 +132,7 @@ import LogoAlorange from "./LogoAlorange.vue";
 import SearchInput from "../global/SearchInput.vue";
 import ToggleMenu from "./ToggleMenu.vue";
 import SideMenu from "../user/SideMenu";
+import TopBar from "./TopBar.vue";
 
 export default {
     name: "LayoutNavbarAuth",
@@ -144,7 +147,8 @@ export default {
         SideMenu,
         SearchInput,
         Cart,
-        ToggleMenu
+        ToggleMenu,
+        TopBar
     },
     data() {
         return {

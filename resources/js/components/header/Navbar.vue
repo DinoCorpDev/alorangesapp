@@ -9,8 +9,8 @@
         :fixed="headerFixed"
     >
         <div class="w-100">
-            <TopBar class="d-none d-md-block" />
-            <v-container class="logo-container fill-height justify-space-between" fluid>
+            <TopBar />
+            <v-container class="logo-container fill-height justify-space-between" fluid style="margin-top: 2.5%;">
                 <router-link :to="{ name: 'Home2' }" class="layout-navbar-brand">
                     <LogoAloranges :large="logoLarge" class="d-none d-sm-block" />
                     <!-- <img src="./Logo Aloranges.png" alt="" class="d-block d-sm-none"> -->
