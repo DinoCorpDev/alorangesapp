@@ -16,165 +16,114 @@ use App\Models\CodigoPostal;
 use App\Models\Subscriber;
 use App\Notifications\EmailVerificationNotification;
 use Str;
+use DB;
+use Log;
 
 class AuthController extends Controller
 {
     public function signup(Request $request)
     {
-        $input = json_decode($request->form);
+        DB::beginTransaction();
 
-        if (get_setting('customer_login_with') == 'email') {
-            $user = User::where('email', $input->email)->first();
-        } elseif (get_setting('customer_login_with') == 'phone') {
-            // $user = User::where('phone', $input->phone)->first();
-        } else {
-            $user = User::where('email', $input->email)->first();
-        }
+        try {
 
-        if ($user != null) {
-            return response()->json([
-                'success' => false,
-                'message' => translate('El usuario ya existe.'),
-                'data' => null
-            ]);
-        }
+            $input = json_decode($request->form);
 
-        if (!isset($input->phone) || !isset($input->email)) {
-            return response()->json([
-                'success' => false,
-                'message' => translate('Correo y celular requeridos.'),
-                'data' => null
-            ], 200);
-        }
-
-        $path_docs = public_path() . '/docs/';
-        $path_camara = public_path() . '/camara/';
-        $path_ruts = public_path() . '/ruts/';
-
-        $docfile = '';
-        $camarafile = '';
-        $rutfile = '';
-
-        if ($request->hasFile('filecamara')) {
-            $fileCamara = $request->file('filecamara');
-            $filenameWithExt = $fileCamara->getClientOriginalName();
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-            $extension = $fileCamara->getClientOriginalExtension();
-            $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-            $fileCamara->move($path_camara, $fileNameToStore);
-            $camarafile = $fileNameToStore;
-        }
-
-        if ($request->hasFile('filedocumento')) {
-            $fileDocument = $request->file('filedocumento');
-            $filenameWithExt = $fileDocument->getClientOriginalName();
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-            $extension = $fileDocument->getClientOriginalExtension();
-            $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-            $fileDocument->move($path_docs, $fileNameToStore);
-            $docfile = $fileNameToStore;
-        }
-
-        if ($request->hasFile('filerut')) {
-            $fileRut = $request->file('filerut');
-            $filenameWithExt = $fileRut->getClientOriginalName();
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-            $extension = $fileRut->getClientOriginalExtension();
-            $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-            $fileRut->move($path_ruts, $fileNameToStore);
-            $rutfile = $fileNameToStore;
-        }
-
-        $user = new User([
-            'email' => $input->email,
-            'password' => Hash::make($input->password),
-            'person_type' => $input->personType,
-            'first_name' => $input->firstName,
-            'second_name' => $input->secondName,
-            'first_lastname' => $input->firstLastname,
-            'second_lastname' => $input->secondLastname,
-            'document_type' => $input->documentType,
-            'document_number' => $input->documentNumber,
-            'company_razon' => $input->companyRazon,
-            'company_email' => $input->companyEmail,
-            'company_phone' => $input->companyPhone,
-            'company_actividad' => json_encode($input->companyActividad),
-            'company_type' => $input->companyType,
-            'company_document_type' => $input->companyDocumentType,
-            'company_document_number' => $input->companyDocumentNumber,
-            'documento_file' => $docfile,
-            'camara_file' => $camarafile,
-            'rut_file' => $rutfile,
-            'phone' => $input->phone,
-            'policies_and_cookies_consent' => $input->policiesAndCookiesConsent,
-            'offers_consent' => $input->offersConsent,
-            'verification_code' => rand(100000, 999999),
-            'emailPurchasingPerson' => $input->emailPurchasingPerson,
-            'cellphonePurchasingPerson' => $input->cellphonePurchasingPerson,
-            'phonePurchasingPerson' => $input->phonePurchasingPerson,
-        ]);
-
-        $user->save();
-
-        if ($input->personType == 'Juridical') {
-            $company = new Company([
-                'user_id' => $user->id,
-                'person_type' => $user->person_type,
-                'first_name' => $user->first_name,
-                'second_name' => $user->second_name,
-                'first_lastname' => $user->first_lastname,
-                'second_lastname' => $user->second_lastname,
-                'document_type' => $user->document_type,
-                'document_number' => $user->document_number,
-                'company_razon' => $user->company_razon,
-                'company_email' => $user->company_email,
-                'company_phone' => $user->company_phone,
-                'company_actividad' => json_encode($input->companyActividad),
-                'regimen_fiscal' => json_encode($input->regimenFiscal),
-                'responsabilidad_tribut' => json_encode($input->responsabilidadTribut),
-                'company_type' => $user->company_type,
-                'company_document_type' => $user->company_document_type,
-                'company_document_number' => $user->company_document_number,
-                'documento_file' => $docfile,
-                'camara_file' => $camarafile,
-                'rut_file' => $rutfile,
-            ]);
-            $company->save();
-        }
-
-
-
-        if (isset($input->temp_user_id) && $input->temp_user_id != null) {
-            Cart::where('temp_user_id', $input->temp_user_id)->update(
-                [
-                    'user_id' => $user->id,
-                    'temp_user_id' => null
-                ]
-            );
-        }
-
-        if (get_setting('customer_otp_with') != 'disabled') {
-            if (get_setting('customer_login_with') == 'email' || (get_setting('customer_login_with') == 'email_phone' && get_setting('customer_otp_with') == 'email')) {
-                $user->notify(new EmailVerificationNotification());
+            if (!$input) {
                 return response()->json([
-                    'success' => true,
-                    'user' => $user,
-                    'verified' => false,
-                    'message' => translate('Codigo de Verificación enviado al correo.')
-                ], 200);
-            } else {
-                (new SmsServices)->phoneVerificationSms($user->phone, $user->verification_code);
-                return response()->json([
-                    'success' => true,
-                    'user' => $user,
-                    'verified' => false,
-                    'message' => translate('Codigo de Verificación enviado al celular.')
-                ], 200);
+                    'success' => false,
+                    'message' => 'Formato de datos inválido.',
+                    'data' => null
+                ], 400);
             }
-        }
 
-        $tokenResult = $user->createToken('Personal Access Token');
-        return $this->loginSuccess($tokenResult, $user);
+            if (empty($input->email) || empty($input->phone) || empty($input->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Correo, celular y contraseña son requeridos.',
+                    'data' => null
+                ], 400);
+            }
+
+            $user = User::where('email', $input->email)->first();
+
+            if ($user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => translate('El usuario ya existe.'),
+                    'data' => null
+                ], 409);
+            }
+
+            $path_docs = public_path('/docs/');
+            $path_camara = public_path('/camara/');
+            $path_ruts = public_path('/ruts/');
+
+            $docfile = '';
+            $camarafile = '';
+            $rutfile = '';
+
+            // SUBIDA ARCHIVOS
+            if ($request->hasFile('filecamara')) {
+
+                $fileCamara = $request->file('filecamara');
+
+                if (!$fileCamara->isValid()) {
+                    throw new \Exception('Archivo cámara inválido.');
+                }
+
+                $fileNameToStore = time() . '_' . $fileCamara->getClientOriginalName();
+
+                $fileCamara->move($path_camara, $fileNameToStore);
+
+                $camarafile = $fileNameToStore;
+            }
+
+            // USER
+            $user = new User([
+                'email' => $input->email,
+                'password' => Hash::make($input->password),
+                'phone' => $input->phone,
+                'verification_code' => rand(100000, 999999),
+                'document_number' => $input->documentNumber,
+                'document_type' => $input->documentType,
+                'user_type' => 'customer',
+            ]);
+
+            $user->save();
+
+            // COMPANY
+            if (($input->personType ?? '') == 'Juridical') {
+
+                $company = new Company([
+                    'user_id' => $user->id,
+                    'company_razon' => $input->companyRazon ?? null,
+                ]);
+
+                $company->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario registrado correctamente.',
+                'user' => $user
+            ]);
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            Log::error('Error signup: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error durante el registro.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
     public function login(Request $request)

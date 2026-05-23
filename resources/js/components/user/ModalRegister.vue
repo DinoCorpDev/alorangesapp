@@ -1209,149 +1209,187 @@ export default {
             this.form.filerut = e.target.files[0];
         },
         async omitir() {
-            if (
-                this.form.firstName == "" ||
-                this.form.firstLastname == "" ||
-                this.form.documentType == "" ||
-                this.form.documentNumber == ""
-            ) {
-                this.$v.form.$touch();
-                return;
-            }
-
-            if (this.form.personType == "Juridical") {
+            try{
                 if (
-                    this.form.companyRazon == "" ||
-                    this.form.companyType == "" ||
-                    this.form.companyDocumentNumber == "" ||
-                    this.form.companyActividad == "" ||
-                    this.form.companyPhone == "" ||
-                    this.form.companyEmail == "" || 
-                    this.form.regimenFiscal == "" ||
-                    this.form.responsabilidadTribut == "" 
+                    this.form.firstName == "" ||
+                    this.form.firstLastname == "" ||
+                    this.form.documentType == "" ||
+                    this.form.documentNumber == ""
                 ) {
                     this.$v.form.$touch();
                     return;
                 }
 
-                if (
-                    // this.form.filecamara.length == 0 ||
-                    // this.form.filedocumento.length == 0 ||
-                    this.form.filerut.length == 0
-                ) {
+                if (this.form.personType == "Juridical") {
+                    if (
+                        this.form.companyRazon == "" ||
+                        this.form.companyType == "" ||
+                        this.form.companyDocumentNumber == "" ||
+                        this.form.companyActividad == "" ||
+                        this.form.companyPhone == "" ||
+                        this.form.companyEmail == "" || 
+                        this.form.regimenFiscal == "" ||
+                        this.form.responsabilidadTribut == "" 
+                    ) {
+                        this.$v.form.$touch();
+                        return;
+                    }
+
+                    if (
+                        // this.form.filecamara.length == 0 ||
+                        // this.form.filedocumento.length == 0 ||
+                        this.form.filerut.length == 0
+                    ) {
+                        this.snack({
+                            message: "Por favor cargue los archivos!",
+                            color: "red"
+                        });
+                        return;
+                    }
+                }
+
+                this.form.phone = this.form.phone.replace(/\s/g, "");
+                this.mainAddress.phone = this.form.phone;
+
+                this.loadingregister = true;
+                let formData = new FormData();
+
+                // formData.append("filecamara", this.form.filecamara);
+                // formData.append("filedocumento", this.form.filedocumento);
+                formData.append("filerut", this.form.filerut);
+                formData.append("form", JSON.stringify(this.form));
+
+                const res = await this.call_api("post", "auth/signup", formData, true);
+
+                if (res.data.success) {
+                    this.mainAddress.customer_id = res.data.user.id;
+
                     this.snack({
-                        message: "Por favor cargue los archivos!",
+                        message: res.data.message,
+                        color: "green"
+                    });
+
+                    // await this.saveAddress().then(() => {
+                    //     this.showLoginDialog(false);
+                    //     this.updateChatWindow(false);
+                    // });
+
+                    this.resetData();
+                    this.registerNotification = true;
+                    //this.showRegister = false;
+                } else {
+                    this.snack({
+                        message: res.data.message,
                         color: "red"
                     });
-                    return;
                 }
-            }
 
-            this.form.phone = this.form.phone.replace(/\s/g, "");
-            this.mainAddress.phone = this.form.phone;
+                this.loadingregister = false;
+            } catch (error) {
 
-            this.loadingregister = true;
-            let formData = new FormData();
+                console.error("Error registro:", error);
 
-            // formData.append("filecamara", this.form.filecamara);
-            // formData.append("filedocumento", this.form.filedocumento);
-            formData.append("filerut", this.form.filerut);
-            formData.append("form", JSON.stringify(this.form));
+                let message = "Ocurrió un error al registrar el usuario.";
 
-            const res = await this.call_api("post", "auth/signup", formData, true);
-
-            if (res.data.success) {
-                this.mainAddress.customer_id = res.data.user.id;
+                if (error?.response?.data?.message) {
+                    message = error.response.data.message;
+                }
 
                 this.snack({
-                    message: res.data.message,
-                    color: "green"
-                });
-
-                // await this.saveAddress().then(() => {
-                //     this.showLoginDialog(false);
-                //     this.updateChatWindow(false);
-                // });
-
-                this.resetData();
-                this.registerNotification = true;
-                //this.showRegister = false;
-            } else {
-                this.snack({
-                    message: res.data.message,
+                    message,
                     color: "red"
                 });
-            }
 
-            this.loadingregister = false;
+            } finally {
+                this.loadingregister = false;
+            }
         },
         async register() {
-            this.$v.form.$touch();
-            this.$v.mainAddress.$touch();
+            try{
+                this.$v.form.$touch();
+                this.$v.mainAddress.$touch();
 
-            /*if (this.form.invalidPhone) {
-                this.form.showInvalidPhone = true;
-                return;
-            }*/
+                /*if (this.form.invalidPhone) {
+                    this.form.showInvalidPhone = true;
+                    return;
+                }*/
 
-            if (this.$v.form.$anyError || this.$v.mainAddress.$anyError) {
-                console.log(this.$v.form);
-                console.log(this.$v.mainAddress.$anyError);
-                console.log('pasa por aqui');
-                return;
-            }
-
-            if (this.form.personType == "Juridical") {
-                if (
-                    // this.form.filecamara.length == 0 ||
-                    // this.form.filedocumento.length == 0 ||
-                    this.form.filerut.length == 0
-                ) {
-                    this.snack({
-                        message: "Por favor cargue los archivos!",
-                        color: "red"
-                    });
+                if (this.$v.form.$anyError || this.$v.mainAddress.$anyError) {
+                    console.log(this.$v.form);
+                    console.log(this.$v.mainAddress.$anyError);
+                    console.log('pasa por aqui');
                     return;
                 }
-            }
 
-            this.form.phone = this.form.phone.replace(/\s/g, "");
-            this.mainAddress.phone = this.form.phone;
+                if (this.form.personType == "Juridical") {
+                    if (
+                        // this.form.filecamara.length == 0 ||
+                        // this.form.filedocumento.length == 0 ||
+                        this.form.filerut.length == 0
+                    ) {
+                        this.snack({
+                            message: "Por favor cargue los archivos!",
+                            color: "red"
+                        });
+                        return;
+                    }
+                }
 
-            this.loadingregister = true;
-            let formData = new FormData();
+                this.form.phone = this.form.phone.replace(/\s/g, "");
+                this.mainAddress.phone = this.form.phone;
 
-            //formData.append("filecamara", this.form.filecamara);
-            //formData.append("filedocumento", this.form.filedocumento);
-            formData.append("filerut", this.form.filerut);
-            formData.append("form", JSON.stringify(this.form));
+                this.loadingregister = true;
+                let formData = new FormData();
 
-            const res = await this.call_api("post", "auth/signup", formData, true);
+                //formData.append("filecamara", this.form.filecamara);
+                //formData.append("filedocumento", this.form.filedocumento);
+                formData.append("filerut", this.form.filerut);
+                formData.append("form", JSON.stringify(this.form));
 
-            if (res.data.success) {
-                this.mainAddress.customer_id = res.data.user.id;
+                const res = await this.call_api("post", "auth/signup", formData, true);
+
+                if (res.data.success) {
+                    this.mainAddress.customer_id = res.data.user.id;
+
+                    this.snack({
+                        message: res.data.message,
+                        color: "green"
+                    });
+
+                    await this.saveAddress().then(() => {
+                        this.showLoginDialog(false);
+                        this.updateChatWindow(false);
+                    });
+
+                    this.resetData();
+                    this.registerNotification = true;
+                    //this.showRegister = false;
+                } else {
+                    this.snack({
+                        message: res.data.message,
+                        color: "red"
+                    });
+                }
+
+                this.loadingregister = false;
+            } catch (error) {
+
+                console.error("Error registro:", error);
+
+                let message = "Ocurrió un error al registrar el usuario.";
+
+                if (error?.response?.data?.message) {
+                    message = error.response.data.message;
+                }
 
                 this.snack({
-                    message: res.data.message,
-                    color: "green"
-                });
-
-                await this.saveAddress().then(() => {
-                     this.showLoginDialog(false);
-                     this.updateChatWindow(false);
-                });
-
-                this.resetData();
-                this.registerNotification = true;
-                //this.showRegister = false;
-            } else {
-                this.snack({
-                    message: res.data.message,
+                    message,
                     color: "red"
                 });
-            }
 
-            this.loadingregister = false;
+            } finally {
+                this.loadingregister = false;
+            }
         },
         async fetchCountries() {
             if (!this.countriesLoaded) {
