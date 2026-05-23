@@ -493,7 +493,7 @@ class OrderController extends Controller
         $combined_order->grand_total = $grand_total;
         $combined_order->save();
 
-        $adminEmail = (new AnonymousNotifiable)->route('mail', 'alorangescorporation@gmail.com');
+        $adminEmail = (new AnonymousNotifiable)->route('mail', 'ventasonlinealoranges@gmail.com');
         //Invioce mail send to the customer and seller
         try {
             Notification::send([$user, $adminEmail],new OrderPlacedNotification($combined_order));
