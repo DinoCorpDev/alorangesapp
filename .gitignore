@@ -12,7 +12,7 @@ yarn-error.log
 /.idea
 /composer.phar
 package-lock.json
-
+public/*
 public/web-assets/js
 /public/mix-manifest.json
 public/web-assets/css
