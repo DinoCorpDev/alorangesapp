@@ -77,6 +77,10 @@ Route::get('/demo/cron_2', [DemoController::class, 'cron_2']);
 Route::get('/insert_translation_keys', [DemoController::class, 'insert_trasnalation_keys']);
 Route::get('/customer-products/admin', [SettingController::class, 'initSetting']);
 
+// Explicit login routes to ensure /login uses the local LoginController implementation
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+
 Auth::routes(['register' => false]);
 Route::get('/logout', [LoginController::class, 'logout']);
 

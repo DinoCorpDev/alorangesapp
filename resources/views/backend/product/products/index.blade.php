@@ -65,6 +65,34 @@
         </div>
     </div>
 
+    <style>
+        /* Table improvements for admin product list */
+        .aiz-table.table {
+            border-collapse: collapse;
+        }
+        .aiz-table th, .aiz-table td {
+            padding: 0.75rem 0.9rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .aiz-table td .product-title {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+        }
+        .aiz-table.table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9fbfc;
+        }
+        .product-thumb {
+            width: 60px;
+            height: auto;
+            object-fit: cover;
+        }
+        @media (max-width: 768px) {
+            .aiz-table th, .aiz-table td { white-space: normal; }
+        }
+    </style>
+
     <div class="card">
         <form
             class=""
@@ -74,7 +102,6 @@
         >
             <div class="card-header row gutters-5">
                 <div class="col text-center text-md-left">
-                    <h5 class="mb-md-0 h6">{{ translate('All Products') }}</h5>
                 </div>
                 <div class="col-md-2 ml-auto">
                     <select
@@ -137,7 +164,8 @@
             </div>
         </form>
         <div class="card-body">
-            <table class="table aiz-table mb-0">
+            <div class="table-responsive">
+            <table class="table aiz-table mb-0 table-striped table-hover table-bordered">
                 <thead>
                     <tr>
                         <th class="w-40px">#</th>
@@ -147,8 +175,7 @@
                             data-breakpoints="md"
                             width="20%"
                         >{{ translate('Categories') }}</th>
-                        <th data-breakpoints="md">{{ translate('Brand') }}</th>
-                        <th data-breakpoints="md">{{ translate('Published') }}</th>
+                        
                         <th
                             data-breakpoints="md"
                             class="text-right"
@@ -159,33 +186,25 @@
                     @foreach ($products as $key => $product)
                         <tr>
                             <td>{{ $key + 1 + ($products->currentPage() - 1) * $products->perPage() }}</td>
-                            <td>
-                                <a
-                                    href="{{ route('product', $product->slug) }}"
-                                    target="_blank"
-                                    class="text-reset d-block"
-                                >
-                                    <div class="d-flex align-items-center">
-                                        <img
-                                            src="{{ uploaded_asset($product->thumbnail_img) }}"
-                                            alt="Image"
-                                            class="size-60px size-xxl-80px mr-2"
-                                            onerror="this.onerror=null;this.src='{{ static_asset('/assets/img/placeholder.jpg') }}';"
-                                        />
-                                        <span class="flex-grow-1 minw-0">
-                                            <div class=" text-truncate-2 fs-12">
-                                                {{ $product->getTranslation('name') }}</div>
-                                        </span>
-                                    </div>
-                                </a>
+                            <td>            
+                                <div class="d-flex align-items-center">
+                                    <img
+                                        src="{{ $product->thumbnail_img }}"
+                                        alt="Image"
+                                        class="size-60px size-xxl-80px mr-2"
+                                        onerror="this.onerror=null;this.src='{{ static_asset('/assets/img/placeholder.jpg') }}';"
+                                    />
+                                    <span class="flex-grow-1 minw-0">
+                                        <div class=" text-truncate-2 fs-12">
+                                            {{ $product->getTranslation('name') }}</div>
+                                    </span>
+                                </div>
                             </td>
                             <td>
                                 <div>
                                     <div><span>{{ translate('Rating') }}</span>: <span
                                             class="rating rating-sm my-2">{{ renderStarRating($product->rating) }}</span>
                                     </div>
-                                    <div><span>{{ translate('Total Sold') }}</span>: <span
-                                            class="fw-600">{{ $product->num_of_sale }}</span></div>
                                     <div>
                                         <span>{{ translate('Price') }}</span>:
                                         @if ($product->highest_price != $product->lowest_price)
@@ -200,34 +219,10 @@
                             <td>
                                 @foreach ($product->categories as $category)
                                     <span
-                                        class="badge badge-inline badge-md bg-soft-dark mb-1">{{ $category->getTranslation('name') }}</span>
+                                        class="badge badge-inline badge-md bg-soft-dark mb-1">{{ $category->name }}</span>
                                 @endforeach
-                            </td>
-                            <td>
-                                @if ($product->brand)
-                                    <div class="h-50px w-100px d-flex align-items-center justify-content-center">
-                                        <img
-                                            src="{{ uploaded_asset($product->brand->logo) }}"
-                                            alt="{{ translate('Brand') }}"
-                                            class="mw-100 mh-100"
-                                            onerror="this.onerror=null;this.src='{{ static_asset('/assets/img/placeholder.jpg') }}';"
-                                        />
-                                    </div>
-                                @else
-                                    <span>{{ translate('No brand') }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input
-                                        onchange="update_published(this)"
-                                        value="{{ $product->id }}"
-                                        type="checkbox"
-                                        @if ($product->published == 1) checked @endif
-                                    >
-                                    <span class="slider round"></span>
-                                </label>
-                            </td>
+                            </td>                            
+                            
                             <td class="text-right">
                                 @can('view_products')
                                     <a
@@ -271,6 +266,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
             <div class="aiz-pagination">
                 {{ $products->appends(request()->input())->links() }}
             </div>

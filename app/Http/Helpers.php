@@ -56,23 +56,25 @@ if (!function_exists('convert_to_usd')) {
 if (!function_exists('format_price')) {
     function format_price($price, $show_tag = false)
     {
+        // Force no decimals (remove cents)
+        $decimals = 0;
 
         if (get_setting('decimal_separator') == 1) {
-            $fomated_price = number_format($price, get_setting('no_of_decimals'));
+            $fomated_price = number_format($price, $decimals);
         } else {
-            $fomated_price = number_format($price, get_setting('no_of_decimals'), ',', ' ');
+            $fomated_price = number_format($price, $decimals, ',', ' ');
         }
 
         if ($show_tag) {
             if ($price < 1000000) {
                 // Anything less than a million
-                $fomated_price = number_format($price, get_setting('no_of_decimals'));
+                $fomated_price = number_format($price, $decimals);
             } else if ($price < 1000000000) {
                 // Anything less than a billion
-                $fomated_price = number_format($price / 1000000, get_setting('no_of_decimals')) . 'M';
+                $fomated_price = number_format($price / 1000000, $decimals) . 'M';
             } else {
                 // At least a billion
-                $fomated_price = number_format($price / 1000000000, get_setting('no_of_decimals')) . 'B';
+                $fomated_price = number_format($price / 1000000000, $decimals) . 'B';
             }
         }
 

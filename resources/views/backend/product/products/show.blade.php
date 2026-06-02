@@ -92,8 +92,18 @@
                         <span class="mr-2 ml-0">{{ translate('Category') }}:</span>
                         <span class="text-right">
                             @foreach ($product->categories as $category)
-                                <span
-                                    class="badge badge-inline badge-md bg-soft-dark mb-1">{{ $category->getTranslation('name') }}</span>
+                                @php
+                                    $ancestors = [];
+                                    $curr = $category;
+                                    while ($curr) {
+                                        $ancestors[] = $curr->getTranslation('name');
+                                        $curr = $curr->parentCategory;
+                                    }
+                                    $ancestors = array_reverse($ancestors);
+                                    $path = implode(' > ', $ancestors);
+                                    $prodCount = $category->product_categories()->count();
+                                @endphp
+                                <span class="badge badge-inline badge-md bg-soft-dark mb-1">{{ $path }} <small class="text-muted">({{ $prodCount }})</small></span>
                             @endforeach
                         </span>
                     </div>

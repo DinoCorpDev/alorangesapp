@@ -3,7 +3,7 @@
         <Navbar v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
         <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" @toggleMenu="toggleMenu" />
 
-        <v-main class="aiz-main-wrap">
+        <v-main class="aiz-main-wrap" :style="{ marginTop: $route.meta.hasHeader ? '160px' : '0px' }">
             <Breadcrumb />
             <v-navigation-drawer v-model="userNavDrawerActive" fixed temporary right style="z-index: 999">
                 <SideMenu class="pa-3" />
