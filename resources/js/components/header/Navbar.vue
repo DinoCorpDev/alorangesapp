@@ -10,7 +10,7 @@
     >
         <div class="w-100">
             <TopBar />
-            <v-container class="logo-container fill-height justify-space-between" fluid style="margin-top: 2.5%;">
+            <v-container class="logo-container fill-height justify-space-between" fluid>
                 <router-link :to="{ name: 'Home2' }" class="layout-navbar-brand">
                     <LogoAloranges :large="logoLarge" class="d-none d-sm-block" />
                     <!-- <img src="./Logo Aloranges.png" alt="" class="d-block d-sm-none"> -->
@@ -95,6 +95,7 @@ export default {
 .layout-navbar {
     min-height: 60px;
     z-index: 10;
+    margin-top: 64px !important;
     background-color: white !important;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 4px 6px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
 

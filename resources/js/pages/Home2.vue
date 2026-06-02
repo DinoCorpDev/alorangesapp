@@ -4,7 +4,7 @@
             <v-col class="pa-6 pa-sm-8" cols="12" sm="7" md="7">
                 <h1 class="home-main-title mb-8 mb-sm-8">
                     ¡Tu proveedor de suministros de papelería, aseo, cafetería, cartonería, tecnología, seguridad
-                    industrial y mucho mas para tu empresassss!
+                    industrial y mucho mas para tu empresas!
                 </h1>
                 <!-- <h1 class="home-main-title mb-6 mb-sm-8">¡Todo en un solo lugar, rápido, fácil y seguro!</h1> -->
                 <!-- <p class="home-main-description mb-6 d-none d-sm-block">
@@ -15,7 +15,7 @@
                 <SearchInput class="search-menu" :showInput="true" :placeholder="'Escribe lo que buscas'" />
             </v-col>
             <v-col class="pa-0 d-flex" cols="12" sm="5" md="5">
-                <img src="/public/assets/img/bannerhomeimg-removebg-preview3.png" style="width: 100%; height: auto" />
+                <img class="hero-banner-img" src="/public/assets/img/bannerhomeimg-removebg-preview3.png" style="height: auto" />
             </v-col>
         </v-row>
 
@@ -29,7 +29,7 @@
                                     $vuetify.breakpoint.name == 'md' || $vuetify.breakpoint.name == 'lg' ? false : true
                                 "
                             >
-                                <v-col class="center-flex" cols="3">
+                                <v-col class="center-flex" cols="6" sm="3">
                                     <v-img
                                         src="/public/assets/img/Group13.png"
                                         style="width: 60%; height: auto"
@@ -39,7 +39,7 @@
                                     <h3 style="text-align: center">Domicilios gratis</h3>
                                     <p class="preambulo-text" style="text-align: center">En compras mínimas</p>
                                 </v-col>
-                                <v-col class="center-flex" cols="3">
+                                <v-col class="center-flex" cols="6" sm="3">
                                     <v-img
                                         src="/public/assets/img/Group14.png"
                                         style="width: 40%; height: auto"
@@ -49,7 +49,7 @@
                                     <h3>Apoyo 24/7</h3>
                                     <p class="preambulo-text">Servicio técnico</p>
                                 </v-col>
-                                <v-col class="center-flex" cols="3">
+                                <v-col class="center-flex" cols="6" sm="3">
                                     <v-img
                                         src="/public/assets/img/Group12.png"
                                         style="width: 40%; height: auto"
@@ -59,7 +59,7 @@
                                     <h3>Pago seguro</h3>
                                     <p class="preambulo-text">Múltiples bancos</p>
                                 </v-col>
-                                <v-col class="center-flex" cols="3">
+                                <v-col class="center-flex" cols="6" sm="3">
                                     <v-img
                                         src="/public/assets/img/Refresh.png"
                                         style="width: 40%; height: auto"
@@ -340,14 +340,23 @@ export default {
 
 <style lang="scss">
 .search-menu {
-    @media (max-width: 700px) {
-        max-width: 100% !important;
-    }
+    width: 100%;
+    max-width: 100% !important;
+}
+.main {
+    padding: 24px 0;
+}
 
-    @media (min-width: 700px) {
-        max-width: 90% !important;
+@media (max-width: 700px) {
+    .main {
+        padding: 16px 8px;
+    }
+    .main .pa-6 {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
     }
 }
+
 .center-items {
     display: flex;
     flex-direction: column;
@@ -355,19 +364,29 @@ export default {
     align-items: center;
 }
 .wrapper-app-banner {
-    // background-image: url("/public/assets/img/bg10400.png");
+    padding: 24px 0;
+    width: 100%;
     background-position: center;
     background-size: contain;
     display: flex;
     flex-direction: row;
     align-items: center;
 }
+.hero-banner-img {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+}
 .imgsize-cel {
-    width: 75%;
+    width: 95%;
+    max-width: 420px;
     height: auto;
 }
 .imgsize-btn-dwn {
-    width: 200px;
+    width: 100%;
+    max-width: 220px;
     height: auto;
 }
 .title-banner-dwn {
@@ -383,19 +402,24 @@ export default {
             color: black;
             font-weight: 400;
             font-size: 18px;
-            line-height: 22px;
+            line-height: 24px;
+            text-align: center;
             @media (min-width: 600px) {
-                font-size: 31px;
-                line-height: 37px;
+                font-size: 28px;
+                line-height: 34px;
+                text-align: left;
             }
         }
         &-title {
-            font-size: 30px;
-            line-height: 36px;
+            font-size: 46px;
+            line-height: 54px;
             font-weight: 600;
+            text-align: center;
+            max-width: 100%;
             @media (min-width: 600px) {
-                line-height: 57px;
-                font-size: 53px;
+                line-height: 62px;
+                font-size: 58px;
+                text-align: left;
             }
         }
         &-carousel {
@@ -433,23 +457,55 @@ export default {
     padding: 0 15%;
 }
 h3 {
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
+    text-align: center;
     @media (min-width: 600px) {
         font-size: 35px;
         font-weight: 500;
+        text-align: left;
     }
 }
 .preambulo-text {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 400;
+    text-align: center;
     @media (min-width: 600px) {
-        font-size: 25px;
+        font-size: 22px;
+        text-align: left;
     }
 }
 .theme--dark {
     .preambulo .rounded-section {
         background-color: #18191a;
+    }
+}
+
+.imgsize-cel {
+    width: 95%;
+    max-width: 400px;
+    height: auto;
+}
+
+.Wrapper-AppStore {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.Wrapper-AppStore-responsive {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.banner-title {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    @media (min-width: 600px) {
+        font-size: 58px;
+        text-align: left;
     }
 }
 

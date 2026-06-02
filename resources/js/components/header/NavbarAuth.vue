@@ -4,7 +4,6 @@
         <v-app-bar
             ref="layoutNavbar"
             class="layout-navbar-auth"
-            style="margin-top: 2.5%;"
             :color="$vuetify.theme.dark ? '#000000' : '#FAFCFC'"
             elevation="0"
             prominent
@@ -241,6 +240,7 @@ export default {
 .layout-navbar-auth {
     min-height: 60px;
     z-index: 10;
+    margin-top: 64px !important;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 4px 6px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
     @media (max-width: 960px) {
         max-height: 60px;

@@ -17,9 +17,9 @@
             </v-btn>
         </div>
         <v-container class="fs-13 py-0 px-0 px-md-3 mr-2">
-            <v-row align="center" class="my-0 d-none d-md-flex">
-                <v-col cols="6" class="py-2">
-                    <div class="d-flex align-center">
+            <v-row align="center" class="my-0 d-flex flex-column flex-md-row">
+                <v-col cols="12" md="6" class="py-2">
+                    <div class="d-flex align-center flex-wrap d-none d-md-flex">
                         <!-- language switcher -->
                         <v-menu
                             v-if="data.show_language_switcher == 'on' && allLanguages.length > 1"
@@ -110,8 +110,8 @@
                         </template>
                     </div>
                 </v-col>
-                <v-col cols="6" class="py-2">
-                    <div class="d-flex align-center justify-end">
+                <v-col cols="12" md="6" class="py-2">
+                    <div class="d-flex align-center justify-end flex-wrap topbar-contact">
                         <!-- <router-link :to="{ name: 'TrackOrder' }" class="text-reset opacity-60">
                             {{ $t("track_order") }}
                         </router-link> -->
@@ -219,12 +219,63 @@ export default {
 
 <style scoped>
 .topbar {
-    position: fixed;
+    position: fixed !important;
     top: 0;
     left: 0;
+    right: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: 1100;
+    min-height: 64px;
+    height: 64px;
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.topbar .v-container {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 100%;
+}
+.topbar .v-row {
+    justify-content: space-between;
+    height: 100%;
+    align-items: center;
+}
+.topbar .v-row > .v-col {
+    min-width: 0;
+}
+.topbar .v-divider {
+    border-color: rgba(0, 0, 0, 0.08);
+}
+@media (max-width: 960px) {
+    .topbar {
+        min-height: 64px;
+        height: 64px;
+    }
+    .topbar .v-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+    .topbar .v-col {
+        flex: 0 0 auto;
+        min-width: auto;
+        width: auto;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+    .topbar .topbar-contact {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: 0.75rem;
+    }
+    .topbar .v-divider {
+        display: none;
+    }
+    .topbar a,
+    .topbar span,
+    .topbar i {
+        font-size: 12px;
+    }
 }
 </style>
