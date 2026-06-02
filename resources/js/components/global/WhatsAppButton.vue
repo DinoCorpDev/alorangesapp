@@ -155,94 +155,76 @@ export default {
 .float {
   position: fixed;
   background-size: contain;
-  width: 58px;
-  height: 58px;
-  bottom: 15px;
-  background-repeat: no-repeat;
-  right: 40px;
-  background-image: url('/public/images/WhatsappIcon.png');
-  border-radius: 50px;
-  text-align: center;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
-  z-index: 10000;
-}
+    width: 68px;
+    height: 68px;
+    bottom: 15px;
+    background-repeat: no-repeat;
+    right: 40px;
+    background-image: url('/public/images/WhatsappIcon.png');
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    z-index: 10000;
+  }
 
-.float-message {
-  position: fixed;
-  background-size: cover;
-  width: 165px;
-  height: 43px;
-  bottom: 22px;
-  background-color: #fff;
-  background-repeat: no-repeat;
-  right: 109px;
-  border-radius: 5px;
-  text-align: left;
-  box-shadow: rgb(0 0 0 / 25%) 0px 14px 28px, rgb(0 0 0 / 22%) 0px 10px 10px;
-  z-index: 10000;
-  padding: 10px 19px;
-}
+  .float-message {
+    position: fixed;
+    background-size: cover;
+    width: 195px;
+    height: 51px;
+    bottom: 22px;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    right: 109px;
+    border-radius: 5px;
+    text-align: left;
+    box-shadow: rgb(0 0 0 / 25%) 0px 14px 28px, rgb(0 0 0 / 22%) 0px 10px 10px;
+    z-index: 10000;
+    padding: 12px 19px;
+    font-size: 18px;
+    line-height: 1.3;
+  }
 
-.float-message:focus {
-  position: fixed;
-  background-size: contain;
-  width: 62px;
-  height: 62px;
-  bottom: 35px;
-  background-repeat: no-repeat;
-  right: 40px;
-  border-radius: 50px;
-  text-align: center;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
-  z-index: 10000;
-}
+  .float-message:focus {
+    position: fixed;
+    background-size: contain;
+    width: 74px;
+    height: 74px;
+    bottom: 35px;
+    background-repeat: no-repeat;
+    right: 40px;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    z-index: 10000;
+  }
 
-.float:focus {
-  position: fixed;
-  background-size: contain;
-  width: 62px;
-  height: 62px;
-  bottom: 35px;
-  background-repeat: no-repeat;
-  right: 40px;
-  background-image: url('/public/images/WhatsappIcon.png');
-  border-radius: 50px;
-  text-align: center;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
-  z-index: 10000;
-}
-
-.response {
-  position: fixed;
-  width: 25%;
-  height: 145px;
-  bottom: 115px;
-  right: 40px;
-  background-color: #fff;
-  color: #000;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 13px;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
-  z-index: 10000;
-}
+  .float:focus {
+    position: fixed;
+    background-size: contain;
+    width: 74px;
+    height: 74px;
+    background-image: url('/public/images/WhatsappIcon.png');
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    z-index: 10000;
+  }
 
 .modal-whats {
   background-size: contain;
-  width: 32px;
-  height: 32px;
-  background-repeat: no-repeat;
-  background-image: url('/public/images/WhatsappIcon.png');
-}
+    width: 42px;
+    height: 42px;
+    background-repeat: no-repeat;
+    background-image: url('/public/images/WhatsappIcon.png');
+  }
 
-.header-logo {
-  background-size: contain;
-  margin: auto;
-  display: block;
-  width: 100px;
-  height: 50px;
-  background-repeat: no-repeat;
-  background-image: url('/public/images/AlorangesWhite2.png');
+  .header-logo {
+    background-size: contain;
+    margin: auto;
+    display: block;
+    width: 130px;
+    height: 65px;
 }
 
 .btn-close {

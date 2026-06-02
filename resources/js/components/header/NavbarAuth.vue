@@ -9,7 +9,7 @@
             prominent
             dense
             shrink-on-scroll
-            :fixed="headerFixed"
+            fixed
         >
             <v-container class="pa-0 fill-height d-flex justify-space-between" fluid>
                 <router-link :to="{ name: 'Home2' }" class="layout-navbar-auth-brand">
@@ -151,7 +151,6 @@ export default {
     },
     data() {
         return {
-            headerFixed: false,
             logoLarge: false,
             scrollThreshold: 70,
             dialogResposive: false,
@@ -174,7 +173,6 @@ export default {
             const currentScroll = this.$refs.layoutNavbar.currentScroll;
             const windowWidth = window.innerWidth;
 
-            this.headerFixed = currentScroll >= this.scrollThreshold;
             this.logoLarge = windowWidth < 960 ? false : currentScroll >= this.scrollThreshold / 2;
         },
         async logout() {
@@ -238,9 +236,13 @@ export default {
     align-items: center;
 }
 .layout-navbar-auth {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    width: 100%;
     min-height: 60px;
     z-index: 10;
-    margin-top: 64px !important;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 4px 6px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
     @media (max-width: 960px) {
         max-height: 60px;

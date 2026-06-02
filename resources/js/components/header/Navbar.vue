@@ -1,16 +1,17 @@
 <template>
-    <v-app-bar
-        ref="layoutNavbar"
-        class="layout-navbar"
-        :color="$vuetify.theme.dark ? '#000000' : '#FAFCFC'"
-        elevation="0"
-        prominent
-        shrink-on-scroll
-        :fixed="headerFixed"
-    >
-        <div class="w-100">
-            <TopBar />
-            <v-container class="logo-container fill-height justify-space-between" fluid>
+    <div>
+        <TopBar />
+        <v-app-bar
+            ref="layoutNavbar"
+            class="layout-navbar"
+            :color="$vuetify.theme.dark ? '#000000' : '#FAFCFC'"
+            elevation="0"
+            prominent
+            shrink-on-scroll
+            fixed
+        >
+            <div class="w-100">
+                <v-container class="logo-container fill-height justify-space-between" fluid>
                 <router-link :to="{ name: 'Home2' }" class="layout-navbar-brand">
                     <LogoAloranges :large="logoLarge" class="d-none d-sm-block" />
                     <!-- <img src="./Logo Aloranges.png" alt="" class="d-block d-sm-none"> -->
@@ -34,8 +35,9 @@
                     </div>
                 </div>
             </v-container>
-        </div>
-    </v-app-bar>
+            </div>
+        </v-app-bar>
+    </div>
 </template>
 
 <script>
@@ -62,7 +64,6 @@ export default {
     },
     data() {
         return {
-            headerFixed: false,
             logoLarge: false,
             scrollThreshold: 10
         };
@@ -80,8 +81,7 @@ export default {
             const currentScroll = this.$refs.layoutNavbar.currentScroll;
             const windowWidth = window.innerWidth;
 
-            this.headerFixed = currentScroll >= this.scrollThreshold;
-            this.logoLarge = windowWidth < 960 ? false : this.headerFixed;
+            this.logoLarge = windowWidth < 960 ? false : currentScroll >= this.scrollThreshold;
         }
     }
 };
@@ -93,12 +93,15 @@ export default {
 }
 
 .layout-navbar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    width: 100%;
     min-height: 60px;
     z-index: 10;
-    margin-top: 64px !important;
     background-color: white !important;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 4px 6px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
-
     @media (max-width: 600px) {
         max-height: 60px;
     }

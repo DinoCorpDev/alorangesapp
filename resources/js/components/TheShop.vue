@@ -117,4 +117,14 @@ export default {
     background: #fff;
     z-index: 10000;
 }
+
+.v-main.aiz-main-wrap {
+    padding-top: 160px;
+}
+
+@media (max-width: 960px) {
+    .v-main.aiz-main-wrap {
+        padding-top: 124px;
+    }
+}
 </style>
