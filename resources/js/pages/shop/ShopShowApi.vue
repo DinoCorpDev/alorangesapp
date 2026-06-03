@@ -162,7 +162,6 @@ export default {
         CarouselSwiper,
     },
     mounted() {
-        console.log(this.category);
         this.getProducts();
         this.updateBreadcrumb();
     },
