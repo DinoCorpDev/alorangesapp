@@ -72,7 +72,7 @@
                             </td>
                             {{-- <td>
                             <span class="avatar avatar-square avatar-xs">
-                                <img src="{{ uploaded_asset($category->icon) }}" alt="{{translate('icon')}}">
+                                <img src="{{ uploaded_asset($category->banner) }}" alt="{{translate('Image')}}">
                             </span>
                         </td> --}}
                             <td>

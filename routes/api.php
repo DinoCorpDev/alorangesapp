@@ -68,6 +68,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
 
     Route::get('all-categories', [CategoryController::class, 'index']);
     Route::get('categories/first-level', [CategoryController::class, 'first_level_categories']);
+    Route::get('category/by-name/{name}', [CategoryController::class, 'get_category_by_name']);
     Route::get('all-brands', [BrandController::class, 'index']);
     Route::get('all-offers', [OfferController::class, 'index']);
     Route::get('offer/{slug}', [OfferController::class, 'show']);

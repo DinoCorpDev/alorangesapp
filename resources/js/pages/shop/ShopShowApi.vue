@@ -3,7 +3,7 @@
         <v-row
             class="banner-principal"
             :style="{
-                backgroundImage: `url('${getBannerByCategory}')`,
+                backgroundImage: `url(${banner || getBannerByCategory})`,
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 margin: '10px 0'
@@ -127,7 +127,8 @@ export default {
         isList:false,
     }),
     props: {
-        category: { type: String, default: "" }
+        category: { type: String, default: "" },
+        banner: { type: String, default: "" }
     },
     computed:{
         getBannerByCategory() {
@@ -137,13 +138,13 @@ export default {
                 case "Aseo":
                     return "/public/assets/img/BannerRopa.jpg";
                 case "Cafeteria":
-                    return "/public/assets/img/BannerHogar.jpg";
+                    return "/public/assets/img/banner2home.jpg";
                 case "Tecnologia":
-                    return "/public/assets/img/BannerHogar.jpg";
+                    return "/public/assets/img/banner2home.jpg";
                 case "Cartoneria":
-                    return "/public/assets/img/BannerHogar.jpg";
+                    return "/public/assets/img/banner2home.jpg";
                 case "Seguridad industrial":
-                    return "/public/assets/img/BannerHogar.jpg";
+                    return "/public/assets/img/banner2home.jpg";
                 default:
                     return "/public/assets/img/BannerShop.jpg";
             }
@@ -161,6 +162,7 @@ export default {
         CarouselSwiper,
     },
     mounted() {
+        console.log(this.category);
         this.getProducts();
         this.updateBreadcrumb();
     },

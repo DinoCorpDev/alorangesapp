@@ -24,4 +24,9 @@ class CategoryController extends Controller
     {
         return new CategoryCollection(Category::where('level', 0)->get());
     }
+
+    public function get_category_by_name($name)
+    {
+        return new CategoryCollection(Category::where('name', $name)->get());
+    }
 }

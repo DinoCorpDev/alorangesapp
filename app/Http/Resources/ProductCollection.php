@@ -14,6 +14,8 @@ class ProductCollection extends ResourceCollection
                     'id' => (int) $data->id,
                     'name' => $data->name,
                     'slug' => $data->slug,
+                    'lowest_price' => (int) $data->lowest_price,
+                    'highest_price' => (int) $data->highest_price,
                     'thumbnail_image' => $data->thumbnail_img,
                     'base_price' => (float) product_base_price($data),
                     'base_discounted_price' => (float) product_discounted_base_price($data),

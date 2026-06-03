@@ -92,7 +92,7 @@ Route::get('/collection/{slug}', [HomeController::class, 'index'])->name('collec
 Route::get('/blog-details/{slug}', [HomeController::class, 'index'])->name('blog.details');
 
 //Address
-Route::resource('addresses', AddressController::class);
+Route::resource('addresses', AddressController::class)->except(['update', 'destroy']);
 Route::controller(AddressController::class)->group(function () {
     Route::post('/get-states', 'getStates')->name('get-state');
     Route::post('/get-cities', 'getCities')->name('get-city');

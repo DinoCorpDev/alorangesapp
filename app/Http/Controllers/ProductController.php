@@ -159,7 +159,12 @@ class ProductController extends Controller
             $product->earn_point = $request->earn_point;
         }
 
-        // shipping info
+        // Product essential information
+        $product->reference                 = $request->reference;
+        $product->currency                  = $request->currency ?? null;
+        $product->warranty_text             = $request->warranty_text;
+        
+        // Shipping info
         $product->standard_delivery_time    = $request->standard_delivery_time;
         $product->express_delivery_time     = $request->express_delivery_time;
         $product->weight                    = $request->weight;
@@ -170,7 +175,8 @@ class ProductController extends Controller
         $product->save();
 
         // Product Translations
-        $product_translation = ProductTranslation::firstOrNew(['lang' => env('DEFAULT_LANGUAGE'), 'product_id' => $product->id]);
+        $lang = env('DEFAULT_LANGUAGE') ?: 'en';
+        $product_translation = ProductTranslation::firstOrNew(['lang' => $lang, 'product_id' => $product->id]);
         $product_translation->name = $request->name;
         $product_translation->unit = $request->unit;
         $product_translation->description = $request->description;
@@ -637,7 +643,7 @@ class ProductController extends Controller
             abort(403);
         }
 
-        $lang = $request->lang;
+        $lang = !empty($request->lang) ? $request->lang : (env('DEFAULT_LANGUAGE') ?: 'en');
         $categories = Category::where('level', 0)->get();
         $all_attributes = Attribute::get();
         return view('backend.product.products.edit', compact('product', 'categories', 'lang', 'all_attributes'));
@@ -671,7 +677,9 @@ class ProductController extends Controller
             abort(403);
         }
 
-        if ($request->lang == env("DEFAULT_LANGUAGE")) {
+        $lang = !empty($request->lang) ? $request->lang : (env('DEFAULT_LANGUAGE') ?: 'en');
+
+        if ($lang == (env('DEFAULT_LANGUAGE') ?: 'en')) {
             $product->name          = $request->name;
             $product->unit          = $request->unit;
             $product->description   = $request->description;
@@ -686,7 +694,7 @@ class ProductController extends Controller
         $product->published         = $request->status;
 
         // Product Translations
-        $product_translation                = ProductTranslation::firstOrNew(['lang' => $request->lang, 'product_id' => $product->id]);
+        $product_translation                = ProductTranslation::firstOrNew(['lang' => $lang, 'product_id' => $product->id]);
         $product_translation->name          = $request->name;
         $product_translation->unit          = $request->unit;
         $product_translation->description   = $request->description;
@@ -850,13 +858,13 @@ class ProductController extends Controller
                 }
             }
 
-            $variation              = $product->variations->first();
-            $variation->product_id  = $product->id;
-            $variation->code        = null;
-            $variation->sku         = $request->sku;
-            $variation->price       = $request->price;
-            $variation->stock       = $request->stock;
-            $variation->save();
+            // $variation              = $product->variations->first();
+            // $variation->product_id  = $product->id;
+            // $variation->code        = null;
+            // $variation->sku         = $request->sku;
+            // $variation->price       = $request->price;
+            // $variation->stock       = $request->stock;
+            // $variation->save();
         }
 
 
@@ -890,70 +898,12 @@ class ProductController extends Controller
             }
         }
 
-        $product->reference =  $request->reference;
-        $product->currency =  $request->currency;
-        $product->shipping =  $request->shipping;
-        $product->material =  $request->material;
-        $product->intake =  $request->intake;
-        $product->engaste =  $request->engaste;
-        $product->warranty_text =  $request->warranty_text;
-
-        $product->si2 =  $request->si2;
-        $product->medidas_de_embalaje =  $request->medidas_de_embalaje;
-        $product->si3 =  $request->si3;
-        $product->peso_de_producto =  $request->peso_de_producto;
-        $product->si4 =  $request->si4;
-        $product->peso_de_envio =  $request->peso_de_envio;
-        $product->tipo_de_coneccion =  $request->tipo_de_coneccion;
-        $product->eficiencia =  $request->eficiencia;
-        $product->caracteristica1 =  $request->caracteristica1;
-        $product->caracteristica2 =  $request->caracteristica2;
-        $product->caracteristica3 =  $request->caracteristica3;
-        $product->caracteristica4 =  $request->caracteristica4;
-        $product->caracteristica5 =  $request->caracteristica5;
-        $product->caracteristica6 =  $request->caracteristica6;
-        $product->caracteristica7 =  $request->caracteristica7;
-        $product->caracteristica8 =  $request->caracteristica8;
-        $product->beneficio1 =  $request->beneficio1;
-        $product->beneficio2 =  $request->beneficio2;
-        $product->beneficio3 =  $request->beneficio3;
-        $product->beneficio4 =  $request->beneficio4;
-        $product->beneficio5 =  $request->beneficio5;
-        $product->postventa =  $request->postventa;
-        $product->imagen1 = $request->imagen1;
-        $product->imagen2 =  $request->imagen2;
-        $product->imagen3 =  $request->imagen3;
-        $product->imagen4 =  $request->imagen4;
-        $product->video =  $request->video;
-        $product->video2 =  $request->video2;
-        $product->video3 =  $request->video3;
-        $product->video4 =  $request->video4;
-        $product->ficha_tecnica_imagen1 =  $request->ficha_tecnica_imagen1;
-        $product->ficha_tecnica_imagen2 =  $request->ficha_tecnica_imagen2;
-        $product->ficha_tecnica_imagen3 =  $request->ficha_tecnica_imagen3;
-        $product->ficha_tecnica_imagen4 =  $request->ficha_tecnica_imagen4;
-        $product->manual_de_producto =  $request->manual_de_producto;
-        $product->ficha_tecnica_del_producto =  $request->ficha_tecnica_del_producto;
-        $product->manual_de_instalacion =  $request->manual_de_instalacion;
-        $product->thumbnail_img =  $request->thumbnail_img;
-        $product->vida_util =  $request->vida_util;
-        $product->plastico =  $request->plastico;
-        $product->peso_plastico =  $request->peso_plastico;
-        $product->carton =  $request->carton;
-        $product->peso_carton =  $request->peso_carton;
-        $product->papel =  $request->papel;
-        $product->peso_papel =  $request->peso_papel;
-        $product->metal =  $request->metal;
-        $product->peso_metal =  $request->peso_metal;
-        $product->vidrio =  $request->vidrio;
-        $product->peso_vidrio =  $request->peso_vidrio;
-        $product->madera =  $request->madera;
-        $product->peso_madera =  $request->peso_madera;
-        $product->textil =  $request->textil;
-        $product->peso_textil =  $request->peso_textil;
-        $product->bateria_electrico =  $request->bateria_electrico;
-        $product->peso_bateria_electrico =  $request->peso_bateria_electrico;
-        $product->impacto_ambiental =  $request->impacto_ambiental;
+        $product->name = $request->name;
+        $product->reference = $request->reference;
+        $product->currency = $request->currency ?? null;
+        $product->lowest_price  = $request->highest_price;
+        $product->highest_price = $request->highest_price;
+        $product->warranty_text = $request->warranty_text;
 
         $product->save();
 

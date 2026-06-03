@@ -95,7 +95,7 @@ class CategoryController extends Controller
 
         $category->attributes()->sync($request->filtering_attributes);
 
-        $category_translation = CategoryTranslation::firstOrNew(['lang' => env('DEFAULT_LANGUAGE'), 'category_id' => $category->id]);
+        $category_translation = CategoryTranslation::firstOrNew(['lang' => env('DEFAULT_LANGUAGE', 'en'), 'category_id' => $category->id]);
         $category_translation->name = $request->name;
         $category_translation->save();
 
@@ -144,7 +144,10 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
 
-        if ($request->lang == env("DEFAULT_LANGUAGE")) {
+        // Ensure lang has a valid value
+        $lang = $request->lang ?? env("DEFAULT_LANGUAGE", "en");
+
+        if ($lang == env("DEFAULT_LANGUAGE", "en")) {
             $category->name = $request->name;
         }
 
@@ -186,7 +189,7 @@ class CategoryController extends Controller
 
         $category->attributes()->sync($request->filtering_attributes);
 
-        $category_translation = CategoryTranslation::firstOrNew(['lang' => $request->lang, 'category_id' => $category->id]);
+        $category_translation = CategoryTranslation::firstOrNew(['lang' => $lang, 'category_id' => $category->id]);
         $category_translation->name = $request->name;
         $category_translation->save();
 
