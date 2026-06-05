@@ -22,7 +22,7 @@
                     <router-link :to="{ name: space.routeName }" class="text-none">
                         <img
                             class="image-container-image"
-                            :src="space.img || '/public/assets/img/item-placeholder.png'"
+                            :src="space.img || '/public/assets/img/AccesoriosOffMobile.png'"
                             :alt="space.title"
                         />
                         <h3 class="image-container-title">

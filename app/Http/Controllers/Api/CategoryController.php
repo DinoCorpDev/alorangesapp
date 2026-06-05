@@ -29,4 +29,9 @@ class CategoryController extends Controller
     {
         return new CategoryCollection(Category::where('name', $name)->get());
     }
+
+    public function categories_home()
+    {
+        return new CategoryCollection(Category::where('status', 1)->get());
+    }
 }

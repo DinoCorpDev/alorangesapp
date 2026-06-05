@@ -220,51 +220,6 @@ export default {
             showRecuperarPass: false,
             showVerifyAccount: false,
             itemsArray: [
-                {
-                    title: "Papelería",
-                    img: "/public/assets/img/Grupo12238.png",
-                    routeName: "ShopPapeleria"
-                },
-                {
-                    title: "Aseo",
-                    img: "/public/assets/img/Grupo12239.png",
-                    routeName: "ShopAseo"
-                },
-                {
-                    title: "Cafetería",
-                    img: "/public/assets/img/Grupo12240.png",
-                    routeName: "ShopCafeteria"
-                },
-                {
-                    title: "Botiquín",
-                    img: null,
-                    routeName: null
-                },
-                {
-                    title: "Tecnología",
-                    img: "/public/assets/img/Group 5.png",
-                    routeName: "ShopTecnologia"
-                },
-                {
-                    title: "Desechables",
-                    img: null,
-                    routeName: null
-                },
-                {
-                    title: "Empaques",
-                    img: "/public/assets/img/Group 6.png",
-                    routeName: "ShopCartoneria"
-                },
-                {
-                    title: "Dotación",
-                    img: null,
-                    routeName: null
-                },
-                {
-                    title: "Seguridad Industrial",
-                    img: "/public/assets/img/Grupo12241.png",
-                    routeName: "ShopSeguridadIndustrial"
-                }
             ],
             selectedCode: null,
             sliderSeeder,
@@ -312,6 +267,7 @@ export default {
         }
     },
     mounted() {
+        this.getCategories();
         this.$vuetify.theme.dark = true;
 
         this.selectedCode = this.userLanguageObj.code;
@@ -333,6 +289,37 @@ export default {
         updateBreadcrumb() {
             const newItems = [{ text: "disabled", href: "/", disabled: true }];
             this.$store.dispatch("breadcrumb/setBreadcrumbItems", newItems);
+        },
+        getCategories() {
+            this.call_api("get", "categories-home").then((res) => {
+                if (res.data.success) {
+                    this.itemsArray = res.data.data.map((category) => {
+                        return {
+                            title: category.name,
+                            img: category.meta_image,
+                            routeName: "Shop" + this.formatearTexto(category.name)
+                        };
+                    });
+                }
+            }).catch((err) => {
+                console.log(err);
+            });
+        },
+        formatearTexto(texto) {
+            return texto
+                .normalize('NFD') // separa las tildes
+                .replace(/[\u0300-\u036f]/g, '') // elimina tildes
+                .replace(/[^a-zA-Z0-9\s]/g, '') // elimina caracteres especiales
+                .trim()
+                .split(/\s+/)
+                .map((palabra, index) => {
+                    if (index === 0) {
+                        return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+                    }
+
+                    return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
+                })
+                .join('');
         }
     }
 };
