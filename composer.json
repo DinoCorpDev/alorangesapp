@@ -85,6 +85,7 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php scripts/disable-activeitzone-redirect.php",
             "@php artisan package:discover --ansi"
         ]
     },
