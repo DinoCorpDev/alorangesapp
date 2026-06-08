@@ -1,18 +1,21 @@
 <template>
     <div>
-        <v-tabs fixed-tabs :show-arrows="false" class="mt-3">
-            <v-tab
+        <div
+            ref="categoryScroller"
+            class="mt-3 shop-category-tabs"
+            @wheel="scrollCategories"
+        >
+            <router-link
                 v-for="tab in tabs"
                 :key="`tab-${tab.text}`"
-                :ripple="false"
-                :to="{ name: tab.routeName }"
-                class="text-none"
-                link
+                :to="tab.to"
+                class="shop-category-tab text-none"
+                active-class="shop-category-tab--active"
             >
                 <img :src="`${tab.icon}`" :class="`mr-2 ${tab.style}`">
                 <span>{{ tab.text }}</span>
-            </v-tab>
-        </v-tabs>
+            </router-link>
+        </div>
 
         <router-view />
     </div>
@@ -53,15 +56,35 @@ export default {
                     this.tabs = res.data.data.map((category) => {
                         return {
                             text: category.name,
-                            icon: category.meta_image || this.getDefaultIcon(category.name),
+                            icon: this.getCategoryIcon(category),
                             routeName: "Shop" + this.formatearTexto(category.name),
-                            style: category.meta_image ? "tab-icon" : ""
+                            to: this.getCategoryRoute(category),
+                            style: this.isStaticCategory(category.name) ? "static-tab-icon" : "tab-icon"
                         };
                     });
+
+                    this.redirectToFirstCategory();
                 }
             }).catch((err) => {
                 console.log('Error En carga de información');
             });
+        },
+        redirectToFirstCategory() {
+            if (this.tabs.length && this.$route.name === "Shop") {
+                this.$router.replace(this.tabs[0].to);
+            }
+        },
+        scrollCategories(event) {
+            const scroller = this.$refs.categoryScroller;
+
+            if (!scroller) {
+                return;
+            }
+
+            if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+                event.preventDefault();
+                scroller.scrollLeft += event.deltaY;
+            }
         },
         formatearTexto(texto) {
             return texto
@@ -77,6 +100,44 @@ export default {
                     return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
                 })
                 .join('');
+        },
+        getCategoryRoute(category) {
+            const routeName = "Shop" + this.formatearTexto(category.name);
+
+            if (this.isStaticCategory(category.name)) {
+                return { name: routeName };
+            }
+
+            return {
+                name: "ShopDynamicCategory",
+                params: { categorySlug: category.slug || this.slugify(category.name) },
+                query: { category: category.name }
+            };
+        },
+        slugify(text) {
+            return text
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        },
+        isStaticCategory(categoryName) {
+            return [
+                "ShopCartoneria",
+                "ShopAseo",
+                "ShopPapeleria",
+                "ShopCafeteria",
+                "ShopTecnologia",
+                "ShopSeguridadIndustrial"
+            ].includes("Shop" + this.formatearTexto(categoryName));
+        },
+        getCategoryIcon(category) {
+            if (this.isStaticCategory(category.name)) {
+                return this.getDefaultIcon(category.name);
+            }
+
+            return category.banner || "/public/assets/img/item-placeholder.png";
         }
     }
 };
@@ -89,68 +150,71 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-.theme--dark.v-tabs {
-    &::v-deep {
-        .v-tabs-bar {
-            background-color: #000000;
-        }
-
-        .v-tabs-bar__content {
-            border-bottom: 1px solid #242526;
-        }
-    }
-}
-
 .tab-icon {
-    width: 70px;
-    height: 46px;
-    // object-fit: contain;
+    width: 92px;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 6px;
 }
 
-.v-tabs {
-    &::v-deep {
-        .v-tabs-slider {
-            background-color: transparent;
-        }
-        .v-tabs-bar {
-            background-color: #fafcfc;
+.shop-category-tabs {
+    display: flex;
+    justify-content: flex-start;
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 4px 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #f58634 #e9ecef;
+    -webkit-overflow-scrolling: touch;
+}
 
-            @media (max-width: 600px) {
-                height: auto;
-            }
-        }
+.shop-category-tabs::-webkit-scrollbar {
+    height: 8px;
+}
 
-        .v-tabs-bar__content {
-            display: flex;
-            justify-content: space-between;
-        }
+.shop-category-tabs::-webkit-scrollbar-track {
+    background: #e9ecef;
+    border-radius: 10px;
+}
 
-        .v-tab {
-            background-color: #f4f5f7;
-            font-size: 16px;
-            font-weight: 500;
-            letter-spacing: unset;
-            color: #707780 !important;
-            margin: 0 10px !important;
-            border-radius: 8px;
+.shop-category-tabs::-webkit-scrollbar-thumb {
+    background: #f58634;
+    border-radius: 10px;
+}
 
-            &--active,
-            &:hover {
-                color: white !important;
-                background-color: #f58634;
-            }
+.shop-category-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f5f7;
+    min-width: 190px;
+    min-height: 92px;
+    flex: 0 0 auto;
+    font-size: 18px;
+    font-weight: 500;
+    color: #707780 !important;
+    padding: 12px 18px;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-decoration: none;
+}
 
-            &:before,
-            .v-tabs-slider {
-                background-color: transparent;
-            }
-        }
+.shop-category-tab img {
+    flex: 0 0 auto;
+}
 
-        .v-slide-group__prev,
-        .v-slide-group__next {
-            display: none !important;
-        }
-    }
+.static-tab-icon {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+}
+
+.shop-category-tab--active,
+.shop-category-tab:hover {
+    color: white !important;
+    background-color: #f58634;
 }
 
 ::v-deep {

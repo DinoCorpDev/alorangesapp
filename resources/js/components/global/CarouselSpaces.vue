@@ -19,7 +19,7 @@
         <div class="image-container d-block d-sm-none">
             <v-row>
                 <v-col class="image-container-wrap" cols="6" v-for="space in spaces" :key="`slide-space-${space.id}`">
-                    <router-link :to="{ name: space.routeName }" class="text-none">
+                    <router-link :to="space.to || { name: space.routeName }" class="text-none">
                         <img
                             class="image-container-image"
                             :src="space.img || '/public/assets/img/AccesoriosOffMobile.png'"

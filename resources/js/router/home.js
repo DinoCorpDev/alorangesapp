@@ -54,7 +54,6 @@ export default [
         path: "/shop",
         component: Shop,
         name: "Shop",
-        redirect: "/shop/papeleria",
         meta: { requiresAuth: false },
         children: [
             {
@@ -97,6 +96,15 @@ export default [
                 path: "seguridad-industrial",
                 component: ShopSeguridadIndustrial,
                 name: "ShopSeguridadIndustrial",
+                meta: { requiresAuth: false, hasBottomBar: false }
+            },
+            {
+                path: ":categorySlug",
+                component: ShopShowApi,
+                name: "ShopDynamicCategory",
+                props: route => ({
+                    category: route.query.category || route.params.categorySlug
+                }),
                 meta: { requiresAuth: false, hasBottomBar: false }
             }
         ]

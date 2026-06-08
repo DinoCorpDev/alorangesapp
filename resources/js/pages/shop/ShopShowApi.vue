@@ -3,7 +3,7 @@
         <v-row
             class="banner-principal"
             :style="{
-                backgroundImage: `url(${banner || getBannerByCategory})`,
+                backgroundImage: `url(${effectiveBanner})`,
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 margin: '10px 0'
@@ -110,6 +110,7 @@ export default {
         productsSeeder: [],
         resultadoFiltroBotones: [],
         activeButton: null,
+        categoryData: {},
         swiperOptions: {
             slidesPerView: 2,
             centeredSlides: false,
@@ -131,6 +132,9 @@ export default {
         banner: { type: String, default: "" }
     },
     computed:{
+        effectiveBanner() {
+            return this.banner || this.categoryData.banner || this.getBannerByCategory;
+        },
         getBannerByCategory() {
             switch (this.category) {
                 case "Papeleria":
@@ -162,12 +166,38 @@ export default {
         CarouselSwiper,
     },
     mounted() {
+        this.getCategoryData();
         this.getProducts();
         this.updateBreadcrumb();
     },
+    watch: {
+        category() {
+            this.getCategoryData();
+            this.getProducts();
+            this.updateBreadcrumb();
+        }
+    },
     methods: {
+        async getCategoryData() {
+            if (!this.category) {
+                this.categoryData = {};
+                return;
+            }
+
+            try {
+                const res = await Mixin.methods.call_api("get", `category/by-name/${encodeURIComponent(this.category)}`);
+                if (res.data.success && res.data.data.length) {
+                    this.categoryData = res.data.data[0];
+                } else {
+                    this.categoryData = {};
+                }
+            } catch (error) {
+                console.error(error);
+                this.categoryData = {};
+            }
+        },
         async getProducts() {
-            const res = await Mixin.methods.call_api("get", `product/search?category_slug=${this.category}`);
+            const res = await Mixin.methods.call_api("get", `product/search?category_slug=${encodeURIComponent(this.category)}`);
             if (res.data.success) {
                 this.isList = false;
                 // category_slug;
@@ -210,7 +240,8 @@ export default {
         updateBreadcrumb() {
             const newItems = [
                 { text: "Home", href: "/", disabled: false },
-                { text: "Tienda", href: "/", disabled: true }
+                { text: "Tienda", href: "/shop", disabled: false },
+                { text: this.category, href: "", disabled: true }
             ];
             this.$store.dispatch("breadcrumb/setBreadcrumbItems", newItems);
         },
@@ -218,7 +249,7 @@ export default {
         async filter(value) {
             const res = await Mixin.methods.call_api(
                 "get",
-                `product/search?category_slug=${this.category}&&keyword=${value}`
+                `product/search?category_slug=${encodeURIComponent(this.category)}&&keyword=${encodeURIComponent(value)}`
             );
 
             let data = res.data.products.data;

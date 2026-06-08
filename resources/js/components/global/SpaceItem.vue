@@ -1,5 +1,5 @@
 <template>
-    <div class="space-item py-4">
+    <router-link :to="data.to || { name: data.routeName }" class="space-item py-4 text-none d-block">
         <v-img
             class="space-item-image mb-4"
             :src="data.img || '/public/assets/img/item-placeholder.png'"
@@ -8,7 +8,7 @@
         <h3 class="space-item-title">
             {{ data.title }}
         </h3>
-    </div>
+    </router-link>
 </template>
 
 <script>
