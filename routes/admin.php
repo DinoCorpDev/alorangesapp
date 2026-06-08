@@ -43,6 +43,7 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\DigitalProductController;
 use App\Http\Controllers\Payment\AuthorizenetPaymentController;
 use App\Http\Controllers\ProductBulkUploadController;
+use App\Http\Controllers\ProductCatalogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/categories/destroy/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::post('/categories/featured', [CategoryController::class, 'updateFeatured'])->name('categories.featured');
     Route::post('/categories/status', [CategoryController::class, 'updateStatus'])->name('categories.status');
+    Route::get('/product-catalogs', [ProductCatalogController::class, 'index'])->name('product_catalogs.index');
+    Route::get('/product-catalogs/category-products', [ProductCatalogController::class, 'categoryProducts'])->name('product_catalogs.category_products');
+    Route::post('/product-catalogs', [ProductCatalogController::class, 'store'])->name('product_catalogs.store');
+    Route::get('/product-catalogs/{catalog}/download', [ProductCatalogController::class, 'download'])->name('product_catalogs.download');
 
     Route::resource('brands', BrandController::class)->except(['edit', 'destroy']);
     Route::get('/brands/edit/{id}', [BrandController::class, 'edit'])->name('brands.edit');
