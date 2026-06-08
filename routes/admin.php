@@ -96,6 +96,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/categories/edit/{id}', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::get('/categories/destroy/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::post('/categories/featured', [CategoryController::class, 'updateFeatured'])->name('categories.featured');
+    Route::post('/categories/status', [CategoryController::class, 'updateStatus'])->name('categories.status');
 
     Route::resource('brands', BrandController::class)->except(['edit', 'destroy']);
     Route::get('/brands/edit/{id}', [BrandController::class, 'edit'])->name('brands.edit');

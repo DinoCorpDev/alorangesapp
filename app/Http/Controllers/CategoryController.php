@@ -229,4 +229,16 @@ class CategoryController extends Controller
 
         return 0;
     }
+
+    public function updateStatus(Request $request)
+    {
+        $category = Category::findOrFail($request->id);
+        $category->status = $request->status;
+
+        if ($category->save()) {
+            return 1;
+        }
+
+        return 0;
+    }
 }
