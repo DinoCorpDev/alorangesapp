@@ -17,5 +17,6 @@ public/web-assets/js
 /public/mix-manifest.json
 public/web-assets/css
 lastdb.sql
+/temp
 
 public/uploads/all
