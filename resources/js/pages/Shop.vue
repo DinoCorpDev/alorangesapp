@@ -134,7 +134,7 @@ export default {
         },
         getCategoryIcon(category) {
             if (this.hasCategoryImage(category)) {
-                return category.banner || category.meta_image;
+                return category.meta_image || category.banner;
             }
 
             if (this.isStaticCategory(category.name)) {
