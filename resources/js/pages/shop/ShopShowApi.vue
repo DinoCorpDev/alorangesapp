@@ -55,7 +55,19 @@
                 </div>
             </div>
         </v-container>
-        <v-row tag="section" class="mb-6">
+        <div v-if="loading" class="products-loading">
+            <v-progress-circular indeterminate color="#f58634" size="42" width="4" />
+            <div class="products-loading__text">Cargando productos...</div>
+            <v-row class="mt-4">
+                <v-col v-for="item in 6" :key="`product-loader-${item}`" cols="6" sm="4" md="2">
+                    <v-skeleton-loader type="image, article" />
+                </v-col>
+            </v-row>
+        </div>
+        <v-alert v-else-if="!hasProductGroups" class="mt-4" type="info" text>
+            No hay productos disponibles en esta categoria.
+        </v-alert>
+        <v-row v-else tag="section" class="mb-6">
             <v-col cols="12" v-for="(product, key) in productsSeeder" :key="product.id">
                 <v-row class="mb-3">
                     <v-col cols="12" sm="12" md="12">
@@ -111,6 +123,8 @@ export default {
         resultadoFiltroBotones: [],
         activeButton: null,
         categoryData: {},
+        loading: true,
+        productsRequestId: 0,
         swiperOptions: {
             slidesPerView: 2,
             centeredSlides: false,
@@ -152,6 +166,9 @@ export default {
                 default:
                     return "/public/assets/img/BannerShop.jpg";
             }
+        },
+        hasProductGroups() {
+            return Object.keys(this.productsSeeder).length > 0;
         }
     },
     components: {
@@ -197,45 +214,49 @@ export default {
             }
         },
         async getProducts() {
-            const res = await Mixin.methods.call_api("get", `product/search?category_slug=${encodeURIComponent(this.category)}`);
-            if (res.data.success) {
-                this.isList = false;
-                // category_slug;
-                // keyword;
-                // sort_by;
-                // brand_ids;
-                // min_price;
-                // max_price;
-                this.productsSeeder = res.data.products.data;
-                const primerasLetras = this.productsSeeder.map(item => item.name.charAt(0));
-                primerasLetras.sort();
-                let letrasFiltro = [...new Set(primerasLetras)];
+            const requestId = ++this.productsRequestId;
+            this.loading = true;
 
-                this.resultadoFiltroBotones = letrasFiltro.map((letra, index) => ({
-                    id: index + 1,
-                    text: letra
-                }));
+            try {
+                const res = await Mixin.methods.call_api("get", `product/search?category_slug=${encodeURIComponent(this.category)}`);
 
-                let data = res.data.products.data;
-                const clasificadosPorLetra = data.reduce((acc, product) => {
-                    // Obtenemos la primera letra del nombre
-                    const primeraLetra = product.name.charAt(0).toUpperCase();
+                if (requestId !== this.productsRequestId) {
+                    return;
+                }
 
-                    // Si la letra no existe como clave en acc, inicializamos el array
-                    if (!acc[primeraLetra]) {
-                        acc[primeraLetra] = [];
-                    }
-
-                    // Agregamos el objeto al array correspondiente
-                    acc[primeraLetra].push(product);
-                    return acc;
-                }, {});
-
-                // this.productsSeeder = res.data.products.data.slice(0, 12);
-
-                this.productsSeeder = clasificadosPorLetra;
-                this.activeButton = null;
+                if (res.data.success) {
+                    this.isList = false;
+                    this.setProducts(res.data.products.data || []);
+                    this.activeButton = null;
+                }
+            } catch (error) {
+                console.error(error);
+                this.productsSeeder = {};
+                this.resultadoFiltroBotones = [];
+            } finally {
+                if (requestId === this.productsRequestId) {
+                    this.loading = false;
+                }
             }
+        },
+        setProducts(products) {
+            const letrasFiltro = [...new Set(products.map(item => item.name.charAt(0).toUpperCase()))].sort();
+
+            this.resultadoFiltroBotones = letrasFiltro.map((letra, index) => ({
+                id: index + 1,
+                text: letra
+            }));
+
+            this.productsSeeder = products.reduce((acc, product) => {
+                const primeraLetra = product.name.charAt(0).toUpperCase();
+
+                if (!acc[primeraLetra]) {
+                    acc[primeraLetra] = [];
+                }
+
+                acc[primeraLetra].push(product);
+                return acc;
+            }, {});
         },
         updateBreadcrumb() {
             const newItems = [
@@ -247,23 +268,30 @@ export default {
         },
 
         async filter(value) {
-            const res = await Mixin.methods.call_api(
-                "get",
-                `product/search?category_slug=${encodeURIComponent(this.category)}&&keyword=${encodeURIComponent(value)}`
-            );
+            this.loading = true;
 
-            let data = res.data.products.data;
-            const clasificadosPorLetra = data.reduce((acc, product) => {
-                const primeraLetra = product.name.charAt(0).toUpperCase();
-                if (!acc[primeraLetra]) {
-                    acc[primeraLetra] = [];
+            try {
+                const res = await Mixin.methods.call_api(
+                    "get",
+                    `product/search?category_slug=${encodeURIComponent(this.category)}&&keyword=${encodeURIComponent(value)}`
+                );
+
+                if (res.data.success) {
+                    this.productsSeeder = (res.data.products.data || []).reduce((acc, product) => {
+                        const primeraLetra = product.name.charAt(0).toUpperCase();
+                        if (!acc[primeraLetra]) {
+                            acc[primeraLetra] = [];
+                        }
+
+                        acc[primeraLetra].push(product);
+                        return acc;
+                    }, {});
                 }
-
-                acc[primeraLetra].push(product);
-                return acc;
-            }, {});
-            if (res.data.success) {
-                this.productsSeeder = clasificadosPorLetra;
+            } catch (error) {
+                console.error(error);
+                this.productsSeeder = {};
+            } finally {
+                this.loading = false;
             }
         },
         setActiveButton(id, value) {
@@ -307,5 +335,17 @@ export default {
     {
         height: 130px;
     }
+}
+
+.products-loading {
+    padding: 36px 0 24px;
+    text-align: center;
+}
+
+.products-loading__text {
+    color: #707780;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 12px;
 }
 </style>

@@ -2335,8 +2335,9 @@ export default {
             }
         },
         openWindow(url){
-            window.open(url, '_blank', 'noopener,noreferrer');
-            this.numberPag = 4;
+            if (url) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
         },
         updateBreadcrumb() {
             const formattedName = this.capitalizeWords(this.currentUser.name);
@@ -2500,20 +2501,52 @@ export default {
                 )
             });
         },
-        async verifyStatusPayment(dataToTransaction){
-            let resultApi = await this.call_api('POST','product/transaction-wompi',dataToTransaction);
-            if(resultApi.data.TransactionResult.data.payment_method.extra.async_payment_url){
-                return resultApi.data.TransactionResult.data.payment_method.extra.async_payment_url;
-                //window.location.href = this.urlPagoPSE;
-            }else{
-                this.verifyStatusPayment(dataToTransaction);
+        getPsePaymentUrl(paymentResult){
+            return paymentResult?.data?.payment_method?.extra?.async_payment_url || null;
+        },
+        async verifyStatusPayment(dataToTransaction, attempts = 6){
+            for (let attempt = 0; attempt < attempts; attempt++) {
+                let resultApi = await this.call_api('POST','product/transaction-wompi',dataToTransaction);
+                const paymentUrl = this.getPsePaymentUrl(resultApi?.data?.TransactionResult);
+
+                if(paymentUrl){
+                    return paymentUrl;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1200));
             }
+
+            return null;
+        },
+        openPSEPaymentWindow(){
+            const paymentWindow = window.open("", "_blank");
+
+            if (paymentWindow) {
+                paymentWindow.document.write("<p>Estamos conectando con el banco...</p>");
+                paymentWindow.document.close();
+            }
+
+            return paymentWindow;
+        },
+        redirectToPSEPayment(url, paymentWindow = null){
+            if (!url) {
+                return;
+            }
+
+            this.urlPagoPSE = url;
+
+            if (paymentWindow && !paymentWindow.closed) {
+                paymentWindow.location.href = url;
+                return;
+            }
+
+            window.open(url, '_blank', 'noopener,noreferrer');
         },
 
         closePSEModal(){
             this.dialogPSEModal = false;
         },
-        processToSendStore(referenceToPayment){
+        processToSendStore(referenceToPayment, paymentType = null, paymentStatus = null, paymentDetails = null){
             const shippingAddressId = this.selectedAddressEnvio.id;
             const billingAddressId = this.userData.id;
             let metodoPagoContraentregra = this.isEfectivo ? 'Efectivo' : 'Datafono'
@@ -2524,6 +2557,18 @@ export default {
             formData.append("code", referenceToPayment);
             formData.append("metodo_pago_contraentrega", metodoPagoContraentregra);
 
+            if (paymentType) {
+                formData.append("payment_type", paymentType);
+            }
+
+            if (paymentStatus) {
+                formData.append("payment_status", paymentStatus);
+            }
+
+            if (paymentDetails) {
+                formData.append("payment_details", JSON.stringify(paymentDetails));
+            }
+
             this.cartItems.forEach((item, index) => {
                 if (item?.isCollection) {
                     formData.append("cart_collection_ids[]", item?.cart_id);
@@ -2532,6 +2577,62 @@ export default {
                 }
             });
             return formData;
+        },
+        getWompiTransactionStatus(paymentResult){
+            return paymentResult?.data?.status || null;
+        },
+        isFinalWompiStatus(status){
+            return ["APPROVED", "DECLINED", "VOIDED", "ERROR"].includes(status);
+        },
+        async verifyCardPaymentStatus(dataToTransaction, attempts = 10){
+            for (let attempt = 0; attempt < attempts; attempt++) {
+                let resultApi = await this.call_api('POST','product/transaction-wompi',dataToTransaction);
+                const transaction = resultApi?.data?.TransactionResult;
+                const status = this.getWompiTransactionStatus(transaction);
+
+                if(this.isFinalWompiStatus(status)){
+                    return transaction;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+
+            return null;
+        },
+        validateCardPaymentData(){
+            const requiredFields = ["number", "card_holder", "cvc", "exp_month", "exp_year"];
+            const missingField = requiredFields.some(field => !this.formCard[field]);
+
+            if (missingField) {
+                this.snack({
+                    message: "Completa todos los datos de la tarjeta.",
+                    color: "red",
+                });
+                return false;
+            }
+
+            if (this.isCredit && (!this.formCard.installments || parseInt(this.formCard.installments) < 1)) {
+                this.snack({
+                    message: "Ingresa el numero de cuotas.",
+                    color: "red",
+                });
+                return false;
+            }
+
+            return true;
+        },
+        getPaymentErrorMessage(responseData){
+            if (responseData?.message) {
+                return responseData.message;
+            }
+
+            const paymentResult = responseData?.PaymentResult;
+
+            if (typeof paymentResult === "string") {
+                return paymentResult;
+            }
+
+            return paymentResult?.error?.messages?.join(" ") || "Algo ha salido mal, Revisa la informacion e intenta nuevamente";
         },
         async verifyPaymentPSEStatus(){
             try{
@@ -2592,8 +2693,8 @@ export default {
             };
 
             // Función para procesar el guardado del pedido
-            const processOrderStore = async (ref) => {
-                const formData = this.processToSendStore(ref);
+            const processOrderStore = async (ref, paymentType = null, paymentStatus = null, paymentDetails = null) => {
+                const formData = this.processToSendStore(ref, paymentType, paymentStatus, paymentDetails);
                 const res = await this.call_api("post", "checkout/order/store", formData);
                 this.dataCheckout = res.data;
                 this.numberPag = 4;
@@ -2604,6 +2705,20 @@ export default {
                 this.checkoutLoading = true;
                 if (this.pick === 2) {
                 // Caso: pago con tarjeta (Wompi)
+                if (!this.validateCardPaymentData()) {
+                    this.checkoutLoading = false;
+                    return;
+                }
+
+                const installments = this.isCredit ? parseInt(this.formCard.installments) : 1;
+                const cardData = {
+                    number: this.formCard.number,
+                    card_holder: this.formCard.card_holder,
+                    cvc: this.formCard.cvc,
+                    exp_month: this.formCard.exp_month,
+                    exp_year: this.formCard.exp_year,
+                };
+
                 const data = {
                     mount: getTotal(),
                     currency: "COP",
@@ -2611,16 +2726,37 @@ export default {
                     customer_email: this.userData.email,
                     customer_data: customerData,
                     shipping_address: shippingAddress,
-                    cardData: this.formCard,
+                    redirect_url: `${window.location.origin}/user/checkout`,
+                    cardData,
+                    installments,
                 };
 
                 result = await this.call_api("POST", "product/payment-card-wompi", data);
-                if (result.data.success) {
-                    await processOrderStore(referenceToPayment);
+                if (result.data.success && result.data.PaymentResult?.data?.id) {
+                    const transactionId = result.data.PaymentResult.data.id;
+                    const finalTransaction = this.isFinalWompiStatus(this.getWompiTransactionStatus(result.data.PaymentResult))
+                        ? result.data.PaymentResult
+                        : await this.verifyCardPaymentStatus({ id: transactionId });
+                    const finalStatus = this.getWompiTransactionStatus(finalTransaction) || this.getWompiTransactionStatus(result.data.PaymentResult) || "PENDING";
+
+                    if (finalStatus === "APPROVED" || finalStatus === "PENDING") {
+                        await processOrderStore(referenceToPayment, "card", finalStatus, finalTransaction || result.data.PaymentResult);
+
+                        if (finalStatus === "PENDING") {
+                            this.snack({
+                            message: "Tu pago esta en proceso. La orden quedo creada y actualizaremos el estado al confirmarlo.",
+                            color: "orange",
+                            });
+                        }
+                    } else {
+                        this.snack({
+                        message: "El pago fue rechazado o no pudo completarse. Verifica la tarjeta e intenta nuevamente.",
+                        color: "red",
+                        });
+                    }
                 } else {
                     this.snack({
-                    message:
-                        "Algo ha salido mal, Revisa la información e intenta nuevamente",
+                    message: this.getPaymentErrorMessage(result.data),
                     color: "red",
                     });
                 }
@@ -2633,6 +2769,7 @@ export default {
                     customer_email: this.userData.email,
                     customer_data: customerData,
                     shipping_address: shippingAddress,
+                    redirect_url: `${window.location.origin}/user/checkout`,
                     payment_method: {
                     type: "PSE",
                     user_type: this.personTypeSelected,
@@ -2643,19 +2780,36 @@ export default {
                     },
                 };
 
+                const psePaymentWindow = this.openPSEPaymentWindow();
+
                 try {
                     result = await this.call_api("POST", "product/payment-wompi-pse", data);
+                    if (!result?.data?.success || !result?.data?.PaymentResult?.data) {
+                        throw new Error("No se pudo crear la transaccion PSE");
+                    }
+
                     const idTransaction = result.data.PaymentResult.data.id;
                     if (idTransaction) {
-                    const resultURL = await this.verifyStatusPayment({ id: idTransaction });
-                    if (typeof resultURL === "string") {
-                        this.urlPagoPSE = resultURL;
-                        // Abre la URL de pago automáticamente en una nueva pestaña
-                        window.open(this.urlPagoPSE, "_blank");
+                    const resultURL = this.getPsePaymentUrl(result.data.PaymentResult) || await this.verifyStatusPayment({ id: idTransaction });
+                    if (resultURL) {
                         await processOrderStore(referenceToPayment);
+                        this.redirectToPSEPayment(resultURL, psePaymentWindow);
+                    } else {
+                        if (psePaymentWindow && !psePaymentWindow.closed) {
+                            psePaymentWindow.close();
+                        }
+
+                        this.snack({
+                        message: "No fue posible obtener la ventana de pago PSE. Intenta nuevamente.",
+                        color: "red",
+                        });
                     }
                     }
                 } catch (error) {
+                    if (psePaymentWindow && !psePaymentWindow.closed) {
+                        psePaymentWindow.close();
+                    }
+
                     this.snack({
                     message: "Algo ha salido mal, intenta nuevamente mas tarde",
                     color: "red",

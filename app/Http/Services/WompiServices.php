@@ -73,11 +73,8 @@ class WompiServices{
 
             return $res;
         } catch (\Exception $e) {
-            // Manejar el error
-            echo 'Error: ' . $e->getMessage();
+            return $this->formatWompiException($e);
         }
-
-        return $res;
     }
 
     public function wompiTransaction($paymentInformation){
@@ -92,8 +89,20 @@ class WompiServices{
             return $res;
         } catch (\Exception $e) {
             // Manejar el error
-            return $e->getMessage();
+            return $this->formatWompiException($e);
         }
+    }
+
+    private function formatWompiException($exception)
+    {
+        if (method_exists($exception, 'hasResponse') && $exception->hasResponse()) {
+            $body = (string) $exception->getResponse()->getBody();
+            $decoded = json_decode($body, true);
+
+            return $decoded ?: $body;
+        }
+
+        return $exception->getMessage();
     }
 
     public function wompiGetTransaction($id_transaction){

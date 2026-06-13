@@ -26,12 +26,22 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    private $acceptance_token;
+    private $signatureWompi;
+
     public function __construct(){
-        $wompiData = (new WompiServices)->getAceptanceToken();
-        $token = $wompiData['presigned_acceptance'];
-        $this->acceptance_token = $wompiData['presigned_acceptance']['acceptance_token'];
         $this->signatureWompi = 'prod_integrity_h9ukTOEnWfo9EM3hkTLCR6XiEpRGCfG5';
         //$this->signatureWompi = 'test_integrity_uKHYzUy57fASMOf8nmdVOB4aeBhgjYyn';
+    }
+
+    private function getAcceptanceToken()
+    {
+        if ($this->acceptance_token == null) {
+            $wompiData = (new WompiServices)->getAceptanceToken();
+            $this->acceptance_token = $wompiData['presigned_acceptance']['acceptance_token'];
+        }
+
+        return $this->acceptance_token;
     }
 
     public function index()
@@ -132,15 +142,14 @@ class ProductController extends Controller
             ]);
         }
         
-        $productsCategories = ProductCategory::where('category_id',$category['id'])->with('product')->get();
-        
-        foreach ($productsCategories as $key => $prodCat) {
-            array_push($products,$prodCat->product);
-        }
-
-        if ($request->keyword) {
-            $products = $this->buscarObjetosPorLetra($products,$request->keyword);
-        }
+        $products = Product::whereHas('product_categories', function ($query) use ($category) {
+                $query->where('category_id', $category['id']);
+            })
+            ->when($request->keyword, function ($query) use ($request) {
+                $query->where('name', 'like', $request->keyword . '%');
+            })
+            ->orderBy('name', 'asc')
+            ->get();
 
         $collection = new ProductCollection($products);
 
@@ -352,19 +361,33 @@ class ProductController extends Controller
 
     public function wompiPaymentCard(Request $request){
         try {
-            $wompiTokenizeCard = (new WompiServices)->tokenizeCard($request['cardData']);
+            $cardData = $request['cardData'];
+            $cardTokenData = [
+                'number' => (string) ($cardData['number'] ?? ''),
+                'cvc' => (string) ($cardData['cvc'] ?? ''),
+                'exp_month' => (string) ($cardData['exp_month'] ?? ''),
+                'exp_year' => (string) ($cardData['exp_year'] ?? ''),
+                'card_holder' => $cardData['card_holder'] ?? '',
+            ];
+
+            $wompiTokenizeCard = (new WompiServices)->tokenizeCard($cardTokenData);
+            if (!is_array($wompiTokenizeCard) || !isset($wompiTokenizeCard['data']['id'])) {
+                return response()->json([
+                    'success' => false,
+                    'PaymentResult' => $wompiTokenizeCard,
+                    'message' => 'No fue posible tokenizar la tarjeta',
+                ]);
+            }
+
             $mount = $request->mount;
             $currency = $request->currency;
             $reference = $request->reference;
-            $installments = null;
-            if (isset($request['cardData']['installments'])) {
-                $installments = $request['cardData']['installments'];
-            }else{
-                $installments = 1;
-            }
+            $installments = (int) ($request->installments ?? ($cardData['installments'] ?? 1));
+            $installments = $installments > 0 ? $installments : 1;
+
             $llaveConcatenada = $reference.$mount.$currency.$this->signatureWompi;
             $payment_information = [
-                "acceptance_token" => $this->acceptance_token,
+                "acceptance_token" => $this->getAcceptanceToken(),
                 "amount_in_cents" => $mount,
                 "currency" => $currency,
                 "signature" => hash("sha256",$llaveConcatenada),
@@ -374,7 +397,7 @@ class ProductController extends Controller
                     "token" => $wompiTokenizeCard['data']['id'],
                     "installments" => $installments, //Numero de cuotas
                 ],
-                // "redirect_url" => "https =>//mitienda.com.co/pago/resultado",
+                "redirect_url" => $request->redirect_url ?: config('app.url').'/user/checkout',
                 "reference" => $reference,
                 // "expiration_time" => "2023-06-09T20 =>28 =>50.000Z",
                 "customer_data" => $request['customer_data'],
@@ -384,13 +407,15 @@ class ProductController extends Controller
             $PaymentResult = (new WompiServices)->wompiTransaction($payment_information);
 
             return response()->json([
-                'success' => true,
+                'success' => is_array($PaymentResult) && isset($PaymentResult['data']['id']),
                 'PaymentResult' => $PaymentResult,
+                'status' => is_array($PaymentResult) ? ($PaymentResult['data']['status'] ?? null) : null,
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
                 'PaymentResult' => 'Verifica los datos e intenta nuevamente',
+                'message' => $th->getMessage(),
             ]);
         }
     }
@@ -417,7 +442,7 @@ class ProductController extends Controller
         $reference = $request->reference;
         $llaveConcatenada = $reference.$mount.$currency.$this->signatureWompi;      
         $payment_information = [
-            "acceptance_token" => $this->acceptance_token,
+            "acceptance_token" => $this->getAcceptanceToken(),
             "amount_in_cents" => $mount,
             "currency" => $currency,
             "signature" => hash("sha256",$llaveConcatenada),
@@ -430,7 +455,7 @@ class ProductController extends Controller
                 "financial_institution_code" => $request['payment_method']['financial_institution_code'],
                 "payment_description" => $request['payment_method']['payment_description'],
             ],
-            //"redirect_url" => "http://alorangesapp.test/user/checkout",
+            "redirect_url" => $request->redirect_url ?: config('app.url').'/user/checkout',
             "reference" => $reference,
             // "expiration_time" => "2023-06-09T20 =>28 =>50.000Z",
             "customer_data" => $request['customer_data'],
@@ -440,7 +465,7 @@ class ProductController extends Controller
         $PaymentResult = (new WompiServices)->wompiTransaction($payment_information);
         
         return response()->json([
-            'success' => true,
+            'success' => is_array($PaymentResult) && isset($PaymentResult['data']),
             'PaymentResult' => $PaymentResult,
         ]);
     }
@@ -508,14 +533,14 @@ class ProductController extends Controller
                         $productCategories = new ProductCategory;
                     }
                     $productCategories->product_id = $product['id'];
-                    $productCategories->category_id = $category['id'];
+                    $productCategories->category_id = $product['itemCategory']['id'] ?? $category['id'];
                     $productCategories->created_at = now();
                     $productCategories->updated_at = now();
 
                     $productCategories->save();
                     $productStorage->save();
 
-                    $productStorage->categories()->sync([$category['id']]);
+                    $productStorage->categories()->sync([$product['itemCategory']['id'] ?? $category['id']]);
 
                     $counter++;
                     $categoryId = $product['id'];
@@ -545,6 +570,10 @@ class ProductController extends Controller
     private function updateProductsFromAlegra($search_keyword){
         $updateProducts = (new AlegraServices)->getProductsByQuery($search_keyword);
         foreach($updateProducts as $product){
+            if (!isset($product['itemCategory']['id'])) {
+                continue;
+            }
+
             $productStorage = Product::where('reference', $product['reference'])->first();
             if(empty($productStorage)){
                 $productStorage = new Product;
@@ -573,7 +602,7 @@ class ProductController extends Controller
 
             $productStorage->save();
 
-            $productStorage->categories()->sync([$product['category']['id']]);
+            $productStorage->categories()->sync([$product['itemCategory']['id']]);
         }
     }
 }

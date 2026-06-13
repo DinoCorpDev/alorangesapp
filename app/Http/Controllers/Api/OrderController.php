@@ -244,6 +244,7 @@ class OrderController extends Controller
         }
 
         $cartItems = Cart::whereIn('id', $cart_item_ids)->with(['variation.product'])->get();
+        $cartCollections = Cart::whereIn('id', $cart_collection_ids)->with(['collection'])->get();
 
         $shippingAddress = Address::find($request->shipping_address_id);
         $billingAddress = Address::find($request->billing_address_id); 
@@ -510,7 +511,7 @@ class OrderController extends Controller
         }
 
         // clear user's cart
-        Cart::destroy($request->cart_item_ids);
+        Cart::destroy(array_merge($cart_item_ids, $cart_collection_ids));
 
         if ($request->payment_type == 'wallet') {
             $user->balance -= $combined_order->grand_total;
