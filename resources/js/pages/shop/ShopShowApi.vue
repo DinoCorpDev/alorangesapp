@@ -138,7 +138,7 @@ export default {
         getBannerByCategory() {
             switch (this.category) {
                 case "Papeleria":
-                    return "/public/assets/img/banner2home.png";
+                    return "/public/assets/img/BannerShop.jpg";
                 case "Aseo":
                     return "/public/assets/img/BannerRopa.jpg";
                 case "Cafeteria":
