@@ -160,7 +160,6 @@ export default {
 .tab-icon {
     width: 92px;
     height: 62px;
-    object-fit: cover;
     border-radius: 6px;
 }
 
