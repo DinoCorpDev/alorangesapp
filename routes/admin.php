@@ -8,6 +8,7 @@ use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Api\CategoryController as ApiCategoryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
@@ -93,6 +94,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 
     Route::post('/language', [LanguageController::class, 'changeLanguage'])->name('language.change');
 
+    Route::get('/categories/update-alegra', [ApiCategoryController::class, 'alegra'])->name('categories.alegra');
     Route::resource('categories', CategoryController::class)->except(['edit', 'destroy']);
     Route::get('/categories/edit/{id}', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::get('/categories/destroy/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');

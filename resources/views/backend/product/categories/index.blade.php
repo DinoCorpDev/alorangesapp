@@ -10,6 +10,11 @@
                 <h1 class="h3">{{ translate('All categories') }}</h1>
             </div>
             <div class="col-md-6 text-md-right">
+                @can('edit_categories')
+                    <a href="{{ route('categories.alegra') }}" class="btn btn-circle btn-primary mr-2">
+                        <span>{{ translate('Update All Categories From Alegra') }}</span>
+                    </a>
+                @endcan
                 @can('add_categories')
                     <a href="{{ route('categories.create') }}" class="btn btn-circle btn-primary">
                         <span>{{ translate('Add New category') }}</span>
