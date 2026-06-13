@@ -1,5 +1,5 @@
 <template>
-    <ShopShowApi category="Seguridad industrial" :banner="categoryData.banner"/>
+    <ShopShowApi category="Seguridad industrial" :banner="categoryImage"/>
 </template>
 
 <script>
@@ -14,6 +14,11 @@ export default {
     },
     components: {
         ShopShowApi
+    },
+    computed: {
+        categoryImage() {
+            return this.categoryData.banner || this.categoryData.meta_image || "";
+        }
     },
     methods: {
         async getCategories() {

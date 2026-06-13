@@ -3,8 +3,14 @@
         <div>
             <button v-if="showModal" class="btn-close" @click="toggleModal(false)">X</button>
             <div v-else>
-                <button class="float" type="button" @click="toggleModal(true)"></button>
-                <div class="float-message">Necesita ayuda?</div>
+                <a
+                    class="float"
+                    :href="whatsappUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Abrir chat de WhatsApp"
+                ></a>
+                <button class="float-message" type="button" @click="toggleModal(true)">Necesita ayuda?</button>
             </div>
         </div>
 
@@ -26,9 +32,9 @@
 
                 <!-- WhatsApp Links -->
                 <a
-                    href="https://api.whatsapp.com/send/?phone=573174420109&text=Hola+%2AAloranges%2A+me+gustar%C3%ADa+recibir+m%C3%A1s+informaci%C3%B3n+sobre&type=phone_number&app_absent=0"
+                    :href="whatsappUrl"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     class="col-12 box-wha"
                 >
                     <div class="row items-box">
@@ -50,12 +56,19 @@
 export default {
     data() {
         return {
-            showModal: false // Estado inicial del modal
+            showModal: false,
+            phoneNumber: "573174420109",
+            message: "Hola *Aloranges* me gustaría recibir más información"
         };
+    },
+    computed: {
+        whatsappUrl() {
+            return `https://wa.me/${this.phoneNumber}?text=${encodeURIComponent(this.message)}`;
+        }
     },
     methods: {
         toggleModal(state) {
-            this.showModal = state; // Alterna el estado del modal
+            this.showModal = state;
         }
     }
 };
@@ -104,11 +117,21 @@ export default {
   align-items: center;
 }
 
+.response.what-chat {
+  position: fixed;
+  width: 320px;
+  bottom: 105px;
+  right: 40px;
+  z-index: 10001;
+}
+
 .box-wha {
+  display: block;
   height: 57px;
   padding: 10px 15px;
   color: #000 !important;
   margin-bottom: 3px;
+  text-decoration: none !important;
 }
 
 .box-wha-final {
@@ -154,6 +177,7 @@ export default {
 
 .float {
   position: fixed;
+  display: block;
   background-size: contain;
     width: 68px;
     height: 68px;
@@ -183,6 +207,8 @@ export default {
     padding: 12px 19px;
     font-size: 18px;
     line-height: 1.3;
+    border: 0;
+    cursor: pointer;
   }
 
   .float-message:focus {

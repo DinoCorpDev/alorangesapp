@@ -1,5 +1,5 @@
 <template>
-    <ShopShowApi category="Cafeteria" :banner="categoryData.banner"/>
+    <ShopShowApi category="Cafeteria" :banner="categoryImage"/>
 </template>
 
 <script>
@@ -14,6 +14,11 @@ export default {
     },
     components: {
         ShopShowApi
+    },
+    computed: {
+        categoryImage() {
+            return this.categoryData.banner || this.categoryData.meta_image || "";
+        }
     },
     methods: {
         async getCategories() {

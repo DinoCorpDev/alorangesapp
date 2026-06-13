@@ -133,7 +133,7 @@ export default {
     },
     computed:{
         effectiveBanner() {
-            return this.banner || this.categoryData.banner || this.getBannerByCategory;
+            return this.banner || this.categoryData.banner || this.categoryData.meta_image || this.getBannerByCategory;
         },
         getBannerByCategory() {
             switch (this.category) {

@@ -59,7 +59,7 @@ export default {
                             icon: this.getCategoryIcon(category),
                             routeName: "Shop" + this.formatearTexto(category.name),
                             to: this.getCategoryRoute(category),
-                            style: this.isStaticCategory(category.name) ? "static-tab-icon" : "tab-icon"
+                            style: this.hasCategoryImage(category) ? "tab-icon" : "static-tab-icon"
                         };
                     });
 
@@ -133,11 +133,18 @@ export default {
             ].includes("Shop" + this.formatearTexto(categoryName));
         },
         getCategoryIcon(category) {
+            if (this.hasCategoryImage(category)) {
+                return category.banner || category.meta_image;
+            }
+
             if (this.isStaticCategory(category.name)) {
                 return this.getDefaultIcon(category.name);
             }
 
-            return category.banner || "/public/assets/img/item-placeholder.png";
+            return "/public/assets/img/item-placeholder.png";
+        },
+        hasCategoryImage(category) {
+            return !!(category.banner || category.meta_image);
         }
     }
 };

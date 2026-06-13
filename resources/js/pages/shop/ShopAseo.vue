@@ -1,7 +1,7 @@
 <template>
     <ShopShowApi
         category="Aseo"
-        :banner="categoryData.banner"
+        :banner="categoryImage"
     />
 </template>
 
@@ -19,6 +19,12 @@ export default {
         return {
             categoryData: {}
         };
+    },
+
+    computed: {
+        categoryImage() {
+            return this.categoryData.banner || this.categoryData.meta_image || "";
+        }
     },
 
     methods: {
