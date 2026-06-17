@@ -8,7 +8,6 @@ use App\Http\Services\AlegraServices;
 use App\Models\Setting;
 use App\Models\Category;
 use App\Models\CategoryTranslation;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -48,33 +47,47 @@ class CategoryController extends Controller
     public function alegra()
     {
         try {
-            try {
-                DB::statement('SET FOREIGN_KEY_CHECKS=0');
-                CategoryTranslation::truncate();
-                Category::truncate();
-            } finally {
-                DB::statement('SET FOREIGN_KEY_CHECKS=1');
-            }
-
             $categories = (new AlegraServices)->getCategories();
             $counter = 0;
+            $created = 0;
+            $updated = 0;
 
             foreach ($categories as $alegraCategory) {
                 if (!isset($alegraCategory['id'], $alegraCategory['name'])) {
                     continue;
                 }
 
-                $category = new Category;
-                $category->id = $alegraCategory['id'];
+                $category = Category::where('id', $alegraCategory['id'])
+                    ->orWhere('name', $alegraCategory['name'])
+                    ->first();
+
+                $isNewCategory = $category === null;
+
+                if ($isNewCategory) {
+                    $category = new Category;
+                    $category->id = $alegraCategory['id'];
+                    $category->slug = $this->generateUniqueSlug($alegraCategory['name']);
+                    $category->parent_id = 0;
+                    $category->level = 0;
+                    $category->featured = 0;
+                    $category->status = 0;
+                }
+
                 $category->name = $alegraCategory['name'];
-                $category->slug = Str::slug($alegraCategory['name'], '-') . '-' . strtolower(Str::random(5));
-                $category->parent_id = 0;
-                $category->level = 0;
-                $category->featured = 0;
-                $category->status = $alegraCategory['status'] == 'active' ? 1 : 0;
-                $category->order_level = $counter;
-                $category->meta_title = $alegraCategory['name'];
-                $category->meta_description = $alegraCategory['description'] ?? null;
+                $category->status = $category->status == 1 ? 1 : 0;
+
+                if (empty($category->slug)) {
+                    $category->slug = $this->generateUniqueSlug($alegraCategory['name'], $category->id);
+                }
+
+                if (empty($category->meta_title)) {
+                    $category->meta_title = $alegraCategory['name'];
+                }
+
+                if (empty($category->meta_description) && !empty($alegraCategory['description'])) {
+                    $category->meta_description = $alegraCategory['description'];
+                }
+
                 $category->save();
 
                 $categoryTranslation = CategoryTranslation::firstOrNew([
@@ -85,12 +98,14 @@ class CategoryController extends Controller
                 $categoryTranslation->save();
 
                 $counter++;
+                $isNewCategory ? $created++ : $updated++;
             }
 
             $url = config('app.url') . '/admin/categories';
+            $message = "Las categorias han sido actualizadas correctamente. Creadas: {$created}. Actualizadas: {$updated}.";
 
             if (request()->hasSession()) {
-                return redirect($url)->with('success', 'Las categorias han sido actualizadas correctamente');
+                return redirect($url)->with('success', $message);
             }
 
             return redirect($url . '?alegra_categories=updated');
@@ -108,5 +123,25 @@ class CategoryController extends Controller
 
             return redirect($url . '?alegra_categories=error');
         }
+    }
+
+    private function generateUniqueSlug($name, $ignoreCategoryId = null)
+    {
+        $baseSlug = Str::slug($name, '-');
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (
+            Category::where('slug', $slug)
+                ->when($ignoreCategoryId, function ($query) use ($ignoreCategoryId) {
+                    $query->where('id', '!=', $ignoreCategoryId);
+                })
+                ->exists()
+        ) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }
