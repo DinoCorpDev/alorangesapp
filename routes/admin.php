@@ -103,6 +103,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/product-catalogs', [ProductCatalogController::class, 'index'])->name('product_catalogs.index');
     Route::get('/product-catalogs/category-products', [ProductCatalogController::class, 'categoryProducts'])->name('product_catalogs.category_products');
     Route::post('/product-catalogs', [ProductCatalogController::class, 'store'])->name('product_catalogs.store');
+    Route::delete('/product-catalogs/{catalog}', [ProductCatalogController::class, 'destroy'])->name('product_catalogs.destroy');
     Route::get('/product-catalogs/{catalog}/download', [ProductCatalogController::class, 'download'])->name('product_catalogs.download');
 
     Route::resource('brands', BrandController::class)->except(['edit', 'destroy']);

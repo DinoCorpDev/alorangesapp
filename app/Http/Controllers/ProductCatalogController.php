@@ -26,44 +26,69 @@ class ProductCatalogController extends Controller
     public function categoryProducts(Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => 'integer|exists:categories,id',
         ]);
 
-        $products = Product::whereHas('categories', function ($query) use ($request) {
-                $query->where('categories.id', $request->category_id);
-            })
-            ->orderBy('name')
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->getTranslation('name'),
-                    'price' => format_price($product->lowest_price),
-                    'is_disabled' => (float) $product->lowest_price <= 0,
-                ];
-            })
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values();
+        $categoryIds = array_values(array_unique($request->category_ids));
 
-        return response()->json($products);
+        $categories = Category::whereIn('id', $categoryIds)
+            ->orderBy('name')
+            ->get();
+
+        $categoryProducts = $categories->map(function ($category) {
+            $products = Product::whereHas('categories', function ($query) use ($category) {
+                    $query->where('categories.id', $category->id);
+                })
+                ->get()
+                ->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->getTranslation('name'),
+                        'price' => format_price($product->lowest_price),
+                        'is_disabled' => (float) $product->lowest_price <= 0,
+                    ];
+                })
+                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values();
+
+            return [
+                'category_id' => $category->id,
+                'category_name' => $category->getTranslation('name'),
+                'products' => $products,
+            ];
+        })->filter(function ($category) {
+            return $category['products']->isNotEmpty();
+        })->values();
+
+        return response()->json($categoryProducts);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => 'integer|exists:categories,id',
             'product_ids' => 'required|array|min:1',
             'product_ids.*' => 'integer|exists:products,id',
             'name' => 'nullable|string|max:255',
         ]);
 
-        $category = Category::findOrFail($request->category_id);
+        $categoryIds = array_values(array_unique($request->category_ids));
+        $categories = Category::whereIn('id', $categoryIds)
+            ->orderBy('name')
+            ->get();
+        $categoryNames = $categories
+            ->map(function ($category) {
+                return $category->getTranslation('name');
+            })
+            ->values();
         $productIds = array_values(array_unique($request->product_ids));
 
         $products = Product::whereIn('id', $productIds)
             ->where('lowest_price', '>', 0)
-            ->whereHas('categories', function ($query) use ($category) {
-                $query->where('categories.id', $category->id);
+            ->whereHas('categories', function ($query) use ($categoryIds) {
+                $query->whereIn('categories.id', $categoryIds);
             })
             ->get()
             ->sortBy(function ($product) {
@@ -72,11 +97,34 @@ class ProductCatalogController extends Controller
             ->values();
 
         if ($products->isEmpty()) {
-            flash(translate('Select at least one product from the selected category'))->error();
+            flash(translate('Select at least one product from the selected categories'))->error();
             return back();
         }
 
-        $catalogName = $request->name ?: translate('Catalog') . ' - ' . $category->getTranslation('name') . ' - ' . now()->format('Y-m-d H:i');
+        $productsByCategory = $categories->map(function ($category) use ($productIds) {
+            $products = Product::whereIn('id', $productIds)
+                ->where('lowest_price', '>', 0)
+                ->whereHas('categories', function ($query) use ($category) {
+                    $query->where('categories.id', $category->id);
+                })
+                ->get()
+                ->sortBy(function ($product) {
+                    return Str::lower($product->getTranslation('name'));
+                })
+                ->values();
+
+            return [
+                'category' => $category,
+                'letter_groups' => $products->groupBy(function ($product) {
+                    $letter = Str::upper(Str::substr(trim($product->getTranslation('name')), 0, 1));
+                    return preg_match('/[A-Z0-9]/', $letter) ? $letter : '#';
+                })->sortKeys(),
+            ];
+        })->filter(function ($group) {
+            return $group['letter_groups']->isNotEmpty();
+        })->values();
+
+        $catalogName = $request->name ?: translate('Catalog') . ' - ' . $categoryNames->join(', ') . ' - ' . now()->format('Y-m-d H:i');
         $directory = public_path('uploads/catalogs');
 
         if (! is_dir($directory)) {
@@ -88,15 +136,18 @@ class ProductCatalogController extends Controller
 
         PDF::loadView('backend.product.catalogs.pdf', [
             'catalogName' => $catalogName,
-            'category' => $category,
+            'categories' => $categories,
             'products' => $products,
+            'productsByCategory' => $productsByCategory,
         ], [], [])->save(public_path($relativePath));
 
         $catalogs = $this->catalogs();
         array_unshift($catalogs, [
             'id' => (string) Str::uuid(),
             'name' => $catalogName,
-            'category_name' => $category->getTranslation('name'),
+            'category_name' => $categoryNames->join(', '),
+            'category_ids' => $categoryIds,
+            'category_names' => $categoryNames->all(),
             'product_ids' => $products->pluck('id')->values()->all(),
             'file_path' => $relativePath,
             'products_count' => $products->count(),
@@ -126,6 +177,30 @@ class ProductCatalogController extends Controller
         }
 
         return response()->download($path, basename($catalog['file_path']));
+    }
+
+    public function destroy($catalog)
+    {
+        $catalogs = collect($this->catalogs());
+        $catalogToDelete = $catalogs->firstWhere('id', $catalog);
+
+        if (! $catalogToDelete) {
+            flash(translate('Catalog was not found'))->error();
+            return back();
+        }
+
+        $path = public_path($catalogToDelete['file_path']);
+
+        if (file_exists($path)) {
+            unlink($path);
+        }
+
+        $this->saveCatalogs($catalogs->reject(function ($item) use ($catalog) {
+            return $item['id'] === $catalog;
+        })->values()->all());
+
+        flash(translate('Catalog deleted successfully'))->success();
+        return redirect()->route('product_catalogs.index');
     }
 
     protected function catalogs()
