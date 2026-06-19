@@ -103,6 +103,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/product-catalogs', [ProductCatalogController::class, 'index'])->name('product_catalogs.index');
     Route::get('/product-catalogs/category-products', [ProductCatalogController::class, 'categoryProducts'])->name('product_catalogs.category_products');
     Route::post('/product-catalogs', [ProductCatalogController::class, 'store'])->name('product_catalogs.store');
+    Route::get('/product-catalogs/configuration', [ProductCatalogController::class, 'configurationDefaults'])->name('product_catalogs.configuration.defaults');
+    Route::post('/product-catalogs/configuration', [ProductCatalogController::class, 'updateConfigurationDefaults'])->name('product_catalogs.configuration.defaults.update');
+    Route::get('/product-catalogs/{catalog}/configuration', [ProductCatalogController::class, 'configuration'])->name('product_catalogs.configuration');
+    Route::put('/product-catalogs/{catalog}/configuration', [ProductCatalogController::class, 'updateConfiguration'])->name('product_catalogs.configuration.update');
+    Route::get('/product-catalogs/{catalog}/edit', [ProductCatalogController::class, 'edit'])->name('product_catalogs.edit');
+    Route::put('/product-catalogs/{catalog}', [ProductCatalogController::class, 'update'])->name('product_catalogs.update');
     Route::delete('/product-catalogs/{catalog}', [ProductCatalogController::class, 'destroy'])->name('product_catalogs.destroy');
     Route::get('/product-catalogs/{catalog}/download', [ProductCatalogController::class, 'download'])->name('product_catalogs.download');
 
@@ -382,3 +388,4 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 Route::get('/authorizenet/cardtype', [AuthorizenetPaymentController::class, 'cardType'])->name('authorizenet.cardtype');
 
 Route::get('/addons/multivendor', [MultiVendorController::class, 'helloFromMultiVendor']);
+
