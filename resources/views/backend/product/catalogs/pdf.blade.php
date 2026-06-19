@@ -180,11 +180,15 @@
         .product-table { width: 196mm; margin: 22mm 10mm 0; border-collapse: separate; border-spacing: 4mm 4mm; }
         .product-card { width: 94mm; height: 72mm; border: 1px solid #e5e7eb; background: #fff; vertical-align: top; padding: 0; }
         .product-banner { height: 10mm; padding: 2mm 4mm; font-size: 12px; font-weight: 700; overflow: hidden; white-space: nowrap; }
-        .product-body { padding: 4mm; }
-        .product-image { width: 28mm; height: 28mm; object-fit: contain; float: left; margin-right: 4mm; }
+        .product-body { padding: 0; height: 62mm; }
+        .product-layout { width: 100%; height: 62mm; border-collapse: collapse; table-layout: fixed; }
+        .product-image-cell { width: 38mm; padding: 4mm 2mm 4mm 4mm; vertical-align: middle; text-align: center; }
+        .product-image { width: 32mm; height: 54mm; object-fit: contain; }
+        .product-info-cell { padding: 4mm 4mm 4mm 2mm; vertical-align: top; }
         .product-name { font-family: '{{ $cssFont($settings['product_title_font_family']) }}', sans-serif; font-size: {{ (int) $settings['product_title_font_size'] }}px; font-weight: 700; line-height: 1.25; min-height: 13mm; }
+        .product-info-cell.without-description .product-name { min-height: 25mm; }
         .product-price { font-family: '{{ $cssFont($settings['product_price_font_family']) }}', sans-serif; font-size: {{ (int) $settings['product_price_font_size'] }}px; font-weight: 700; color: #f36f21; margin-top: 2mm; }
-        .product-description { font-family: '{{ $cssFont($settings['product_description_font_family']) }}', sans-serif; clear: both; padding-top: 3mm; font-size: {{ (int) $settings['product_description_font_size'] }}px; color: #59606b; line-height: 1.35; }
+        .product-description { font-family: '{{ $cssFont($settings['product_description_font_family']) }}', sans-serif; padding-top: 3mm; font-size: {{ (int) $settings['product_description_font_size'] }}px; color: #59606b; line-height: 1.35; }
         .product-reference { font-family: '{{ $cssFont($settings['product_reference_font_family']) }}', sans-serif; font-size: {{ (int) $settings['product_reference_font_size'] }}px; color: #8a93a3; margin-top: 2mm; }
         .empty-special-page { padding: 32mm 20mm; text-align: center; background: #f4f5f7; }
         .empty-special-page h1 { color: #f36f21; font-size: 28px; margin-bottom: 8mm; }
@@ -360,17 +364,25 @@
                                     <td class="product-card" style="border-color: {{ $boxColor }};">
                                         <div class="product-banner" style="background: {{ $boxColor }}; color: {{ $textColor }};">{{ $product->getTranslation('name') }}</div>
                                         <div class="product-body">
-                                            <img class="product-image" src="{{ $image }}">
-                                            <div class="product-name">{{ $product->getTranslation('name') }}</div>
-                                            @if ($settings['show_prices'])
-                                                <div class="product-price">{{ format_price($product->lowest_price) }}</div>
-                                            @endif
-                                            @if ($description)
-                                                <div class="product-description">{{ $description }}</div>
-                                            @endif
-                                            @if ($product->reference)
-                                                <div class="product-reference">{{ $product->reference }}</div>
-                                            @endif
+                                            <table class="product-layout">
+                                                <tr>
+                                                    <td class="product-image-cell">
+                                                        <img class="product-image" src="{{ $image }}">
+                                                    </td>
+                                                    <td class="product-info-cell {{ $description ? 'with-description' : 'without-description' }}">
+                                                        <div class="product-name">{{ $product->getTranslation('name') }}</div>
+                                                        @if ($settings['show_prices'])
+                                                            <div class="product-price">{{ format_price($product->lowest_price) }}</div>
+                                                        @endif
+                                                        @if ($product->reference)
+                                                            <div class="product-reference">{{ $product->reference }}</div>
+                                                        @endif
+                                                        @if ($description)
+                                                            <div class="product-description">{{ $description }}</div>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            </table>
                                         </div>
                                     </td>
                                 @endforeach
