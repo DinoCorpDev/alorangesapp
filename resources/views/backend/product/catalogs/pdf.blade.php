@@ -188,7 +188,7 @@
         .product-reference { font-family: '{{ $cssFont($settings['product_reference_font_family']) }}', sans-serif; font-size: {{ (int) $settings['product_reference_font_size'] }}px; color: #8a93a3; margin-top: 2mm; }
         .empty-special-page { padding: 32mm 20mm; text-align: center; background: #f4f5f7; }
         .empty-special-page h1 { color: #f36f21; font-size: 28px; margin-bottom: 8mm; }
-        .payment-page { padding: 18mm 20mm; background: #fff; }
+        .payment-page { padding: 34mm 20mm 18mm; background: #fff; }
         .payment-title { color: #ff5a00; font-size: 29px; font-weight: 700; line-height: 1; }
         .payment-pill { background: #27c83a; color: #fff; border-radius: 20px; padding: 3mm 5mm; text-align: center; font-weight: 700; margin: 9mm 0 4mm; font-size: 12px; }
         .payment-box { border: 1.5mm solid #008847; padding: 4mm 5mm; margin-bottom: 7mm; min-height: 22mm; font-size: 10px; line-height: 1.35; }
@@ -201,7 +201,7 @@
         .payment-column-title { background: #27c83a; color: #fff; padding: 2mm; text-align: center; font-weight: 700; font-size: 11px; }
         .payment-column-body { padding: 5mm; font-size: 10px; line-height: 1.35; text-align: center; }
         .payment-column-icon { max-width: 28mm; max-height: 16mm; object-fit: contain; margin-bottom: 3mm; }
-        .info-page { padding: 22mm 20mm; background: #fff; }
+        .info-page { padding: 38mm 20mm 22mm; background: #fff; }
         .info-title { color: #ff5a00; font-size: 26px; font-weight: 700; margin-bottom: 8mm; }
         .info-content { border: 1.2mm solid #008847; padding: 6mm; font-size: 11px; line-height: 1.45; }
         .info-table { width: 100%; border-collapse: collapse; border: 1.2mm solid #008847; font-size: 11px; }
