@@ -161,6 +161,8 @@
         .page { width: 216mm; height: 279mm; page-break-after: always; position: relative; overflow: hidden; }
         .page:last-child { page-break-after: auto; }
         .full-page-image { width: 216mm; height: 279mm; object-fit: cover; }
+        .page-background { position: absolute; inset: 0; width: 216mm; height: 279mm; object-fit: cover; z-index: 0; }
+        .payment-page > :not(.page-background), .info-page > :not(.page-background) { position: relative; z-index: 1; }
         .cover { background: #f4f5f7; padding: 28mm 20mm; }
         .cover-title { position: absolute; left: 20mm; right: 20mm; text-align: center; font-size: 34px; font-weight: 700; color: #f36f21; line-height: 1.15; margin: 0; }
         .cover-meta { position: absolute; left: 20mm; right: 20mm; text-align: center; font-size: 14px; color: #555; margin: 0; }
@@ -188,7 +190,6 @@
         .empty-special-page h1 { color: #f36f21; font-size: 28px; margin-bottom: 8mm; }
         .payment-page { padding: 18mm 20mm; background: #fff; }
         .payment-title { color: #ff5a00; font-size: 29px; font-weight: 700; line-height: 1; }
-        .payment-logo { position: absolute; right: 20mm; top: 17mm; width: 38mm; height: 24mm; object-fit: contain; }
         .payment-pill { background: #27c83a; color: #fff; border-radius: 20px; padding: 3mm 5mm; text-align: center; font-weight: 700; margin: 9mm 0 4mm; font-size: 12px; }
         .payment-box { border: 1.5mm solid #008847; padding: 4mm 5mm; margin-bottom: 7mm; min-height: 22mm; font-size: 10px; line-height: 1.35; }
         .payment-box-content { width: 100%; border-collapse: collapse; }
@@ -202,7 +203,6 @@
         .payment-column-icon { max-width: 28mm; max-height: 16mm; object-fit: contain; margin-bottom: 3mm; }
         .info-page { padding: 22mm 20mm; background: #fff; }
         .info-title { color: #ff5a00; font-size: 26px; font-weight: 700; margin-bottom: 8mm; }
-        .info-image { width: 70mm; max-height: 60mm; object-fit: contain; float: right; margin-left: 8mm; margin-bottom: 6mm; }
         .info-content { border: 1.2mm solid #008847; padding: 6mm; font-size: 11px; line-height: 1.45; }
         .info-table { width: 100%; border-collapse: collapse; border: 1.2mm solid #008847; font-size: 11px; }
         .info-table td { border-bottom: 0.3mm solid #a7d9b8; padding: 4mm; vertical-align: top; }
@@ -266,7 +266,7 @@
     @if ($settings['show_payment_page'])
         <div class="page payment-page">
             @if ($paymentImage)
-                <img class="payment-logo" src="{{ $paymentImage }}">
+                <img class="page-background" src="{{ $paymentImage }}">
             @endif
             <div class="payment-title">{{ $settings['payment_title'] ?: 'MEDIOS DE PAGO' }}</div>
             <div class="payment-pill">{{ $settings['payment_delivery_title'] }}</div>
@@ -315,7 +315,7 @@
     @if ($settings['show_info_page'])
         <div class="page info-page">
             @if ($infoImage)
-                <img class="info-image" src="{{ $infoImage }}">
+                <img class="page-background" src="{{ $infoImage }}">
             @endif
             <div class="info-title">{{ $settings['info_page_title'] ?: translate('Information') }}</div>
             @if (! empty($infoRows))
