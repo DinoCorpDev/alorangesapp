@@ -6,6 +6,7 @@
         'show_page_four' => false,
         'description_limit' => 90,
         'cover_image' => null,
+        'cover_title_position' => 'middle',
         'advisor_name' => '',
         'advisor_phone' => '',
         'advisor_email_1' => '',
@@ -144,6 +145,10 @@
                 ];
             })->values()->all();
     }
+    $coverTitlePosition = in_array($settings['cover_title_position'] ?? 'middle', ['top', 'middle', 'bottom'], true)
+        ? $settings['cover_title_position']
+        : 'middle';
+    $advisorEmails = collect([$settings['advisor_email_1'] ?? '', $settings['advisor_email_2'] ?? ''])->filter()->values();
 @endphp
 <!doctype html>
 <html>
@@ -157,11 +162,17 @@
         .page:last-child { page-break-after: auto; }
         .full-page-image { width: 216mm; height: 279mm; object-fit: cover; }
         .cover { background: #f4f5f7; padding: 28mm 20mm; }
-        .cover-title { font-size: 34px; font-weight: 700; color: #f36f21; line-height: 1.15; margin-top: 120mm; }
-        .cover-meta { font-size: 14px; color: #555; margin-top: 8mm; }
-        .cover-overlay-title { position: absolute; left: 16mm; right: 16mm; bottom: 38mm; text-align: center; color: #ff5a00; font-size: 32px; line-height: 1.08; font-weight: 700; text-transform: uppercase; }
+        .cover-title { position: absolute; left: 20mm; right: 20mm; text-align: center; font-size: 34px; font-weight: 700; color: #f36f21; line-height: 1.15; margin: 0; }
+        .cover-meta { position: absolute; left: 20mm; right: 20mm; text-align: center; font-size: 14px; color: #555; margin: 0; }
+        .cover-overlay-title { position: absolute; left: 16mm; right: 16mm; text-align: center; color: #ff5a00; font-size: 32px; line-height: 1.08; font-weight: 700; text-transform: uppercase; }
+        .cover-title-position-top .cover-title, .cover-title-position-top .cover-overlay-title { top: 58mm; transform: none; }
+        .cover-title-position-top .cover-meta { top: 89mm; }
+        .cover-title-position-middle .cover-title, .cover-title-position-middle .cover-overlay-title { top: 50%; transform: translateY(-50%); }
+        .cover-title-position-middle .cover-meta { top: calc(50% + 24mm); }
+        .cover-title-position-bottom .cover-title, .cover-title-position-bottom .cover-overlay-title { bottom: 38mm; transform: none; }
+        .cover-title-position-bottom .cover-meta { bottom: 28mm; }
         .cover-advisor { position: absolute; left: 12mm; right: 12mm; bottom: 10mm; text-align: center; color: #007a3d; font-size: 25px; font-weight: 700; line-height: 1.25; }
-        .cover-advisor-name { display: block; margin-bottom: 2.5mm; text-transform: uppercase; }
+        .cover-advisor-name { display: block; margin-bottom: 2.5mm; text-transform: uppercase; text-align: center; }
         .cover-advisor-contact { margin: 0 3mm; white-space: nowrap; }
         .category-heading { position: absolute; top: 7mm; right: 10mm; width: 18mm; height: 18mm; padding: 0; text-align: right; font-size: 34px; line-height: 18mm; font-weight: 700; }
         .product-table { width: 196mm; margin: 22mm 10mm 0; border-collapse: separate; border-spacing: 4mm 4mm; }
@@ -201,43 +212,51 @@
 </head>
 <body>
     @if ($coverImage)
-        <div class="page">
+        <div class="page cover-title-position-{{ $coverTitlePosition }}">
             <img class="full-page-image" src="{{ $coverImage }}">
             <div class="cover-overlay-title">{{ $catalogName }}</div>
             @if ($settings['advisor_name'] || $settings['advisor_phone'] || $settings['advisor_email_1'] || $settings['advisor_email_2'])
                 <div class="cover-advisor">
                     @if ($settings['advisor_name'])
-                        <span class="cover-advisor-name">{{ translate('Commercial Advisor') }}: {{ $settings['advisor_name'] }}</span>
+                        <span class="cover-advisor-name">{{ $settings['advisor_name'] }}</span>
                     @endif
-                    @if ($settings['advisor_phone'])
-                        <span class="cover-advisor-contact">{{ $settings['advisor_phone'] }}</span>
-                    @endif
-                    @if ($settings['advisor_email_1'])
-                        <span class="cover-advisor-contact">{{ $settings['advisor_email_1'] }}</span>
-                    @endif
-                    @if ($settings['advisor_email_2'])
-                        <span class="cover-advisor-contact">{{ $settings['advisor_email_2'] }}</span>
+                    @if ($settings['advisor_phone'] || $advisorEmails->isNotEmpty())
+                        <span class="cover-advisor-contact">
+                            @if ($settings['advisor_phone'])
+                                {{ $settings['advisor_phone'] }}
+                            @endif
+                            @if ($settings['advisor_phone'] && $advisorEmails->isNotEmpty())
+                                |
+                            @endif
+                            @if ($advisorEmails->isNotEmpty())
+                                {{ $advisorEmails->join(' - ') }}
+                            @endif
+                        </span>
                     @endif
                 </div>
             @endif
         </div>
     @else
-        <div class="page cover">
+        <div class="page cover cover-title-position-{{ $coverTitlePosition }}">
             <div class="cover-title">{{ $catalogName }}</div>
             <div class="cover-meta">{{ $categories->map(function ($category) { return $category->getTranslation('name'); })->join(' - ') }}</div>
             @if ($settings['advisor_name'] || $settings['advisor_phone'] || $settings['advisor_email_1'] || $settings['advisor_email_2'])
                 <div class="cover-advisor">
                     @if ($settings['advisor_name'])
-                        <span class="cover-advisor-name">{{ translate('Commercial Advisor') }}: {{ $settings['advisor_name'] }}</span>
+                        <span class="cover-advisor-name">{{ $settings['advisor_name'] }}</span>
                     @endif
-                    @if ($settings['advisor_phone'])
-                        <span class="cover-advisor-contact">{{ $settings['advisor_phone'] }}</span>
-                    @endif
-                    @if ($settings['advisor_email_1'])
-                        <span class="cover-advisor-contact">{{ $settings['advisor_email_1'] }}</span>
-                    @endif
-                    @if ($settings['advisor_email_2'])
-                        <span class="cover-advisor-contact">{{ $settings['advisor_email_2'] }}</span>
+                    @if ($settings['advisor_phone'] || $advisorEmails->isNotEmpty())
+                        <span class="cover-advisor-contact">
+                            @if ($settings['advisor_phone'])
+                                {{ $settings['advisor_phone'] }}
+                            @endif
+                            @if ($settings['advisor_phone'] && $advisorEmails->isNotEmpty())
+                                |
+                            @endif
+                            @if ($advisorEmails->isNotEmpty())
+                                {{ $advisorEmails->join(' - ') }}
+                            @endif
+                        </span>
                     @endif
                 </div>
             @endif

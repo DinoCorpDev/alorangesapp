@@ -59,6 +59,16 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
+                                <label>{{ translate('Title Position') }}</label>
+                                <select class="form-control aiz-selectpicker" name="cover_title_position">
+                                    <option value="top" @if (old('cover_title_position', $settings['cover_title_position'] ?? 'middle') === 'top') selected @endif>{{ translate('Top') }}</option>
+                                    <option value="middle" @if (old('cover_title_position', $settings['cover_title_position'] ?? 'middle') === 'middle') selected @endif>{{ translate('Middle') }}</option>
+                                    <option value="bottom" @if (old('cover_title_position', $settings['cover_title_position'] ?? 'middle') === 'bottom') selected @endif>{{ translate('Bottom') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <label>{{ translate('Advisor Name') }}</label>
                                 <input type="text" class="form-control" name="advisor_name" value="{{ old('advisor_name', $settings['advisor_name'] ?? '') }}" placeholder="{{ translate('Advisor Name') }}">
                             </div>

@@ -86,6 +86,7 @@ class ProductCatalogController extends Controller
 
         $settings = $this->validatedConfigurationSettings($request);
         $settings['cover_image'] = $existing['settings']['cover_image'] ?? null;
+        $settings['cover_title_position'] = $existing['settings']['cover_title_position'] ?? 'middle';
         $settings['advisor_name'] = $existing['settings']['advisor_name'] ?? '';
         $settings['advisor_phone'] = $existing['settings']['advisor_phone'] ?? '';
         $settings['advisor_email_1'] = $existing['settings']['advisor_email_1'] ?? '';
@@ -257,6 +258,7 @@ class ProductCatalogController extends Controller
             'product_ids.*' => 'integer|exists:products,id',
             'name' => 'nullable|string|max:255',
             'cover_image' => 'nullable|string|max:255',
+            'cover_title_position' => 'nullable|in:top,middle,bottom',
             'advisor_name' => 'nullable|string|max:120',
             'advisor_phone' => 'nullable|string|max:60',
             'advisor_email_1' => 'nullable|email|max:120',
@@ -287,6 +289,7 @@ class ProductCatalogController extends Controller
 
         $settings = array_merge($this->catalogDefaultsConfig(), $existing['settings'] ?? [], [
             'cover_image' => $request->cover_image,
+            'cover_title_position' => $request->cover_title_position ?: 'middle',
             'advisor_name' => $request->advisor_name,
             'advisor_phone' => $request->advisor_phone,
             'advisor_email_1' => $request->advisor_email_1,
@@ -664,6 +667,7 @@ class ProductCatalogController extends Controller
             'show_page_four' => false,
             'description_limit' => 90,
             'cover_image' => null,
+            'cover_title_position' => 'middle',
             'advisor_name' => '',
             'advisor_phone' => '',
             'advisor_email_1' => '',
