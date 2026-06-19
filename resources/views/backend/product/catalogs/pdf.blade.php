@@ -175,7 +175,7 @@
         .cover-title-position-bottom .cover-meta { bottom: 28mm; }
         .cover-advisor { position: absolute; left: 12mm; right: 12mm; bottom: 10mm; text-align: center; color: #007a3d; font-size: 25px; font-weight: 700; line-height: 1.25; }
         .cover-advisor-name { display: block; margin-bottom: 2.5mm; text-transform: uppercase; text-align: center; }
-        .cover-advisor-contact { margin: 0 3mm; white-space: nowrap; }
+        .cover-advisor-contact { display: block; max-width: 185mm; margin: 0 auto; white-space: normal; overflow-wrap: anywhere; word-break: break-word; font-size: 20px; line-height: 1.2; }
         .category-heading { position: absolute; top: 7mm; right: 10mm; width: 18mm; height: 18mm; padding: 0; text-align: right; font-size: 34px; line-height: 18mm; font-weight: 700; }
         .product-table { width: 196mm; margin: 22mm 10mm 0; border-collapse: separate; border-spacing: 4mm 4mm; }
         .product-card { width: 94mm; height: 72mm; border: 1px solid #e5e7eb; background: #fff; vertical-align: top; padding: 0; }
