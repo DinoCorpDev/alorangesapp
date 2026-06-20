@@ -38,18 +38,18 @@
                             v-on="on"
                         />
                     </template>
-                    <span>Refrescar</span>
+                    <span>Cargar todos</span>
                 </v-tooltip>
                 <div class="container-buttons">
                     <div v-for="filtro in resultadoFiltroBotones" :key="`button-${filtro.id}`">
                         <CustomButton
                             :text="filtro.text"
-                            :color="activeButton === filtro.id ? 'orange-cart2' : 'nero3'"
+                            :color="activeButton === filtro.text ? 'orange-cart2' : 'nero3'"
                             type="button"
                             class="mt-4 mr-3"
                             width="45"
                             height="54"
-                            @click="setActiveButton(filtro.id, filtro.text)"
+                            @click="setActiveButton(filtro.text)"
                         />
                     </div>
                 </div>
@@ -119,7 +119,7 @@ import Mixin from "../../utils/mixin";
 export default {
     name: "ShopShowApi",
     data: () => ({
-        productsSeeder: [],
+        productsSeeder: {},
         resultadoFiltroBotones: [],
         activeButton: null,
         categoryData: {},
@@ -184,13 +184,13 @@ export default {
     },
     mounted() {
         this.getCategoryData();
-        this.getProducts();
+        this.getInitialProducts();
         this.updateBreadcrumb();
     },
     watch: {
         category() {
             this.getCategoryData();
-            this.getProducts();
+            this.getInitialProducts();
             this.updateBreadcrumb();
         }
     },
@@ -218,14 +218,15 @@ export default {
             this.loading = true;
 
             try {
-                const res = await Mixin.methods.call_api("get", `product/search?category_slug=${encodeURIComponent(this.category)}`);
+                const res = await this.fetchCategoryProducts({ all: true });
 
                 if (requestId !== this.productsRequestId) {
                     return;
                 }
 
                 if (res.data.success) {
-                    this.isList = false;
+                    this.isList = true;
+                    this.resultadoFiltroBotones = res.data.letters || [];
                     this.setProducts(res.data.products.data || []);
                     this.activeButton = null;
                 }
@@ -239,14 +240,50 @@ export default {
                 }
             }
         },
+        async getInitialProducts() {
+            const requestId = ++this.productsRequestId;
+            this.loading = true;
+
+            try {
+                const res = await this.fetchCategoryProducts({ all: true });
+
+                if (requestId !== this.productsRequestId) {
+                    return;
+                }
+
+                if (res.data.success) {
+                    this.isList = false;
+                    this.resultadoFiltroBotones = res.data.letters || [];
+                    this.activeButton = null;
+                    this.setProducts(res.data.products.data || []);
+                }
+            } catch (error) {
+                console.error(error);
+                this.productsSeeder = {};
+                this.resultadoFiltroBotones = [];
+            } finally {
+                if (requestId === this.productsRequestId) {
+                    this.loading = false;
+                }
+            }
+        },
+        fetchCategoryProducts({ letter = null, all = false } = {}) {
+            const params = new URLSearchParams({
+                mode: "shop_category",
+                category_slug: this.category || ""
+            });
+
+            if (letter) {
+                params.append("letter", letter);
+            }
+
+            if (all) {
+                params.append("all", "1");
+            }
+
+            return Mixin.methods.call_api("get", `product/search?${params.toString()}`);
+        },
         setProducts(products) {
-            const letrasFiltro = [...new Set(products.map(item => item.name.charAt(0).toUpperCase()))].sort();
-
-            this.resultadoFiltroBotones = letrasFiltro.map((letra, index) => ({
-                id: index + 1,
-                text: letra
-            }));
-
             this.productsSeeder = products.reduce((acc, product) => {
                 const primeraLetra = product.name.charAt(0).toUpperCase();
 
@@ -268,35 +305,32 @@ export default {
         },
 
         async filter(value) {
+            const requestId = ++this.productsRequestId;
             this.loading = true;
 
             try {
-                const res = await Mixin.methods.call_api(
-                    "get",
-                    `product/search?category_slug=${encodeURIComponent(this.category)}&&keyword=${encodeURIComponent(value)}`
-                );
+                const res = await this.fetchCategoryProducts({ letter: value });
+
+                if (requestId !== this.productsRequestId) {
+                    return;
+                }
 
                 if (res.data.success) {
-                    this.productsSeeder = (res.data.products.data || []).reduce((acc, product) => {
-                        const primeraLetra = product.name.charAt(0).toUpperCase();
-                        if (!acc[primeraLetra]) {
-                            acc[primeraLetra] = [];
-                        }
-
-                        acc[primeraLetra].push(product);
-                        return acc;
-                    }, {});
+                    this.resultadoFiltroBotones = res.data.letters || this.resultadoFiltroBotones;
+                    this.activeButton = res.data.activeLetter || value;
+                    this.setProducts(res.data.products.data || []);
                 }
             } catch (error) {
                 console.error(error);
                 this.productsSeeder = {};
             } finally {
-                this.loading = false;
+                if (requestId === this.productsRequestId) {
+                    this.loading = false;
+                }
             }
         },
-        setActiveButton(id, value) {
+        setActiveButton(value) {
             this.isList = true;
-            this.activeButton = id;
             this.filter(value);
         }
     }

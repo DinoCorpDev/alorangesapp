@@ -20,6 +20,10 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LanguageController;
 
+if (! class_exists(SellerController::class)) {
+    return;
+}
+
 /*
 |--------------------------------------------------------------------------
 | Seller Routes

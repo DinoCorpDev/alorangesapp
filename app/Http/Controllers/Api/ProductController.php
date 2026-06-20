@@ -17,7 +17,12 @@ use App\Models\AttributeCategory;
 use App\Models\OrderDetail;
 use App\Models\Shop;
 use App\Models\ProductCategory;
+use App\Models\Upload;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use App\Utility\CategoryUtility;
 
 use App\Http\Services\AlegraServices;
@@ -134,12 +139,16 @@ class ProductController extends Controller
             ]);
         }
 
-        $category = Category::where('name','=',$request->category_slug)->first();
+        $category = $this->findShopCategory($request->category_slug);
         if (empty($category)) {
             return response()->json([
                 'success' => true,
                 'products' => $products,
             ]);
+        }
+
+        if ($request->mode === 'shop_category') {
+            return $this->shopCategoryProductsResponse($request, $category);
         }
         
         $products = Product::whereHas('product_categories', function ($query) use ($category) {
@@ -359,6 +368,78 @@ class ProductController extends Controller
         ]);
     }
 
+    private function findShopCategory($category)
+    {
+        if (!$category) {
+            return null;
+        }
+
+        return Category::where('name', $category)
+            ->orWhere('slug', $category)
+            ->first();
+    }
+
+    private function shopCategoryProductsResponse(Request $request, Category $category)
+    {
+        $letters = $this->getShopCategoryLetters($category);
+        $requestedLetter = strtoupper((string) $request->letter);
+        $activeLetter = $requestedLetter ?: ($letters[0]['text'] ?? null);
+        $loadAll = filter_var($request->all, FILTER_VALIDATE_BOOLEAN);
+
+        $productsQuery = $this->shopCategoryProductsQuery($category)
+            ->when(!$loadAll && $activeLetter, function ($query) use ($activeLetter) {
+                $query->where('products.name', 'like', $activeLetter.'%');
+            })
+            ->orderBy('products.name', 'asc');
+
+        $collection = new ProductCollection($productsQuery->get());
+
+        return response()->json([
+            'success' => true,
+            'products' => $collection,
+            'letters' => $letters,
+            'activeLetter' => $loadAll ? null : $activeLetter,
+            'total' => array_sum(array_column($letters, 'count')),
+            'mode' => $loadAll ? 'all' : 'letter',
+        ]);
+    }
+
+    private function getShopCategoryLetters(Category $category): array
+    {
+        return DB::table('products')
+            ->join('product_categories', 'products.id', '=', 'product_categories.product_id')
+            ->where('product_categories.category_id', $category->id)
+            ->where('products.published', 1)
+            ->where('products.approved', 1)
+            ->selectRaw("UPPER(LEFT(TRIM(products.name), 1)) as letter, COUNT(DISTINCT products.id) as total")
+            ->groupBy('letter')
+            ->orderBy('letter')
+            ->get()
+            ->filter(function ($item) {
+                return $item->letter !== '';
+            })
+            ->values()
+            ->map(function ($item, $index) {
+                return [
+                    'id' => $index + 1,
+                    'text' => $item->letter,
+                    'count' => (int) $item->total,
+                ];
+            })
+            ->all();
+    }
+
+    private function shopCategoryProductsQuery(Category $category)
+    {
+        return Product::query()
+            ->select('products.*')
+            ->where('products.published', 1)
+            ->where('products.approved', 1)
+            ->whereHas('product_categories', function ($query) use ($category) {
+                $query->where('category_id', $category->id);
+            });
+    }
+
     public function wompiPaymentCard(Request $request){
         try {
             $cardData = $request['cardData'];
@@ -471,86 +552,25 @@ class ProductController extends Controller
     }
 
     public function alegra(){
-        $products = [];
-        $counter = 0;
-        $categoryId = 0;
+        @set_time_limit(0);
 
-        Product::truncate();
-        ProductCategory::truncate();
+        $counter = 0;
 
         try {
-            $categories = Category::all();
-            foreach($categories as $category){
-                $products = (new AlegraServices)->getProductsByCategory($category['id']);
-                foreach($products as $product){
-                    $productStorage = Product::where('id', $product['id'])->first();
-                    if(empty($productStorage)){
-                        $productStorage = new Product;
+            (new AlegraServices)->eachProduct(function ($product) use (&$counter) {
+                try {
+                    if ($this->syncAlegraProduct($product)) {
+                        $counter++;
                     }
-                    $productStorage->id = $product['id'];
-                    $productStorage->name = $product['name'];
-                    $productStorage->reference = $product['reference'];
-                    $productStorage->description = $product['description'];
-                    $percentage = $product['tax'] ? $product['tax'][0]['percentage'] : 0;
-                    $price = 0;
-                    foreach ($product['price'] as $key => $listPrices) {
-                        if ($listPrices['name'] === 'PUNTO DE VENTA') {
-                            $finalPrice = (int)$listPrices['price'];
-                            if ($percentage > 0) {
-                                $percentageToPrice = (int)$percentage / 100 + 1;
-                            }else{
-                                $percentageToPrice = 1;
-                            }
-                            
-                            $total = $finalPrice * $percentageToPrice;
-                            $totalSinCentavos = floor($total);
-                            $price = $totalSinCentavos;
-                        }
-                    }
-                    $productStorage->tax = $percentage;
-                    $productStorage->lowest_price = $price;
-                    $productStorage->highest_price = $price;
-                    $productStorage->description = $product['description'];
-                    $productStorage->shop_id = 1;
-                    $productStorage->slug = Str::slug($product['name'], '-') . '-' . strtolower(Str::random(5));
-                    $productStorage->published = $product['status'] == 'active' ? 1 : 0;
-                    
-                    if (isset($product['images']) && count($product['images']) > 0 ) {
-                        $productStorage->thumbnail_img = $product['images'][0]['url'];
-                    }else{
-                        $productStorage->thumbnail_img = '';
-                    }
-                    
-                    $images = $product['images'] ?? [];
-
-                    foreach($images as $index => $image)
-                    {
-                        $productStorage['imagen'.($index+1)] = $image['url'];
-                    }
-
-                    $productCategories = ProductCategory::where('product_id',$product['id'])->first();
-                    if(empty($productCategories)){
-                        $productCategories = new ProductCategory;
-                    }
-                    $productCategories->product_id = $product['id'];
-                    $productCategories->category_id = $product['itemCategory']['id'] ?? $category['id'];
-                    $productCategories->created_at = now();
-                    $productCategories->updated_at = now();
-
-                    $productCategories->save();
-                    $productStorage->save();
-
-                    $productStorage->categories()->sync([$product['itemCategory']['id'] ?? $category['id']]);
-
-                    $counter++;
-                    $categoryId = $product['id'];
+                } catch (Exception $e) {
+                    report($e);
                 }
-            }
+            });
+
             $url = config('app.url').'/admin/product';
-            return redirect($url)->with('Actualizado', 'Los productos han sido actualizados correctamente');
+            return redirect($url)->with('Actualizado', $counter.' productos han sido actualizados correctamente');
         } catch (Exception $e) {
-            $error_code = $e->errorInfo[1];
-            $categoryId = $e->errorInfo[1];
+            report($e);
             return back()->withErrors('There was a problem uploading the data!');
         }
     }
@@ -569,40 +589,161 @@ class ProductController extends Controller
 
     private function updateProductsFromAlegra($search_keyword){
         $updateProducts = (new AlegraServices)->getProductsByQuery($search_keyword);
+
         foreach($updateProducts as $product){
-            if (!isset($product['itemCategory']['id'])) {
-                continue;
-            }
-
-            $productStorage = Product::where('reference', $product['reference'])->first();
-            if(empty($productStorage)){
-                $productStorage = new Product;
-            }
-            $productStorage->id = $product['id'];
-            $productStorage->name = $product['name'];
-            $productStorage->reference = $product['reference'];
-            $productStorage->description = $product['description'];
-            $price = array_filter($product['price'], function ($object) {
-                return $object['name'] == 'PRECIOS APPWEB';
-            });
-            $priceValue = reset($price);
-            $priceWithIva = ($priceValue['price'] * $product['tax'][0]['percentage']/100) + $priceValue['price'];
-            $productStorage->lowest_price = $priceWithIva;
-            $productStorage->highest_price = $priceWithIva;
-            $productStorage->description = $product['description'];
-            $productStorage->shop_id = 1;
-            $productStorage->slug = Str::slug($product['name'], '-') . '-' . strtolower(Str::random(5));
-            $productStorage->published = $product['status'] == 'active' ? 1 : 0;
-
-            $images = $product['images'] ?? [];
-
-            foreach($images as $index => $image){
-                $productStorage['imagen'.($index+1)] = $image['url'];
-            }
-
-            $productStorage->save();
-
-            $productStorage->categories()->sync([$product['itemCategory']['id']]);
+            $this->syncAlegraProduct($product, 'PRECIOS APPWEB');
         }
+    }
+
+    private function syncAlegraProduct(array $product, string $priceListName = 'PUNTO DE VENTA'): bool
+    {
+        if (!isset($product['id'])) {
+            return false;
+        }
+
+        $categoryId = $this->resolveAlegraCategoryId($product);
+        $productStorage = Product::find($product['id']) ?: new Product;
+        $productStorage->id = $product['id'];
+        $productStorage->name = $product['name'] ?? '';
+        $productStorage->reference = $product['reference'] ?? '';
+        $productStorage->description = $product['description'] ?? '';
+        $productStorage->tax = $this->getAlegraTaxPercentage($product);
+        $price = $this->calculateAlegraPrice($product, $priceListName);
+        $productStorage->lowest_price = $price;
+        $productStorage->highest_price = $price;
+        $productStorage->shop_id = 1;
+        $productStorage->slug = $productStorage->slug ?: Str::slug($productStorage->name, '-') . '-' . strtolower(Str::random(5));
+        $productStorage->published = ($product['status'] ?? '') == 'active' ? 1 : 0;
+
+        $this->syncAlegraProductImages($productStorage, $product);
+
+        $productStorage->save();
+
+        if ($categoryId && Category::whereKey($categoryId)->exists()) {
+            $productStorage->categories()->sync([$categoryId]);
+        }
+
+        return true;
+    }
+
+    private function resolveAlegraCategoryId(array $product)
+    {
+        return $product['itemCategory']['id']
+            ?? $product['category']['id']
+            ?? $product['idItemCategory']
+            ?? null;
+    }
+
+    private function getAlegraTaxPercentage(array $product)
+    {
+        return isset($product['tax'][0]['percentage']) ? (float) $product['tax'][0]['percentage'] : 0;
+    }
+
+    private function calculateAlegraPrice(array $product, string $priceListName)
+    {
+        $percentage = $this->getAlegraTaxPercentage($product);
+        $prices = $product['price'] ?? [];
+        $basePrice = 0;
+
+        foreach ($prices as $listPrice) {
+            if (($listPrice['name'] ?? '') === $priceListName) {
+                $basePrice = (float) ($listPrice['price'] ?? 0);
+                break;
+            }
+        }
+
+        if ($basePrice == 0 && isset($prices[0]['price'])) {
+            $basePrice = (float) $prices[0]['price'];
+        }
+
+        return floor($basePrice * (($percentage / 100) + 1));
+    }
+
+    private function syncAlegraProductImages(Product $productStorage, array $product): void
+    {
+        $images = array_values($product['images'] ?? []);
+
+        for ($index = 0; $index < 4; $index++) {
+            $field = 'imagen'.($index + 1);
+            $imageUrl = $images[$index]['url'] ?? null;
+
+            if ($imageUrl) {
+                $productStorage->{$field} = $this->storeAlegraImage($imageUrl, $product['id'], $index + 1, $productStorage->{$field});
+            } elseif (!$productStorage->{$field}) {
+                $productStorage->{$field} = null;
+            }
+        }
+
+        if (isset($images[0]['url'])) {
+            $productStorage->thumbnail_img = $this->storeAlegraImage($images[0]['url'], $product['id'], 0, $productStorage->thumbnail_img);
+        } elseif (!$productStorage->thumbnail_img) {
+            $productStorage->thumbnail_img = null;
+        }
+    }
+
+    private function storeAlegraImage(?string $url, $productId, int $index, $currentValue = null)
+    {
+        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return $currentValue;
+        }
+
+        if ($this->hasLocalUpload($currentValue)) {
+            return $currentValue;
+        }
+
+        try {
+            $path = parse_url($url, PHP_URL_PATH) ?: '';
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $extension = in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif']) ? $extension : 'jpg';
+            $hash = substr(sha1($path ?: $url), 0, 16);
+            $fileName = 'alegra-'.$productId.'-'.$index.'-'.$hash.'.'.$extension;
+            $relativePath = 'uploads/all/'.$fileName;
+            $absolutePath = public_path($relativePath);
+
+            $upload = Upload::where('file_name', $relativePath)->first();
+            if (File::exists($absolutePath) && $upload) {
+                return $upload->id;
+            }
+
+            File::ensureDirectoryExists(dirname($absolutePath));
+
+            $response = Http::timeout(45)
+                ->withOptions(['verify' => false])
+                ->retry(2, 500)
+                ->get($url);
+
+            if (!$response->successful() || empty($response->body())) {
+                return $currentValue;
+            }
+
+            File::put($absolutePath, $response->body());
+
+            $contentType = $response->header('Content-Type', 'image/'.$extension);
+
+            $upload = $upload ?: new Upload;
+            $upload->file_original_name = $fileName;
+            $upload->file_name = $relativePath;
+            $upload->user_id = 1;
+            $upload->extension = $extension;
+            $upload->type = str_contains($contentType, 'image') ? 'image' : 'others';
+            $upload->file_size = File::size($absolutePath);
+            $upload->save();
+
+            return $upload->id;
+        } catch (Exception $e) {
+            report($e);
+            return $currentValue;
+        }
+    }
+
+    private function hasLocalUpload($value): bool
+    {
+        if (!$value || !ctype_digit((string) $value)) {
+            return false;
+        }
+
+        $upload = Upload::find($value);
+
+        return $upload && File::exists(public_path($upload->file_name));
     }
 }

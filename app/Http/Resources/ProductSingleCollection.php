@@ -21,7 +21,7 @@ class ProductSingleCollection extends JsonResource
 
         $images=[];
         array_push($images, [
-            'src' => $this->thumbnail_img,
+            'src' => $this->productImage($this->thumbnail_img),
             'type' => 'image']);
         return [
             'id' => (int) $this->id,
@@ -96,5 +96,14 @@ class ProductSingleCollection extends JsonResource
         }
 
         return $result;
+    }
+
+    private function productImage($image)
+    {
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $image;
+        }
+
+        return api_asset($image);
     }
 }

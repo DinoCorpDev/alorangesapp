@@ -657,6 +657,14 @@ function hex2rgba($color, $opacity = false)
 if (!function_exists('api_asset')) {
     function api_asset($id)
     {
+        if (filter_var($id, FILTER_VALIDATE_URL)) {
+            return $id;
+        }
+
+        if (is_string($id) && (strpos($id, 'uploads/') === 0 || strpos($id, 'assets/') === 0)) {
+            return static_asset($id);
+        }
+
         if (($asset = \App\Models\Upload::find($id)) != null) {
             return my_asset($asset->file_name);
         }
@@ -667,6 +675,20 @@ if (!function_exists('api_asset')) {
 if (!function_exists('api_asset_new')) {
     function api_asset_new($id)
     {
+        if (filter_var($id, FILTER_VALIDATE_URL)) {
+            return (object) [
+                'src' => $id,
+                'type' => 'image'
+            ];
+        }
+
+        if (is_string($id) && (strpos($id, 'uploads/') === 0 || strpos($id, 'assets/') === 0)) {
+            return (object) [
+                'src' => static_asset($id),
+                'type' => 'image'
+            ];
+        }
+
         if (($asset = \App\Models\Upload::find($id)) != null) {
             return (object) [
                 'src' => my_asset($asset->file_name),
@@ -682,6 +704,14 @@ if (!function_exists('api_asset_new')) {
 if (!function_exists('uploaded_asset')) {
     function uploaded_asset($id)
     {
+        if (filter_var($id, FILTER_VALIDATE_URL)) {
+            return $id;
+        }
+
+        if (is_string($id) && (strpos($id, 'uploads/') === 0 || strpos($id, 'assets/') === 0)) {
+            return static_asset($id);
+        }
+
         if (($asset = \App\Models\Upload::find($id)) != null) {
             return my_asset($asset->file_name);
         }
