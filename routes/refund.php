@@ -2,6 +2,10 @@
 use App\Addons\Refund\Http\Controllers\Admin\RefundRequestController;
 use App\Addons\Refund\Http\Controllers\Seller\RefundRequestController as SellerRefundRequestController;
 
+if (! class_exists(RefundRequestController::class) || ! class_exists(SellerRefundRequestController::class)) {
+    return;
+}
+
 
 /*
 |--------------------------------------------------------------------------

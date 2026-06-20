@@ -387,5 +387,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 //Authorize-Net-Payment
 Route::get('/authorizenet/cardtype', [AuthorizenetPaymentController::class, 'cardType'])->name('authorizenet.cardtype');
 
-Route::get('/addons/multivendor', [MultiVendorController::class, 'helloFromMultiVendor']);
+if (class_exists(MultiVendorController::class)) {
+    Route::get('/addons/multivendor', [MultiVendorController::class, 'helloFromMultiVendor']);
+}
 
