@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
@@ -411,6 +412,22 @@ class ProductCatalogController extends Controller
         ], base_path(), null, null, 300);
 
         $process->run();
+        $pdfReady = $this->waitForPdfFile($absolutePath);
+
+        if (! $process->isSuccessful() || ! $pdfReady) {
+            Log::error('Chrome catalog PDF generation failed', [
+                'exit_code' => $process->getExitCode(),
+                'exit_code_text' => $process->getExitCodeText(),
+                'output' => trim($process->getOutput()),
+                'error_output' => trim($process->getErrorOutput()),
+                'html_path' => $htmlPath,
+                'pdf_path' => $absolutePath,
+                'pdf_exists' => file_exists($absolutePath),
+                'pdf_size' => file_exists($absolutePath) ? filesize($absolutePath) : 0,
+            ]);
+
+            throw new \RuntimeException(trim($process->getErrorOutput() ?: $process->getOutput() ?: 'Chrome could not generate the PDF. HTML debug file: '.$htmlPath));
+        }
 
         if (file_exists($htmlPath)) {
             @unlink($htmlPath);
@@ -419,10 +436,38 @@ class ProductCatalogController extends Controller
         if (is_dir($userDataDirectory)) {
             $this->deleteDirectory($userDataDirectory);
         }
+    }
 
-        if (! $process->isSuccessful() || ! file_exists($absolutePath) || filesize($absolutePath) === 0) {
-            throw new \RuntimeException(trim($process->getErrorOutput() ?: $process->getOutput() ?: 'Chrome could not generate the PDF.'));
+    protected function waitForPdfFile($absolutePath, int $seconds = 30): bool
+    {
+        $deadline = microtime(true) + $seconds;
+        $lastSize = 0;
+        $stableChecks = 0;
+
+        while (microtime(true) < $deadline) {
+            clearstatcache(true, $absolutePath);
+
+            if (file_exists($absolutePath)) {
+                $size = filesize($absolutePath);
+
+                if ($size > 0 && $size === $lastSize) {
+                    $stableChecks++;
+
+                    if ($stableChecks >= 2) {
+                        return true;
+                    }
+                } else {
+                    $stableChecks = 0;
+                    $lastSize = $size;
+                }
+            }
+
+            usleep(250000);
         }
+
+        clearstatcache(true, $absolutePath);
+
+        return file_exists($absolutePath) && filesize($absolutePath) > 0;
     }
 
     protected function deleteDirectory($directory)

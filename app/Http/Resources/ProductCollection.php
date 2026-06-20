@@ -16,7 +16,7 @@ class ProductCollection extends ResourceCollection
                     'slug' => $data->slug,
                     'lowest_price' => (int) $data->lowest_price,
                     'highest_price' => (int) $data->highest_price,
-                    'thumbnail_image' => $data->thumbnail_img,
+                    'thumbnail_image' => $this->productImage($data->thumbnail_img),
                     'base_price' => (float) product_base_price($data),
                     'base_discounted_price' => (float) product_discounted_base_price($data),
                     'stock' => $data->stock,
@@ -40,5 +40,14 @@ class ProductCollection extends ResourceCollection
             'success' => true,
             'status' => 200
         ];
+    }
+
+    private function productImage($image)
+    {
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $image;
+        }
+
+        return api_asset($image);
     }
 }

@@ -112,7 +112,7 @@
     $paymentCashIcon = $pageImage($settings['payment_cash_icon']);
     $infoImage = $pageImage($settings['info_page_image']);
     $pageFourImage = $pageImage($settings['page_four_image']);
-    $fallbackImage = $pageImage(get_setting('header_logo')) ?: $localPublicAsset('assets/img/logo.png') ?: ($fallbackImage ?? null);
+    $fallbackImage = $localPublicAsset('assets/img/item-placeholder.png') ?: ($fallbackImage ?? null);
     $advertisingItems = $settings['advertising_items'] ?? [];
     if (empty($advertisingItems) && ! empty($settings['advertising_image']) && ($settings['advertising_position'] ?? '') === 'after_each_letter') {
         $advertisingItems = [['image' => $settings['advertising_image'], 'letter' => 'A']];
