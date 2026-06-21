@@ -7,6 +7,8 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Mpdf\Mpdf;
+use Mpdf\Output\Destination;
 use Symfony\Component\Process\Process;
 
 class ProductCatalogController extends Controller
@@ -369,12 +371,41 @@ class ProductCatalogController extends Controller
         return $relativePath;
     }
 
+    protected function renderCatalogWithMpdf(array $viewData, string $absolutePath): void
+    {
+        $tempDir = storage_path('app/product_catalogs/mpdf_temp');
+
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $mpdf = new Mpdf([
+            'mode'          => 'utf-8',
+            'format'        => [216, 279],
+            'margin_left'   => 0,
+            'margin_right'  => 0,
+            'margin_top'    => 0,
+            'margin_bottom' => 0,
+            'margin_header' => 0,
+            'margin_footer' => 0,
+            'tempDir'       => $tempDir,
+        ]);
+
+        $mpdf->SetTitle($viewData['catalogName'] ?? 'Catalog');
+        $mpdf->SetDisplayMode('fullpage');
+        $mpdf->shrink_tables_to_fit = 0;
+
+        $html = view('backend.product.catalogs.pdf_mpdf', $viewData)->render();
+        $mpdf->WriteHTML($html);
+        $mpdf->Output($absolutePath, Destination::FILE);
+    }
+
     protected function renderCatalogWithBrowser(array $viewData, $absolutePath)
     {
-        $chromePath = config('services.browsershot.chrome_path');
+        $chromePath = str_replace('/', DIRECTORY_SEPARATOR, (string) config('services.browsershot.chrome_path'));
 
         if (! $chromePath || ! file_exists($chromePath)) {
-            throw new \RuntimeException('Chrome executable was not found. Check BROWSERSHOT_CHROME_PATH.');
+            throw new \RuntimeException('Chrome executable was not found. Check BROWSERSHOT_CHROME_PATH in .env (current: ' . $chromePath . ')');
         }
 
         $tempDirectory = storage_path('app/product_catalogs/browser');

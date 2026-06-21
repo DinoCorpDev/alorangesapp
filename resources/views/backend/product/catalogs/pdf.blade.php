@@ -156,7 +156,7 @@
     <meta charset="utf-8">
     <style>
         @page { margin: 0; size: letter; }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         body { margin: 0; font-family: DejaVu Sans, sans-serif; color: #2f3138; font-size: 11px; }
         .page { width: 216mm; height: 279mm; page-break-after: always; position: relative; overflow: hidden; }
         .page:last-child { page-break-after: auto; }
