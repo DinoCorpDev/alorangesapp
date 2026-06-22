@@ -7,6 +7,8 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Mpdf\Mpdf;
+use Mpdf\Output\Destination;
 use Symfony\Component\Process\Process;
 
 class ProductCatalogController extends Controller
@@ -364,17 +366,72 @@ class ProductCatalogController extends Controller
             'fallbackImage' => uploaded_asset(get_setting('header_logo')) ?: static_asset('assets/img/logo.png'),
         ];
 
-        $this->renderCatalogWithBrowser($viewData, $absolutePath);
+        $this->renderCatalogWithMpdf($viewData, $absolutePath);
 
         return $relativePath;
     }
 
+    protected function renderCatalogWithMpdf(array $viewData, string $absolutePath): void
+    {
+        $tempDir = storage_path('app/product_catalogs/mpdf_temp');
+
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $mpdf = new Mpdf([
+            'mode'          => 'utf-8',
+            'format'        => [216, 279],
+            'margin_left'   => 0,
+            'margin_right'  => 0,
+            'margin_top'    => 0,
+            'margin_bottom' => 0,
+            'margin_header' => 0,
+            'margin_footer' => 0,
+            'tempDir'       => $tempDir,
+        ]);
+
+        $mpdf->SetTitle($viewData['catalogName'] ?? 'Catalog');
+        $mpdf->SetDisplayMode('fullpage');
+        $mpdf->shrink_tables_to_fit = 0;
+
+        $html = view('backend.product.catalogs.pdf_mpdf', $viewData)->render();
+        $mpdf->WriteHTML($html);
+        $this->removeBlankMpdfPages($mpdf);
+        $mpdf->Output($absolutePath, Destination::FILE);
+    }
+
+    protected function removeBlankMpdfPages(Mpdf $mpdf): void
+    {
+        $visiblePages = [];
+
+        foreach ($mpdf->pages as $content) {
+            if (strlen(trim((string) $content)) <= 220) {
+                continue;
+            }
+
+            $visiblePages[] = $content;
+        }
+
+        if (count($visiblePages) === count($mpdf->pages) || empty($visiblePages)) {
+            return;
+        }
+
+        $mpdf->pages = [];
+
+        foreach ($visiblePages as $index => $content) {
+            $mpdf->pages[$index + 1] = $content;
+        }
+
+        $mpdf->page = count($visiblePages);
+    }
+
     protected function renderCatalogWithBrowser(array $viewData, $absolutePath)
     {
-        $chromePath = config('services.browsershot.chrome_path');
+        $chromePath = str_replace('/', DIRECTORY_SEPARATOR, (string) config('services.browsershot.chrome_path'));
 
         if (! $chromePath || ! file_exists($chromePath)) {
-            throw new \RuntimeException('Chrome executable was not found. Check BROWSERSHOT_CHROME_PATH.');
+            throw new \RuntimeException('Chrome executable was not found. Check BROWSERSHOT_CHROME_PATH in .env (current: ' . $chromePath . ')');
         }
 
         $tempDirectory = storage_path('app/product_catalogs/browser');
