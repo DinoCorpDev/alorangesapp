@@ -20,9 +20,20 @@ class LanguageController extends Controller
 
     public function changeLanguage(Request $request)
     {
-        $request->session()->put('locale', $request->locale);
-        $language = Language::where('code', $request->locale)->first();
+        $language = Language::where('code', $request->locale)->where('status', 1)->first();
+
+        if (! $language) {
+            return response()->json([
+                'success' => false,
+                'message' => translate('Language was not found'),
+            ], 422);
+        }
+
+        $request->session()->put('locale', $language->code);
+        app()->setLocale($language->code);
         flash(translate('Language changed to ') . $language->name)->success();
+
+        return response()->json(['success' => true]);
     }
 
     public function index(Request $request)
