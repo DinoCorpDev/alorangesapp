@@ -151,10 +151,28 @@
 
     // Cover title row vertical alignment based on position setting
     // mPDF does not respect vertical-align:middle on fixed-height cells — use padding-top instead
-    $coverPaddingTop = match ($coverTitlePosition) {
-        'top'    => '18mm',
-        'bottom' => ($hasAdvisor ? '158mm' : '208mm'),
-        default  => ($hasAdvisor ? '82mm'  : '110mm'),
+    $coverFooterHeight = $hasAdvisor ? 38 : 0;
+    $coverTitleHeight = 52;
+    $coverTitleTop = match ($coverTitlePosition) {
+        'top'    => 34,
+        'bottom' => ($hasAdvisor ? 166 : 198),
+        default  => ($hasAdvisor ? 92 : 112),
+    };
+    $coverTitleBottomSpace = max(0, 276 - $coverTitleTop - $coverTitleHeight - $coverFooterHeight);
+
+    $safeTitleFontSize = min(14, max(8, (int) ($settings['product_title_font_size'] ?: 12)));
+    $safeDescriptionFontSize = min(9, max(7, (int) ($settings['product_description_font_size'] ?: 8)));
+    $safePriceFontSize = min(18, max(10, (int) ($settings['product_price_font_size'] ?: 16)));
+    $safeReferenceFontSize = min(12, max(8, (int) ($settings['product_reference_font_size'] ?: 11)));
+
+    $pdfPageRendered = false;
+    $pageBreak = function () use (&$pdfPageRendered) {
+        if ($pdfPageRendered) {
+            return '<pagebreak />';
+        }
+
+        $pdfPageRendered = true;
+        return '';
     };
 @endphp
 <!doctype html>
@@ -166,8 +184,7 @@
         * { box-sizing: border-box; }
         body { margin: 0; padding: 0; font-family: DejaVu Sans, sans-serif; color: #2f3138; font-size: 11px; }
 
-        /* Each .pdf-page triggers a page break after itself */
-        .pdf-page { page-break-after: always; }
+        .pdf-page { width: 216mm; overflow: hidden; }
 
         /* ─── COVER ─────────────────────────────── */
         .cover-bg     { background: #f4f5f7; }
@@ -204,6 +221,47 @@
         .product-price { font-weight: 700; color: #f36f21; margin: 2mm 0 0; }
         .product-ref   { color: #8a93a3; margin: 2mm 0 0; }
         .product-desc  { color: #59606b; line-height: 1.35; margin: 3mm 0 0; }
+        /* Executive report refresh - mPDF safe overrides */
+        body { color: #1f2937; font-size: 10px; background: #ffffff; }
+        .muted { color: #64748b; }
+        .report-page { width: 216mm; height: 276mm; background: #f5f7fb; overflow: hidden; }
+        .report-hero { height: 48mm; background: #e9eef5; overflow: hidden; }
+        .report-hero img { display: block; width: 216mm; height: 48mm; }
+        .report-shell { margin: 0 14mm; padding-top: 10mm; }
+        .report-eyebrow { color: #64748b; font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 2mm; }
+        .report-title { color: #111827; font-size: 25px; font-weight: 700; line-height: 1.1; margin: 0; }
+        .report-accent { width: 24mm; height: 1.2mm; background: #f36f21; margin: 3mm 0 7mm; }
+        .report-card { background: #ffffff; border: 0.35mm solid #d8e0ea; padding: 4mm; }
+        .report-card-title { color: #0f766e; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 2mm; }
+        .report-card-body { color: #334155; font-size: 9.5px; line-height: 1.45; }
+        .full-page-bg { display: block; width: 216mm; height: 276mm; }
+        .cover-page { width: 216mm; height: 276mm; overflow: hidden; background: #f4f5f7; }
+        .cover-overlay-table { width: 216mm; height: 276mm; border-collapse: collapse; }
+        .report-overlay { margin-left: 14mm; width: 188mm; }
+        .payment-icon { max-width: 24mm; max-height: 14mm; }
+        .payment-method-table { width: 100%; border-collapse: separate; border-spacing: 4mm 0; margin-top: 5mm; }
+        .payment-method-card { background: #ffffff; border: 0.35mm solid #d8e0ea; padding: 4mm; height: 34mm; vertical-align: top; }
+        .payment-method-title { color: #0f172a; font-size: 10px; font-weight: 700; text-transform: uppercase; border-bottom: 0.35mm solid #e5e7eb; padding-bottom: 2mm; margin-bottom: 3mm; }
+        .payment-cash-card { margin-top: 5mm; background: #ffffff; border: 0.35mm solid #d8e0ea; padding: 4mm; min-height: 24mm; }
+        .info-table { width: 100%; border-collapse: collapse; background: #ffffff; border: 0.35mm solid #d8e0ea; }
+        .info-table td { border-bottom: 0.25mm solid #e5e7eb; padding: 4mm; vertical-align: top; font-size: 10px; line-height: 1.45; }
+        .info-table tr:last-child td { border-bottom: 0; }
+        .info-table-label { width: 34%; color: #0f766e; font-weight: 700; background: #f0fdfa; text-transform: uppercase; }
+        .product-sheet { width: 216mm; height: 276mm; border-collapse: collapse; background: #f5f7fb; }
+        .product-sheet-header { height: 25mm; padding: 7mm 12mm 4mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
+        .product-category { color: #64748b; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+        .product-letter { color: #111827; font-size: 30px; font-weight: 700; line-height: 1; text-align: right; }
+        .product-row { height: 82mm; }
+        .product-cell { width: 50%; vertical-align: top; }
+        .product-card { width: 91mm; height: 74mm; border-collapse: collapse; background: #ffffff; border: 0.35mm solid #d8e0ea; }
+        .product-media { width: 34mm; height: 74mm; padding: 2mm; text-align: center; vertical-align: middle; background: #f8fafc; border-right: 0.35mm solid #e5e7eb; }
+        .product-img { max-width: 30mm; max-height: 68mm; }
+        .product-head { height: 13mm; padding: 2mm 3mm; font-weight: 700; line-height: 1.2; vertical-align: middle; }
+        .product-info { height: 61mm; padding: 3mm; vertical-align: top; }
+        .product-name { color: #111827; font-weight: 700; line-height: 1.25; margin: 0 0 2mm; }
+        .product-price { color: #f36f21; font-weight: 700; line-height: 1.1; margin: 0 0 1.5mm; }
+        .product-ref { color: #475569; font-weight: 700; line-height: 1.2; margin: 0 0 2mm; }
+        .product-desc { color: #64748b; line-height: 1.35; margin: 0; }
     </style>
 </head>
 <body>
@@ -212,49 +270,52 @@
 {{-- PORTADA                                                  --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
 @if ($coverImage)
-    {{-- Portada con imagen de fondo usando background-image en tabla (mPDF soportado) --}}
-    <table class="pdf-page" style="width:216mm; height:279mm; border-collapse:collapse;
-           background-image:url('{{ $coverImage }}'); background-size:cover; background-position:center;">
-        <tr>
-            <td style="text-align:center; vertical-align:top;
-                padding-top:{{ $coverPaddingTop }}; padding-left:16mm; padding-right:16mm;
-                height:{{ $hasAdvisor ? '220mm' : '279mm' }};">
-                <div class="cover-overlay-title">{{ $catalogName }}</div>
-            </td>
-        </tr>
-        @if ($hasAdvisor)
-            <tr>
-                <td style="text-align:center; vertical-align:bottom; padding:0 12mm 10mm; height:59mm;">
-                    <div class="cover-advisor">
-                        @if ($settings['advisor_name'])
-                            <div style="font-size:22px; text-transform:uppercase; margin-bottom:2mm; font-weight:700;">{{ $settings['advisor_name'] }}</div>
-                        @endif
-                        @if ($settings['advisor_phone'] || $advisorEmails->isNotEmpty())
-                            <div style="font-size:17px;">
-                                {{ $settings['advisor_phone'] }}
-                                @if ($settings['advisor_phone'] && $advisorEmails->isNotEmpty()) | @endif
-                                {{ $advisorEmails->join(' - ') }}
+    {!! $pageBreak() !!}
+    <div class="cover-page">
+        <img class="full-page-bg" src="{{ $coverImage }}" alt="">
+        <div style="margin-top:-276mm;">
+            <table class="cover-overlay-table">
+                <tr><td style="height:{{ $coverTitleTop }}mm;">&nbsp;</td></tr>
+                <tr>
+                    <td style="text-align:center; vertical-align:middle; padding-left:16mm; padding-right:16mm; height:{{ $coverTitleHeight }}mm;">
+                        <div class="cover-overlay-title">{{ $catalogName }}</div>
+                    </td>
+                </tr>
+                <tr><td style="height:{{ $coverTitleBottomSpace }}mm;">&nbsp;</td></tr>
+                @if ($hasAdvisor)
+                    <tr>
+                        <td style="text-align:center; vertical-align:bottom; padding:0 12mm 8mm; height:{{ $coverFooterHeight }}mm;">
+                            <div class="cover-advisor">
+                                @if ($settings['advisor_name'])
+                                    <div style="font-size:22px; text-transform:uppercase; margin-bottom:2mm; font-weight:700;">{{ $settings['advisor_name'] }}</div>
+                                @endif
+                                @if ($settings['advisor_phone'] || $advisorEmails->isNotEmpty())
+                                    <div style="font-size:17px;">
+                                        {{ $settings['advisor_phone'] }}
+                                        @if ($settings['advisor_phone'] && $advisorEmails->isNotEmpty()) | @endif
+                                        {{ $advisorEmails->join(' - ') }}
+                                    </div>
+                                @endif
                             </div>
-                        @endif
-                    </div>
-                </td>
-            </tr>
-        @endif
-    </table>
+                        </td>
+                    </tr>
+                @endif
+            </table>
+        </div>
+    </div>
 @else
-    {{-- Portada sin imagen: fondo plano --}}
-    <table class="pdf-page cover-bg" style="width:216mm; height:279mm; border-collapse:collapse;">
+    {!! $pageBreak() !!}
+    <table class="pdf-page cover-bg" style="width:216mm; height:276mm; border-collapse:collapse;">
+        <tr><td style="height:{{ $coverTitleTop }}mm;">&nbsp;</td></tr>
         <tr>
-            <td style="text-align:center; vertical-align:top;
-                padding-top:{{ $coverPaddingTop }}; padding-left:20mm; padding-right:20mm;
-                height:{{ $hasAdvisor ? '229mm' : '279mm' }};">
+            <td style="text-align:center; vertical-align:middle; padding-left:20mm; padding-right:20mm; height:{{ $coverTitleHeight }}mm;">
                 <div class="cover-title">{{ $catalogName }}</div>
-                <div class="cover-meta">{{ $categories->map(fn($c) => $c->getTranslation('name'))->join(' - ') }}</div>
             </td>
         </tr>
+        <tr><td style="height:{{ $coverTitleBottomSpace }}mm;">&nbsp;</td></tr>
         @if ($hasAdvisor)
             <tr>
-                <td style="text-align:center; vertical-align:bottom; padding:0 12mm 10mm; height:50mm;">
+                <td style="text-align:center; vertical-align:bottom; padding:0 12mm 8mm; height:{{ $coverFooterHeight }}mm;">
                     <div class="cover-advisor">
                         @if ($settings['advisor_name'])
                             <div style="font-size:22px; text-transform:uppercase; margin-bottom:2mm; font-weight:700;">{{ $settings['advisor_name'] }}</div>
@@ -277,58 +338,65 @@
 {{-- PÁGINA DE MEDIOS DE PAGO                                --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
 @if ($settings['show_payment_page'])
-    <div class="pdf-page" style="padding:34mm 20mm 18mm; position:relative;">
+    {!! $pageBreak() !!}
+    <div class="report-page">
         @if ($paymentImage)
-            {{-- Imagen de fondo absoluta — en mPDF position:absolute es relativo a la página --}}
-            <img src="{{ $paymentImage }}" style="position:absolute; top:0mm; left:0mm; width:216mm; height:279mm;">
+            <img class="full-page-bg" src="{{ $paymentImage }}" alt="">
         @endif
+        <div class="report-overlay" style="@if ($paymentImage) margin-top:-218mm; @else margin-top:58mm; @endif">
+            <div class="report-title">{{ $settings['payment_title'] ?: 'MEDIOS DE PAGO' }}</div>
+            <div class="report-accent"></div>
 
-        <div class="payment-title">{{ $settings['payment_title'] ?: 'MEDIOS DE PAGO' }}</div>
-
-        <div class="payment-pill">{{ $settings['payment_delivery_title'] }}</div>
-
-        <div class="payment-box">
-            <table style="width:100%; border-collapse:collapse;">
-                <tr>
-                    <td style="vertical-align:middle;">{!! nl2br(e($settings['payment_bank_info'])) !!}</td>
-                    @if ($paymentBankIcon)
-                        <td style="width:34mm; text-align:center; vertical-align:middle; padding-left:4mm;">
-                            <img class="payment-icon" src="{{ $paymentBankIcon }}" alt="">
+            <div class="report-card">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <td style="vertical-align:top;">
+                            <div class="report-card-title">{{ $settings['payment_delivery_title'] }}</div>
+                            <div class="report-card-body">{!! nl2br(e($settings['payment_bank_info'])) !!}</div>
                         </td>
-                    @endif
+                        @if ($paymentBankIcon)
+                            <td style="width:28mm; text-align:center; vertical-align:middle;">
+                                <img class="payment-icon" src="{{ $paymentBankIcon }}" alt="">
+                            </td>
+                        @endif
+                    </tr>
+                </table>
+            </div>
+
+            <table class="payment-method-table">
+                <tr>
+                    <td class="payment-method-card" style="width:50%;">
+                        <div class="payment-method-title">{{ $settings['payment_debit_title'] }}</div>
+                        @if ($paymentDebitIcon)
+                            <div style="text-align:center; margin-bottom:2mm;"><img class="payment-icon" src="{{ $paymentDebitIcon }}" alt=""></div>
+                        @endif
+                        <div class="report-card-body">{!! nl2br(e($settings['payment_debit_info'])) !!}</div>
+                    </td>
+                    <td class="payment-method-card" style="width:50%;">
+                        <div class="payment-method-title">{{ $settings['payment_credit_title'] }}</div>
+                        @if ($paymentCreditIcon)
+                            <div style="text-align:center; margin-bottom:2mm;"><img class="payment-icon" src="{{ $paymentCreditIcon }}" alt=""></div>
+                        @endif
+                        <div class="report-card-body">{!! nl2br(e($settings['payment_credit_info'])) !!}</div>
+                    </td>
                 </tr>
             </table>
-        </div>
 
-        <table style="width:100%; border-collapse:separate; border-spacing:4mm 0; margin-bottom:7mm;">
-            <tr>
-                <td style="width:50%; border:1.2mm solid #008847; vertical-align:top; padding:0;">
-                    <div class="payment-column-title">{{ $settings['payment_debit_title'] }}</div>
-                    <div class="payment-column-body">
-                        @if ($paymentDebitIcon)
-                            <img class="payment-column-icon" src="{{ $paymentDebitIcon }}" alt=""><br>
+            <div class="payment-cash-card">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <td style="vertical-align:top;">
+                            <div class="payment-method-title">{{ $settings['payment_cash_title'] }}</div>
+                            <div class="report-card-body">{!! nl2br(e($settings['payment_cash_info'])) !!}</div>
+                        </td>
+                        @if ($paymentCashIcon)
+                            <td style="width:28mm; text-align:center; vertical-align:middle;">
+                                <img class="payment-icon" src="{{ $paymentCashIcon }}" alt="">
+                            </td>
                         @endif
-                        {!! nl2br(e($settings['payment_debit_info'])) !!}
-                    </div>
-                </td>
-                <td style="width:50%; border:1.2mm solid #008847; vertical-align:top; padding:0;">
-                    <div class="payment-column-title">{{ $settings['payment_credit_title'] }}</div>
-                    <div class="payment-column-body">
-                        @if ($paymentCreditIcon)
-                            <img class="payment-column-icon" src="{{ $paymentCreditIcon }}" alt=""><br>
-                        @endif
-                        {!! nl2br(e($settings['payment_credit_info'])) !!}
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        <div class="payment-pill">{{ $settings['payment_cash_title'] }}</div>
-        <div class="payment-box" style="text-align:center;">
-            @if ($paymentCashIcon)
-                <img class="payment-column-icon" src="{{ $paymentCashIcon }}" alt=""><br>
-            @endif
-            {!! nl2br(e($settings['payment_cash_info'])) !!}
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 @endif
@@ -337,11 +405,40 @@
 {{-- PÁGINA DE INFORMACIÓN                                    --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
 @if ($settings['show_info_page'])
-    <div class="pdf-page" style="padding:38mm 20mm 22mm; position:relative;">
+    {!! $pageBreak() !!}
+    <div class="report-page">
         @if ($infoImage)
-            <img src="{{ $infoImage }}" style="position:absolute; top:0mm; left:0mm; width:216mm; height:279mm;">
+            <img class="full-page-bg" src="{{ $infoImage }}" alt="">
         @endif
+        <div class="report-overlay" style="@if ($infoImage) margin-top:-218mm; @else margin-top:58mm; @endif">
+            <div class="report-title">{{ $settings['info_page_title'] ?: 'INFORMACION' }}</div>
+            <div class="report-accent"></div>
 
+            @if (! empty($infoRows))
+                <table class="info-table">
+                    @foreach ($infoRows as $row)
+                        <tr>
+                            <td class="info-table-label">{{ $row['label'] ?? '' }}</td>
+                            <td>{{ $row['value'] ?? '' }}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            @else
+                <div class="report-card">
+                    <div class="report-card-body">&nbsp;</div>
+                </div>
+            @endif
+        </div>
+    </div>
+@endif
+
+@if (false && $settings['show_info_page'])
+    {!! $pageBreak() !!}
+    <div class="pdf-page" style="width:216mm; height:276mm; overflow:hidden;">
+        @if ($infoImage)
+            <img src="{{ $infoImage }}" style="display:block; width:216mm; height:276mm;" alt="">
+        @endif
+        <div style="@if ($infoImage) margin-top:-226mm; @else margin-top:50mm; @endif margin-left:20mm; width:176mm;">
         <div class="info-title">{{ $settings['info_page_title'] ?: 'INFORMACIÓN' }}</div>
 
         @if (! empty($infoRows))
@@ -356,6 +453,7 @@
         @else
             <div style="border:1.2mm solid #008847; padding:6mm; min-height:20mm;"></div>
         @endif
+        </div>
     </div>
 @endif
 
@@ -363,15 +461,128 @@
 {{-- PÁGINA 4 (imagen opcional)                              --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
 @if ($settings['show_page_four'] && $pageFourImage)
+    {!! $pageBreak() !!}
     <div class="pdf-page">
-        <img src="{{ $pageFourImage }}" style="display:block; width:216mm; height:279mm;" alt="">
+        <img src="{{ $pageFourImage }}" style="display:block; width:216mm; height:276mm;" alt="">
     </div>
 @endif
 
 {{-- ═══════════════════════════════════════════════════════ --}}
 {{-- PÁGINAS DE PRODUCTOS                                     --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
-@foreach ($productsByCategory as $categoryGroup)
+@foreach ($productsByCategory as $executiveCategoryGroup)
+    @php
+        $executiveCategoryName = $executiveCategoryGroup['category']
+            ? $executiveCategoryGroup['category']->getTranslation('name')
+            : '';
+    @endphp
+
+    @foreach ($executiveCategoryGroup['letter_groups'] as $letter => $letterProducts)
+        @foreach ($letterProducts->chunk(6) as $chunk)
+            @php
+                $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
+                $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
+            @endphp
+
+            {!! $pageBreak() !!}
+            <table class="product-sheet">
+                <tr>
+                    <td colspan="5" class="product-sheet-header" style="text-align:right;">
+                        <div class="product-letter" style="color:{{ $boxColor }};">{{ $letter }}</div>
+                    </td>
+                </tr>
+
+                @foreach ($chunk->values()->chunk(2) as $row)
+                    @php $rowProducts = $row->values(); @endphp
+                    <tr class="product-row">
+                        <td style="width:12mm;">&nbsp;</td>
+
+                        @for ($productSlot = 0; $productSlot < 2; $productSlot++)
+                            @php $product = $rowProducts->get($productSlot); @endphp
+
+                            @if ($product)
+                                @php
+                                    $image = $pageImage($product->thumbnail_img)
+                                        ?: $pageImage($product->meta_image)
+                                        ?: $fallbackImage;
+                                    $rawName = trim($product->getTranslation('name'));
+                                    $description = trim(strip_tags(
+                                        $product->getTranslation('description')
+                                        ?: $product->meta_description
+                                        ?: ''
+                                    ));
+                                    $description = \Illuminate\Support\Str::limit($description, $descriptionLimit);
+                                    $hasDescription = $description !== '';
+                                    $displayName = \Illuminate\Support\Str::limit($rawName, $hasDescription ? 70 : 105);
+                                    $bannerName = \Illuminate\Support\Str::limit($rawName, 50);
+                                @endphp
+                                <td style="width:91mm; padding-top:4mm; padding-bottom:3mm; vertical-align:top;">
+                                    <table class="product-card" style="border-color:{{ $boxColor }};">
+                                        <tr>
+                                            <td class="product-media" rowspan="2">
+                                                @if ($image)
+                                                    <img class="product-img" src="{{ $image }}" alt="">
+                                                @endif
+                                            </td>
+                                            <td class="product-head" style="background-color:{{ $boxColor }}; color:{{ $textColor }}; font-family:{{ $cssFont($settings['product_title_font_family']) }}, sans-serif; font-size:{{ $safeTitleFontSize }}px;">
+                                                {{ $bannerName }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="product-info">
+                                                <div class="product-name" style="font-family:{{ $cssFont($settings['product_title_font_family']) }}, sans-serif; font-size:{{ $safeTitleFontSize }}px;">
+                                                    {{ $displayName }}
+                                                </div>
+
+                                                @if ($settings['show_prices'])
+                                                    <div class="product-price" style="font-family:{{ $cssFont($settings['product_price_font_family']) }}, sans-serif; font-size:{{ $safePriceFontSize }}px;">
+                                                        {{ format_price($product->lowest_price) }}
+                                                    </div>
+                                                @endif
+
+                                                @if ($product->reference)
+                                                    <div class="product-ref" style="font-family:{{ $cssFont($settings['product_reference_font_family']) }}, sans-serif; font-size:{{ $safeReferenceFontSize }}px;">
+                                                        Ref. {{ $product->reference }}
+                                                    </div>
+                                                @endif
+
+                                                @if ($hasDescription)
+                                                    <div class="product-desc" style="font-family:{{ $cssFont($settings['product_description_font_family']) }}, sans-serif; font-size:{{ $safeDescriptionFontSize }}px;">
+                                                        {{ $description }}
+                                                    </div>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            @else
+                                <td style="width:91mm;">&nbsp;</td>
+                            @endif
+
+                            @if ($productSlot === 0)
+                                <td style="width:10mm;">&nbsp;</td>
+                            @endif
+                        @endfor
+
+                        <td style="width:12mm;">&nbsp;</td>
+                    </tr>
+                @endforeach
+            </table>
+
+        @endforeach
+
+        @if ($advertisingByLetter->has($letter))
+            @foreach ($advertisingByLetter->get($letter) as $advertisingItem)
+                {!! $pageBreak() !!}
+                <div class="pdf-page">
+                    <img src="{{ $advertisingItem['image'] }}" style="display:block; width:216mm; height:276mm;" alt="">
+                </div>
+            @endforeach
+        @endif
+    @endforeach
+@endforeach
+
+@foreach ([] as $categoryGroup)
     @foreach ($categoryGroup['letter_groups'] as $letter => $letterProducts)
         @foreach ($letterProducts->chunk(6) as $chunkIdx => $chunk)
             @php
@@ -380,6 +591,7 @@
             @endphp
 
             {{-- Una tabla por página de productos --}}
+            {!! $pageBreak() !!}
             <table class="pdf-page" style="width:216mm; border-collapse:collapse;">
 
                 {{-- Fila encabezado de letra (22mm) --}}
@@ -478,8 +690,9 @@
             {{-- Página de publicidad después de esta letra --}}
             @if ($advertisingByLetter->has($letter))
                 @foreach ($advertisingByLetter->get($letter) as $advertisingItem)
+                    {!! $pageBreak() !!}
                     <div class="pdf-page">
-                        <img src="{{ $advertisingItem['image'] }}" style="display:block; width:216mm; height:279mm;" alt="">
+                        <img src="{{ $advertisingItem['image'] }}" style="display:block; width:216mm; height:276mm;" alt="">
                     </div>
                 @endforeach
             @endif

@@ -366,7 +366,7 @@ class ProductCatalogController extends Controller
             'fallbackImage' => uploaded_asset(get_setting('header_logo')) ?: static_asset('assets/img/logo.png'),
         ];
 
-        $this->renderCatalogWithBrowser($viewData, $absolutePath);
+        $this->renderCatalogWithMpdf($viewData, $absolutePath);
 
         return $relativePath;
     }
@@ -397,7 +397,33 @@ class ProductCatalogController extends Controller
 
         $html = view('backend.product.catalogs.pdf_mpdf', $viewData)->render();
         $mpdf->WriteHTML($html);
+        $this->removeBlankMpdfPages($mpdf);
         $mpdf->Output($absolutePath, Destination::FILE);
+    }
+
+    protected function removeBlankMpdfPages(Mpdf $mpdf): void
+    {
+        $visiblePages = [];
+
+        foreach ($mpdf->pages as $content) {
+            if (strlen(trim((string) $content)) <= 220) {
+                continue;
+            }
+
+            $visiblePages[] = $content;
+        }
+
+        if (count($visiblePages) === count($mpdf->pages) || empty($visiblePages)) {
+            return;
+        }
+
+        $mpdf->pages = [];
+
+        foreach ($visiblePages as $index => $content) {
+            $mpdf->pages[$index + 1] = $content;
+        }
+
+        $mpdf->page = count($visiblePages);
     }
 
     protected function renderCatalogWithBrowser(array $viewData, $absolutePath)
