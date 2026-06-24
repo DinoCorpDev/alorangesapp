@@ -160,10 +160,10 @@
     };
     $coverTitleBottomSpace = max(0, 276 - $coverTitleTop - $coverTitleHeight - $coverFooterHeight);
 
-    $safeTitleFontSize = min(14, max(8, (int) ($settings['product_title_font_size'] ?: 12)));
+    $safeTitleFontSize = min(10, max(7, (int) ($settings['product_title_font_size'] ?: 10)));
     $safeDescriptionFontSize = min(9, max(7, (int) ($settings['product_description_font_size'] ?: 8)));
-    $safePriceFontSize = min(18, max(10, (int) ($settings['product_price_font_size'] ?: 16)));
-    $safeReferenceFontSize = min(12, max(8, (int) ($settings['product_reference_font_size'] ?: 11)));
+    $safePriceFontSize = min(13, max(9, (int) ($settings['product_price_font_size'] ?: 13)));
+    $safeReferenceFontSize = min(9, max(7, (int) ($settings['product_reference_font_size'] ?: 9)));
 
     $pdfPageRendered = false;
     $pageBreak = function () use (&$pdfPageRendered) {
@@ -248,19 +248,23 @@
         .info-table tr:last-child td { border-bottom: 0; }
         .info-table-label { width: 34%; color: #0f766e; font-weight: 700; background: #f0fdfa; text-transform: uppercase; }
         .product-sheet { width: 216mm; height: 276mm; border-collapse: collapse; background: #f5f7fb; }
-        .product-sheet-header { height: 25mm; padding: 7mm 12mm 4mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
+        .product-sheet-header { height: 22mm; padding: 6mm 10mm 3mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
         .product-category { color: #64748b; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
         .product-letter { color: #111827; font-size: 30px; font-weight: 700; line-height: 1; text-align: right; }
-        .product-row { height: 82mm; }
-        .product-cell { width: 50%; vertical-align: top; }
-        .product-card { width: 91mm; height: 74mm; border-collapse: collapse; background: #ffffff; border: 0.35mm solid #d8e0ea; }
-        .product-media { width: 34mm; height: 74mm; padding: 2mm; text-align: center; vertical-align: middle; background: #f8fafc; border-right: 0.35mm solid #e5e7eb; }
-        .product-img { max-width: 30mm; max-height: 68mm; }
-        .product-head { height: 13mm; padding: 2mm 3mm; font-weight: 700; line-height: 1.2; vertical-align: middle; }
-        .product-info { height: 61mm; padding: 3mm; vertical-align: top; }
-        .product-name { color: #111827; font-weight: 700; line-height: 1.25; margin: 0 0 2mm; }
-        .product-price { color: #f36f21; font-weight: 700; line-height: 1.1; margin: 0 0 1.5mm; }
-        .product-ref { color: #475569; font-weight: 700; line-height: 1.2; margin: 0 0 2mm; }
+        .product-row { height: 62mm; }
+        .product-cell { width: 33.33%; vertical-align: top; }
+        .product-card { width: 58mm; height: 54mm; border-collapse: collapse; table-layout: fixed; background: #ffffff; border: 0.35mm solid #d8e0ea; }
+        .product-media { width: 20mm; height: 54mm; padding: 1.5mm; text-align: center; vertical-align: middle; background: #f8fafc; border-right: 0.35mm solid #e5e7eb; }
+        .product-img { max-width: 17mm; max-height: 49mm; }
+        .product-head { width: 38mm; height: 10mm; padding: 1.5mm 2mm; font-weight: 700; line-height: 1.12; vertical-align: middle; }
+        .product-info { width: 38mm; height: 44mm; padding: 4mm 2.5mm 2.5mm; vertical-align: top; }
+        .product-name { color: #111827; font-weight: 700; line-height: 1.22; margin: 0; }
+        .product-price { color: #f36f21; font-weight: 700; line-height: 1.08; margin: 0; }
+        .product-ref { color: #475569; font-weight: 700; line-height: 1.1; margin: 0; }
+        .product-detail-table { width: 100%; border-collapse: collapse; }
+        .product-detail-table td { padding: 0; vertical-align: top; }
+        .product-text-gap { height: 6mm; line-height: 6mm; font-size: 1px; }
+        .product-price-gap { height: 6mm; line-height: 6mm; font-size: 1px; }
         .product-desc { color: #64748b; line-height: 1.35; margin: 0; }
     </style>
 </head>
@@ -478,7 +482,7 @@
     @endphp
 
     @foreach ($executiveCategoryGroup['letter_groups'] as $letter => $letterProducts)
-        @foreach ($letterProducts->chunk(6) as $chunk)
+        @foreach ($letterProducts->chunk(12) as $chunk)
             @php
                 $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
                 $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
@@ -487,17 +491,17 @@
             {!! $pageBreak() !!}
             <table class="product-sheet">
                 <tr>
-                    <td colspan="5" class="product-sheet-header" style="text-align:right;">
+                    <td colspan="7" class="product-sheet-header" style="text-align:right;">
                         <div class="product-letter" style="color:{{ $boxColor }};">{{ $letter }}</div>
                     </td>
                 </tr>
 
-                @foreach ($chunk->values()->chunk(2) as $row)
+                @foreach ($chunk->values()->chunk(3) as $row)
                     @php $rowProducts = $row->values(); @endphp
                     <tr class="product-row">
-                        <td style="width:12mm;">&nbsp;</td>
+                        <td style="width:8mm;">&nbsp;</td>
 
-                        @for ($productSlot = 0; $productSlot < 2; $productSlot++)
+                        @for ($productSlot = 0; $productSlot < 3; $productSlot++)
                             @php $product = $rowProducts->get($productSlot); @endphp
 
                             @if ($product)
@@ -506,17 +510,10 @@
                                         ?: $pageImage($product->meta_image)
                                         ?: $fallbackImage;
                                     $rawName = trim($product->getTranslation('name'));
-                                    $description = trim(strip_tags(
-                                        $product->getTranslation('description')
-                                        ?: $product->meta_description
-                                        ?: ''
-                                    ));
-                                    $description = \Illuminate\Support\Str::limit($description, $descriptionLimit);
-                                    $hasDescription = $description !== '';
-                                    $displayName = \Illuminate\Support\Str::limit($rawName, $hasDescription ? 70 : 105);
-                                    $bannerName = \Illuminate\Support\Str::limit($rawName, 50);
+                                    $displayName = \Illuminate\Support\Str::limit($rawName, 48);
+                                    $bannerName = \Illuminate\Support\Str::limit($rawName, 28);
                                 @endphp
-                                <td style="width:91mm; padding-top:4mm; padding-bottom:3mm; vertical-align:top;">
+                                <td style="width:58mm; padding-top:4mm; padding-bottom:3mm; vertical-align:top;">
                                     <table class="product-card" style="border-color:{{ $boxColor }};">
                                         <tr>
                                             <td class="product-media" rowspan="2">
@@ -530,41 +527,45 @@
                                         </tr>
                                         <tr>
                                             <td class="product-info">
-                                                <div class="product-name" style="font-family:{{ $cssFont($settings['product_title_font_family']) }}, sans-serif; font-size:{{ $safeTitleFontSize }}px;">
-                                                    {{ $displayName }}
-                                                </div>
+                                                <table class="product-detail-table">
+                                                    <tr>
+                                                        <td class="product-name" style="font-family:{{ $cssFont($settings['product_title_font_family']) }}, sans-serif; font-size:{{ $safeTitleFontSize }}px;">
+                                                            {{ $displayName }}
+                                                        </td>
+                                                    </tr>
 
-                                                @if ($settings['show_prices'])
-                                                    <div class="product-price" style="font-family:{{ $cssFont($settings['product_price_font_family']) }}, sans-serif; font-size:{{ $safePriceFontSize }}px;">
-                                                        {{ format_price($product->lowest_price) }}
-                                                    </div>
-                                                @endif
+                                                    @if ($settings['show_prices'])
+                                                        <tr><td class="product-text-gap">&nbsp;</td></tr>
+                                                        <tr>
+                                                            <td class="product-price" style="font-family:{{ $cssFont($settings['product_price_font_family']) }}, sans-serif; font-size:{{ $safePriceFontSize }}px;">
+                                                                {{ format_price($product->lowest_price) }}
+                                                            </td>
+                                                        </tr>
+                                                    @endif
 
-                                                @if ($product->reference)
-                                                    <div class="product-ref" style="font-family:{{ $cssFont($settings['product_reference_font_family']) }}, sans-serif; font-size:{{ $safeReferenceFontSize }}px;">
-                                                        Ref. {{ $product->reference }}
-                                                    </div>
-                                                @endif
-
-                                                @if ($hasDescription)
-                                                    <div class="product-desc" style="font-family:{{ $cssFont($settings['product_description_font_family']) }}, sans-serif; font-size:{{ $safeDescriptionFontSize }}px;">
-                                                        {{ $description }}
-                                                    </div>
-                                                @endif
+                                                    @if ($product->reference)
+                                                        <tr><td class="product-price-gap">&nbsp;</td></tr>
+                                                        <tr>
+                                                            <td class="product-ref" style="font-family:{{ $cssFont($settings['product_reference_font_family']) }}, sans-serif; font-size:{{ $safeReferenceFontSize }}px;">
+                                                                Ref. {{ $product->reference }}
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                </table>
                                             </td>
                                         </tr>
                                     </table>
                                 </td>
                             @else
-                                <td style="width:91mm;">&nbsp;</td>
+                                <td style="width:58mm;">&nbsp;</td>
                             @endif
 
-                            @if ($productSlot === 0)
-                                <td style="width:10mm;">&nbsp;</td>
+                            @if ($productSlot < 2)
+                                <td style="width:5mm;">&nbsp;</td>
                             @endif
                         @endfor
 
-                        <td style="width:12mm;">&nbsp;</td>
+                        <td style="width:8mm;">&nbsp;</td>
                     </tr>
                 @endforeach
             </table>
