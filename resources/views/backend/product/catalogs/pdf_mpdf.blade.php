@@ -5,6 +5,7 @@
         'show_info_page'                 => true,
         'show_page_four'                 => false,
         'description_limit'              => 90,
+        'products_per_page'              => 12,
         'cover_image'                    => null,
         'cover_title_position'           => 'middle',
         'advisor_name'                   => '',
@@ -160,10 +161,37 @@
     };
     $coverTitleBottomSpace = max(0, 276 - $coverTitleTop - $coverTitleHeight - $coverFooterHeight);
 
-    $safeTitleFontSize = min(10, max(7, (int) ($settings['product_title_font_size'] ?: 10)));
+    $productsPerPage = in_array((int) ($settings['products_per_page'] ?? 12), [6, 12], true)
+        ? (int) $settings['products_per_page']
+        : 12;
+    $productColumns = $productsPerPage === 6 ? 2 : 3;
+    $productTableColspan = ($productColumns * 2) + 1;
+    $productSideSpace = $productsPerPage === 6 ? 12 : 8;
+    $productGap = $productsPerPage === 6 ? 10 : 5;
+    $productCardWidth = $productsPerPage === 6 ? 91 : 58;
+    $productCardHeight = $productsPerPage === 6 ? 74 : 54;
+    $productMediaWidth = $productsPerPage === 6 ? 34 : 20;
+    $productMediaHeight = $productCardHeight;
+    $productImageWidth = $productsPerPage === 6 ? 30 : 17;
+    $productImageHeight = $productsPerPage === 6 ? 68 : 49;
+    $productContentWidth = $productCardWidth - $productMediaWidth;
+    $productHeadHeight = $productsPerPage === 6 ? 13 : 10;
+    $productInfoHeight = $productCardHeight - $productHeadHeight;
+    $productRowHeight = $productsPerPage === 6 ? 82 : 62;
+    $productHeaderHeight = $productsPerPage === 6 ? 25 : 22;
+    $productNameLimit = $productsPerPage === 6 ? 82 : 48;
+    $productBannerLimit = $productsPerPage === 6 ? 48 : 28;
+
+    $safeTitleFontSize = $productsPerPage === 6
+        ? min(14, max(8, (int) ($settings['product_title_font_size'] ?: 12)))
+        : min(10, max(7, (int) ($settings['product_title_font_size'] ?: 10)));
     $safeDescriptionFontSize = min(9, max(7, (int) ($settings['product_description_font_size'] ?: 8)));
-    $safePriceFontSize = min(13, max(9, (int) ($settings['product_price_font_size'] ?: 13)));
-    $safeReferenceFontSize = min(9, max(7, (int) ($settings['product_reference_font_size'] ?: 9)));
+    $safePriceFontSize = $productsPerPage === 6
+        ? min(18, max(11, (int) ($settings['product_price_font_size'] ?: 16)))
+        : min(13, max(9, (int) ($settings['product_price_font_size'] ?: 13)));
+    $safeReferenceFontSize = $productsPerPage === 6
+        ? min(12, max(8, (int) ($settings['product_reference_font_size'] ?: 11)))
+        : min(9, max(7, (int) ($settings['product_reference_font_size'] ?: 9)));
 
     $pdfPageRendered = false;
     $pageBreak = function () use (&$pdfPageRendered) {
@@ -248,16 +276,16 @@
         .info-table tr:last-child td { border-bottom: 0; }
         .info-table-label { width: 34%; color: #0f766e; font-weight: 700; background: #f0fdfa; text-transform: uppercase; }
         .product-sheet { width: 216mm; height: 276mm; border-collapse: collapse; background: #f5f7fb; }
-        .product-sheet-header { height: 22mm; padding: 6mm 10mm 3mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
+        .product-sheet-header { height: {{ $productHeaderHeight }}mm; padding: {{ $productsPerPage === 6 ? 7 : 6 }}mm {{ $productsPerPage === 6 ? 12 : 10 }}mm {{ $productsPerPage === 6 ? 4 : 3 }}mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
         .product-category { color: #64748b; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
         .product-letter { color: #111827; font-size: 30px; font-weight: 700; line-height: 1; text-align: right; }
-        .product-row { height: 62mm; }
-        .product-cell { width: 33.33%; vertical-align: top; }
-        .product-card { width: 58mm; height: 54mm; border-collapse: collapse; table-layout: fixed; background: #ffffff; border: 0.35mm solid #d8e0ea; }
-        .product-media { width: 20mm; height: 54mm; padding: 1.5mm; text-align: center; vertical-align: middle; background: #f8fafc; border-right: 0.35mm solid #e5e7eb; }
-        .product-img { max-width: 17mm; max-height: 49mm; }
-        .product-head { width: 38mm; height: 10mm; padding: 1.5mm 2mm; font-weight: 700; line-height: 1.12; vertical-align: middle; }
-        .product-info { width: 38mm; height: 44mm; padding: 4mm 2.5mm 2.5mm; vertical-align: top; }
+        .product-row { height: {{ $productRowHeight }}mm; }
+        .product-cell { width: {{ 100 / $productColumns }}%; vertical-align: top; }
+        .product-card { width: {{ $productCardWidth }}mm; height: {{ $productCardHeight }}mm; border-collapse: collapse; table-layout: fixed; background: #ffffff; border: 0.35mm solid #d8e0ea; }
+        .product-media { width: {{ $productMediaWidth }}mm; height: {{ $productMediaHeight }}mm; padding: {{ $productsPerPage === 6 ? 2 : 1.5 }}mm; text-align: center; vertical-align: middle; background: #f8fafc; border-right: 0.35mm solid #e5e7eb; }
+        .product-img { max-width: {{ $productImageWidth }}mm; max-height: {{ $productImageHeight }}mm; }
+        .product-head { width: {{ $productContentWidth }}mm; height: {{ $productHeadHeight }}mm; padding: {{ $productsPerPage === 6 ? 2 : 1.5 }}mm {{ $productsPerPage === 6 ? 3 : 2 }}mm; font-weight: 700; line-height: 1.12; vertical-align: middle; }
+        .product-info { width: {{ $productContentWidth }}mm; height: {{ $productInfoHeight }}mm; padding: {{ $productsPerPage === 6 ? 5 : 4 }}mm {{ $productsPerPage === 6 ? 3 : 2.5 }}mm {{ $productsPerPage === 6 ? 3 : 2.5 }}mm; vertical-align: top; }
         .product-name { color: #111827; font-weight: 700; line-height: 1.22; margin: 0; }
         .product-price { color: #f36f21; font-weight: 700; line-height: 1.08; margin: 0; }
         .product-ref { color: #475569; font-weight: 700; line-height: 1.1; margin: 0; }
@@ -482,7 +510,7 @@
     @endphp
 
     @foreach ($executiveCategoryGroup['letter_groups'] as $letter => $letterProducts)
-        @foreach ($letterProducts->chunk(12) as $chunk)
+        @foreach ($letterProducts->chunk($productsPerPage) as $chunk)
             @php
                 $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
                 $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
@@ -491,17 +519,17 @@
             {!! $pageBreak() !!}
             <table class="product-sheet">
                 <tr>
-                    <td colspan="7" class="product-sheet-header" style="text-align:right;">
+                    <td colspan="{{ $productTableColspan }}" class="product-sheet-header" style="text-align:right;">
                         <div class="product-letter" style="color:{{ $boxColor }};">{{ $letter }}</div>
                     </td>
                 </tr>
 
-                @foreach ($chunk->values()->chunk(3) as $row)
+                @foreach ($chunk->values()->chunk($productColumns) as $row)
                     @php $rowProducts = $row->values(); @endphp
                     <tr class="product-row">
-                        <td style="width:8mm;">&nbsp;</td>
+                        <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
 
-                        @for ($productSlot = 0; $productSlot < 3; $productSlot++)
+                        @for ($productSlot = 0; $productSlot < $productColumns; $productSlot++)
                             @php $product = $rowProducts->get($productSlot); @endphp
 
                             @if ($product)
@@ -510,10 +538,10 @@
                                         ?: $pageImage($product->meta_image)
                                         ?: $fallbackImage;
                                     $rawName = trim($product->getTranslation('name'));
-                                    $displayName = \Illuminate\Support\Str::limit($rawName, 48);
-                                    $bannerName = \Illuminate\Support\Str::limit($rawName, 28);
+                                    $displayName = \Illuminate\Support\Str::limit($rawName, $productNameLimit);
+                                    $bannerName = \Illuminate\Support\Str::limit($rawName, $productBannerLimit);
                                 @endphp
-                                <td style="width:58mm; padding-top:4mm; padding-bottom:3mm; vertical-align:top;">
+                                <td class="product-cell" style="width:{{ $productCardWidth }}mm; padding-top:4mm; padding-bottom:3mm; vertical-align:top;">
                                     <table class="product-card" style="border-color:{{ $boxColor }};">
                                         <tr>
                                             <td class="product-media" rowspan="2">
@@ -557,15 +585,15 @@
                                     </table>
                                 </td>
                             @else
-                                <td style="width:58mm;">&nbsp;</td>
+                                <td class="product-cell" style="width:{{ $productCardWidth }}mm;">&nbsp;</td>
                             @endif
 
-                            @if ($productSlot < 2)
-                                <td style="width:5mm;">&nbsp;</td>
+                            @if ($productSlot < ($productColumns - 1))
+                                <td style="width:{{ $productGap }}mm;">&nbsp;</td>
                             @endif
                         @endfor
 
-                        <td style="width:8mm;">&nbsp;</td>
+                        <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
                     </tr>
                 @endforeach
             </table>

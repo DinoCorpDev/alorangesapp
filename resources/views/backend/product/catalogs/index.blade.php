@@ -21,6 +21,7 @@
         }
 
         $coverTitlePosition = old('cover_title_position', $settings['cover_title_position'] ?? 'middle');
+        $productsPerPage = (int) old('products_per_page', $settings['products_per_page'] ?? 12);
         $catalogMessages = [
             'categoriesSelected' => translate('categories selected'),
             'productsSelected' => translate('products selected'),
@@ -161,6 +162,81 @@
         }
         .catalog-index-shell .catalog-product-toolbar .form-control {
             max-width: 320px;
+        }
+        .catalog-index-shell .catalog-density-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            max-width: 620px;
+            margin-bottom: 16px;
+        }
+        .catalog-index-shell .catalog-density-option {
+            position: relative;
+            display: block;
+            margin: 0;
+            cursor: pointer;
+        }
+        .catalog-index-shell .catalog-density-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .catalog-index-shell .catalog-density-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 76px;
+            padding: 12px 14px;
+            background: #fff;
+            border: 1px solid #dbe3ec;
+            border-radius: 6px;
+            transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+        }
+        .catalog-index-shell .catalog-density-option input:checked + .catalog-density-card {
+            background: #fff8f3;
+            border-color: #f36f21;
+            box-shadow: 0 0 0 2px rgba(243, 111, 33, 0.12);
+        }
+        .catalog-index-shell .catalog-density-option input:focus + .catalog-density-card {
+            outline: 2px solid rgba(243, 111, 33, 0.35);
+            outline-offset: 2px;
+        }
+        .catalog-index-shell .catalog-density-icon {
+            display: grid;
+            flex: 0 0 54px;
+            width: 54px;
+            height: 44px;
+            padding: 5px;
+            gap: 3px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+        }
+        .catalog-index-shell .catalog-density-icon span {
+            background: #f36f21;
+            border-radius: 1px;
+            opacity: .72;
+        }
+        .catalog-index-shell .catalog-density-icon-six {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+        }
+        .catalog-index-shell .catalog-density-icon-twelve {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+        }
+        .catalog-index-shell .catalog-density-copy strong,
+        .catalog-index-shell .catalog-density-copy small {
+            display: block;
+        }
+        .catalog-index-shell .catalog-density-copy strong {
+            color: #1f2937;
+            font-size: 14px;
+        }
+        .catalog-index-shell .catalog-density-copy small {
+            color: #64748b;
+            margin-top: 2px;
+            line-height: 1.3;
         }
         .catalog-index-shell .catalog-product-table th {
             background: #f8fafc;
@@ -468,6 +544,36 @@
                             <div>
                                 <h6>{{ translate('Products') }}</h6>
                                 <p>{{ translate('Only products with price greater than zero can be selected') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="font-weight-bold mb-2">Productos por página</label>
+                            <div class="catalog-density-options">
+                                <label class="catalog-density-option">
+                                    <input type="radio" name="products_per_page" value="6" @checked($productsPerPage === 6)>
+                                    <span class="catalog-density-card">
+                                        <span class="catalog-density-icon catalog-density-icon-six" aria-hidden="true">
+                                            @for ($i = 0; $i < 6; $i++)<span></span>@endfor
+                                        </span>
+                                        <span class="catalog-density-copy">
+                                            <strong>6 productos</strong>
+                                            <small>Tarjetas e imágenes más grandes</small>
+                                        </span>
+                                    </span>
+                                </label>
+                                <label class="catalog-density-option">
+                                    <input type="radio" name="products_per_page" value="12" @checked($productsPerPage === 12)>
+                                    <span class="catalog-density-card">
+                                        <span class="catalog-density-icon catalog-density-icon-twelve" aria-hidden="true">
+                                            @for ($i = 0; $i < 12; $i++)<span></span>@endfor
+                                        </span>
+                                        <span class="catalog-density-copy">
+                                            <strong>12 productos</strong>
+                                            <small>Formato compacto con más productos</small>
+                                        </span>
+                                    </span>
+                                </label>
                             </div>
                         </div>
 

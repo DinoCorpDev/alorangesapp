@@ -95,6 +95,7 @@ class ProductCatalogController extends Controller
         $settings['advisor_email_1'] = $existing['settings']['advisor_email_1'] ?? '';
         $settings['advisor_email_2'] = $existing['settings']['advisor_email_2'] ?? '';
         $settings['advertising_items'] = $this->catalogAdvertisingItems($existing['settings'] ?? []);
+        $settings['products_per_page'] = (int) ($existing['settings']['products_per_page'] ?? 12);
 
         $categories = Category::whereIn('id', $existing['category_ids'] ?? [])
             ->orderBy('order_level')->orderBy('name')->get();
@@ -270,6 +271,7 @@ class ProductCatalogController extends Controller
             'advertising_images.*' => 'nullable|string|max:255',
             'advertising_letters' => 'nullable|array',
             'advertising_letters.*' => 'nullable|string|max:1',
+            'products_per_page' => 'required|integer|in:6,12',
         ]);
 
         $categoryIds = array_values(array_unique($request->category_ids));
@@ -298,6 +300,7 @@ class ProductCatalogController extends Controller
             'advisor_email_1' => $request->advisor_email_1,
             'advisor_email_2' => $request->advisor_email_2,
             'advertising_items' => $this->sanitizeAdvertisingItems($request),
+            'products_per_page' => (int) $request->products_per_page,
         ]);
 
         $catalogName = $request->name ?: translate('Catalog') . ' - ' . $categoryNames->join(', ') . ' - ' . now()->format('Y-m-d H:i');
@@ -768,6 +771,7 @@ class ProductCatalogController extends Controller
             'show_info_page' => true,
             'show_page_four' => false,
             'description_limit' => 90,
+            'products_per_page' => 12,
             'cover_image' => null,
             'cover_title_position' => 'middle',
             'advisor_name' => '',
