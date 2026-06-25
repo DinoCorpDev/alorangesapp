@@ -161,36 +161,38 @@
     };
     $coverTitleBottomSpace = max(0, 276 - $coverTitleTop - $coverTitleHeight - $coverFooterHeight);
 
-    $productsPerPage = in_array((int) ($settings['products_per_page'] ?? 12), [6, 12], true)
+    $productsPerPage = in_array((int) ($settings['products_per_page'] ?? 12), [12, 20], true)
         ? (int) $settings['products_per_page']
         : 12;
-    $productColumns = $productsPerPage === 6 ? 2 : 3;
+    $compactProducts = $productsPerPage === 20;
+    $productColumns = $compactProducts ? 4 : 3;
     $productTableColspan = ($productColumns * 2) + 1;
-    $productSideSpace = $productsPerPage === 6 ? 12 : 8;
-    $productGap = $productsPerPage === 6 ? 10 : 5;
-    $productCardWidth = $productsPerPage === 6 ? 91 : 58;
-    $productCardHeight = $productsPerPage === 6 ? 74 : 54;
-    $productMediaWidth = $productsPerPage === 6 ? 34 : 20;
-    $productMediaHeight = $productCardHeight;
-    $productImageWidth = $productsPerPage === 6 ? 30 : 17;
-    $productImageHeight = $productsPerPage === 6 ? 68 : 49;
-    $productContentWidth = $productCardWidth - $productMediaWidth;
-    $productHeadHeight = $productsPerPage === 6 ? 13 : 10;
-    $productInfoHeight = $productCardHeight - $productHeadHeight;
-    $productRowHeight = $productsPerPage === 6 ? 82 : 62;
-    $productHeaderHeight = $productsPerPage === 6 ? 25 : 22;
-    $productNameLimit = $productsPerPage === 6 ? 82 : 48;
-    $productBannerLimit = $productsPerPage === 6 ? 48 : 28;
+    $productSideSpace = $compactProducts ? 6 : 8;
+    $productGap = $compactProducts ? 3 : 5;
+    $productCardWidth = $compactProducts ? 45 : 58;
+    $productCardHeight = $compactProducts ? 45 : 54;
+    $productHeadHeight = $compactProducts ? 8 : 10;
+    $productMediaHeight = $compactProducts ? 23 : 27;
+    $productInfoHeight = $productCardHeight - $productHeadHeight - $productMediaHeight;
+    $productImageWidth = $compactProducts ? 37 : 48;
+    $productImageHeight = $compactProducts ? 20 : 23;
+    $productRowHeight = $compactProducts ? 48 : 62;
+    $productCellPaddingTop = $compactProducts ? 1.5 : 4;
+    $productCellPaddingBottom = $compactProducts ? 1 : 3;
+    $productHeaderHeight = $compactProducts ? 22 : 22;
+    $productBannerLimit = $compactProducts ? 34 : 42;
+    $advertisingWidth = ($productCardWidth * 2) + $productGap;
+    $advertisingHeight = ($productRowHeight * 2) - $productCellPaddingTop - $productCellPaddingBottom;
 
-    $safeTitleFontSize = $productsPerPage === 6
-        ? min(14, max(8, (int) ($settings['product_title_font_size'] ?: 12)))
+    $safeTitleFontSize = $compactProducts
+        ? min(8, max(6, (int) ($settings['product_title_font_size'] ?: 8)))
         : min(10, max(7, (int) ($settings['product_title_font_size'] ?: 10)));
     $safeDescriptionFontSize = min(9, max(7, (int) ($settings['product_description_font_size'] ?: 8)));
-    $safePriceFontSize = $productsPerPage === 6
-        ? min(18, max(11, (int) ($settings['product_price_font_size'] ?: 16)))
+    $safePriceFontSize = $compactProducts
+        ? min(11, max(8, (int) ($settings['product_price_font_size'] ?: 10)))
         : min(13, max(9, (int) ($settings['product_price_font_size'] ?: 13)));
-    $safeReferenceFontSize = $productsPerPage === 6
-        ? min(12, max(8, (int) ($settings['product_reference_font_size'] ?: 11)))
+    $safeReferenceFontSize = $compactProducts
+        ? min(8, max(6, (int) ($settings['product_reference_font_size'] ?: 7)))
         : min(9, max(7, (int) ($settings['product_reference_font_size'] ?: 9)));
 
     $pdfPageRendered = false;
@@ -276,23 +278,25 @@
         .info-table tr:last-child td { border-bottom: 0; }
         .info-table-label { width: 34%; color: #0f766e; font-weight: 700; background: #f0fdfa; text-transform: uppercase; }
         .product-sheet { width: 216mm; height: 276mm; border-collapse: collapse; background: #f5f7fb; }
-        .product-sheet-header { height: {{ $productHeaderHeight }}mm; padding: {{ $productsPerPage === 6 ? 7 : 6 }}mm {{ $productsPerPage === 6 ? 12 : 10 }}mm {{ $productsPerPage === 6 ? 4 : 3 }}mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
+        .product-sheet-header { height: {{ $productHeaderHeight }}mm; padding: 6mm {{ $compactProducts ? 8 : 10 }}mm 3mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
         .product-category { color: #64748b; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
         .product-letter { color: #111827; font-size: 30px; font-weight: 700; line-height: 1; text-align: right; }
         .product-row { height: {{ $productRowHeight }}mm; }
         .product-cell { width: {{ 100 / $productColumns }}%; vertical-align: top; }
-        .product-card { width: {{ $productCardWidth }}mm; height: {{ $productCardHeight }}mm; border-collapse: collapse; table-layout: fixed; background: #ffffff; border: 0.35mm solid #d8e0ea; }
-        .product-media { width: {{ $productMediaWidth }}mm; height: {{ $productMediaHeight }}mm; padding: {{ $productsPerPage === 6 ? 2 : 1.5 }}mm; text-align: center; vertical-align: middle; background: #f8fafc; border-right: 0.35mm solid #e5e7eb; }
+        .product-card { width: {{ $productCardWidth }}mm; height: {{ $productCardHeight }}mm; border-collapse: collapse; table-layout: fixed; background: #ffffff; border: 0.3mm solid #dfe5e8; }
+        .product-head { width: {{ $productCardWidth }}mm; height: {{ $productHeadHeight }}mm; padding: {{ $compactProducts ? 1.2 : 1.8 }}mm {{ $compactProducts ? 1.6 : 2.2 }}mm; font-weight: 700; line-height: 1.13; vertical-align: middle; text-transform: uppercase; }
+        .product-media { width: {{ $productCardWidth }}mm; height: {{ $productMediaHeight }}mm; padding: {{ $compactProducts ? 1 : 1.5 }}mm; text-align: center; vertical-align: middle; background: #ffffff; }
         .product-img { max-width: {{ $productImageWidth }}mm; max-height: {{ $productImageHeight }}mm; }
-        .product-head { width: {{ $productContentWidth }}mm; height: {{ $productHeadHeight }}mm; padding: {{ $productsPerPage === 6 ? 2 : 1.5 }}mm {{ $productsPerPage === 6 ? 3 : 2 }}mm; font-weight: 700; line-height: 1.12; vertical-align: middle; }
-        .product-info { width: {{ $productContentWidth }}mm; height: {{ $productInfoHeight }}mm; padding: {{ $productsPerPage === 6 ? 5 : 4 }}mm {{ $productsPerPage === 6 ? 3 : 2.5 }}mm {{ $productsPerPage === 6 ? 3 : 2.5 }}mm; vertical-align: top; }
+        .product-info { width: {{ $productCardWidth }}mm; height: {{ $productInfoHeight }}mm; padding: 0 {{ $compactProducts ? 1.5 : 2 }}mm {{ $compactProducts ? 1.2 : 1.8 }}mm; text-align: center; vertical-align: middle; }
         .product-name { color: #111827; font-weight: 700; line-height: 1.22; margin: 0; }
-        .product-price { color: #f36f21; font-weight: 700; line-height: 1.08; margin: 0; }
-        .product-ref { color: #475569; font-weight: 700; line-height: 1.1; margin: 0; }
+        .product-price { color: #d9832e; font-weight: 500; line-height: 1.1; margin: 0; text-align: center; }
+        .product-ref { color: #475569; font-weight: 400; line-height: 1.1; margin: 0; text-align: center; }
         .product-detail-table { width: 100%; border-collapse: collapse; }
-        .product-detail-table td { padding: 0; vertical-align: top; }
-        .product-text-gap { height: 6mm; line-height: 6mm; font-size: 1px; }
-        .product-price-gap { height: 6mm; line-height: 6mm; font-size: 1px; }
+        .product-detail-table td { padding: 0; vertical-align: middle; }
+        .product-price-gap { height: {{ $compactProducts ? 1.5 : 2.2 }}mm; line-height: {{ $compactProducts ? 1.5 : 2.2 }}mm; font-size: 1px; }
+        .product-advertising-cell { width: {{ $advertisingWidth }}mm; height: {{ $advertisingHeight }}mm; padding: {{ $productCellPaddingTop }}mm 0 {{ $productCellPaddingBottom }}mm; text-align: center; vertical-align: middle; }
+        .product-advertising-frame { width: {{ $advertisingWidth }}mm; height: {{ $advertisingHeight - $productCellPaddingTop - $productCellPaddingBottom }}mm; border: 0.3mm solid #dfe5e8; background: #ffffff; text-align: center; vertical-align: middle; overflow: hidden; }
+        .product-advertising-image { max-width: {{ $advertisingWidth - 1 }}mm; max-height: {{ $advertisingHeight - $productCellPaddingTop - $productCellPaddingBottom - 1 }}mm; }
         .product-desc { color: #64748b; line-height: 1.35; margin: 0; }
     </style>
 </head>
@@ -510,10 +514,43 @@
     @endphp
 
     @foreach ($executiveCategoryGroup['letter_groups'] as $letter => $letterProducts)
-        @foreach ($letterProducts->chunk($productsPerPage) as $chunk)
+        @php
+            $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
+            $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
+            $remainingLetterProducts = $letterProducts->values();
+            $letterAdvertising = $advertisingByLetter->get($letter, collect())->values();
+            $letterPages = collect();
+            $advertisingIndex = 0;
+
+            while ($remainingLetterProducts->isNotEmpty()) {
+                $advertisingItem = $letterAdvertising->get($advertisingIndex);
+                $pageCapacity = $productsPerPage - ($advertisingItem ? 4 : 0);
+                $pageProducts = $remainingLetterProducts->take($pageCapacity)->values();
+                $remainingLetterProducts = $remainingLetterProducts->slice($pageCapacity)->values();
+
+                $letterPages->push([
+                    'products' => $pageProducts,
+                    'advertising' => $advertisingItem,
+                ]);
+
+                if ($advertisingItem) {
+                    $advertisingIndex++;
+                }
+            }
+        @endphp
+
+        @foreach ($letterPages as $letterPage)
             @php
-                $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
-                $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
+                $chunk = $letterPage['products'];
+                $advertisingItem = $letterPage['advertising'];
+                $featuredProductColumns = $productColumns - 2;
+                $featuredProductCount = $featuredProductColumns * 2;
+                $featuredProducts = $advertisingItem
+                    ? $chunk->take($featuredProductCount)->values()
+                    : collect();
+                $regularProducts = $advertisingItem
+                    ? $chunk->slice($featuredProductCount)->values()
+                    : $chunk;
             @endphp
 
             {!! $pageBreak() !!}
@@ -524,7 +561,44 @@
                     </td>
                 </tr>
 
-                @foreach ($chunk->values()->chunk($productColumns) as $row)
+                @if ($advertisingItem)
+                    @for ($featuredRow = 0; $featuredRow < 2; $featuredRow++)
+                        <tr class="product-row">
+                            <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
+
+                            @for ($featuredColumn = 0; $featuredColumn < $featuredProductColumns; $featuredColumn++)
+                                @php
+                                    $featuredProduct = $featuredProducts->get(($featuredRow * $featuredProductColumns) + $featuredColumn);
+                                @endphp
+
+                                <td class="product-cell" style="width:{{ $productCardWidth }}mm; padding-top:{{ $productCellPaddingTop }}mm; padding-bottom:{{ $productCellPaddingBottom }}mm; vertical-align:top;">
+                                    @if ($featuredProduct)
+                                        @include('backend.product.catalogs._pdf_product_card', ['product' => $featuredProduct])
+                                    @else
+                                        &nbsp;
+                                    @endif
+                                </td>
+                                <td style="width:{{ $productGap }}mm;">&nbsp;</td>
+                            @endfor
+
+                            @if ($featuredRow === 0)
+                                <td class="product-advertising-cell" colspan="3" rowspan="2">
+                                    <table class="product-advertising-frame">
+                                        <tr>
+                                            <td style="text-align:center; vertical-align:middle;">
+                                                <img class="product-advertising-image" src="{{ $advertisingItem['image'] }}" alt="">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            @endif
+
+                            <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
+                        </tr>
+                    @endfor
+                @endif
+
+                @foreach ($regularProducts->chunk($productColumns) as $row)
                     @php $rowProducts = $row->values(); @endphp
                     <tr class="product-row">
                         <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
@@ -533,56 +607,8 @@
                             @php $product = $rowProducts->get($productSlot); @endphp
 
                             @if ($product)
-                                @php
-                                    $image = $pageImage($product->thumbnail_img)
-                                        ?: $pageImage($product->meta_image)
-                                        ?: $fallbackImage;
-                                    $rawName = trim($product->getTranslation('name'));
-                                    $displayName = \Illuminate\Support\Str::limit($rawName, $productNameLimit);
-                                    $bannerName = \Illuminate\Support\Str::limit($rawName, $productBannerLimit);
-                                @endphp
-                                <td class="product-cell" style="width:{{ $productCardWidth }}mm; padding-top:4mm; padding-bottom:3mm; vertical-align:top;">
-                                    <table class="product-card" style="border-color:{{ $boxColor }};">
-                                        <tr>
-                                            <td class="product-media" rowspan="2">
-                                                @if ($image)
-                                                    <img class="product-img" src="{{ $image }}" alt="">
-                                                @endif
-                                            </td>
-                                            <td class="product-head" style="background-color:{{ $boxColor }}; color:{{ $textColor }}; font-family:{{ $cssFont($settings['product_title_font_family']) }}, sans-serif; font-size:{{ $safeTitleFontSize }}px;">
-                                                {{ $bannerName }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="product-info">
-                                                <table class="product-detail-table">
-                                                    <tr>
-                                                        <td class="product-name" style="font-family:{{ $cssFont($settings['product_title_font_family']) }}, sans-serif; font-size:{{ $safeTitleFontSize }}px;">
-                                                            {{ $displayName }}
-                                                        </td>
-                                                    </tr>
-
-                                                    @if ($settings['show_prices'])
-                                                        <tr><td class="product-text-gap">&nbsp;</td></tr>
-                                                        <tr>
-                                                            <td class="product-price" style="font-family:{{ $cssFont($settings['product_price_font_family']) }}, sans-serif; font-size:{{ $safePriceFontSize }}px;">
-                                                                {{ format_price($product->lowest_price) }}
-                                                            </td>
-                                                        </tr>
-                                                    @endif
-
-                                                    @if ($product->reference)
-                                                        <tr><td class="product-price-gap">&nbsp;</td></tr>
-                                                        <tr>
-                                                            <td class="product-ref" style="font-family:{{ $cssFont($settings['product_reference_font_family']) }}, sans-serif; font-size:{{ $safeReferenceFontSize }}px;">
-                                                                Ref. {{ $product->reference }}
-                                                            </td>
-                                                        </tr>
-                                                    @endif
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>
+                                <td class="product-cell" style="width:{{ $productCardWidth }}mm; padding-top:{{ $productCellPaddingTop }}mm; padding-bottom:{{ $productCellPaddingBottom }}mm; vertical-align:top;">
+                                    @include('backend.product.catalogs._pdf_product_card', ['product' => $product])
                                 </td>
                             @else
                                 <td class="product-cell" style="width:{{ $productCardWidth }}mm;">&nbsp;</td>
@@ -597,17 +623,7 @@
                     </tr>
                 @endforeach
             </table>
-
         @endforeach
-
-        @if ($advertisingByLetter->has($letter))
-            @foreach ($advertisingByLetter->get($letter) as $advertisingItem)
-                {!! $pageBreak() !!}
-                <div class="pdf-page">
-                    <img src="{{ $advertisingItem['image'] }}" style="display:block; width:216mm; height:276mm;" alt="">
-                </div>
-            @endforeach
-        @endif
     @endforeach
 @endforeach
 

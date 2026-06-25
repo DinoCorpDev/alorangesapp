@@ -21,7 +21,7 @@
         }
 
         $coverTitlePosition = old('cover_title_position', $settings['cover_title_position'] ?? 'middle');
-        $productsPerPage = (int) old('products_per_page', $settings['products_per_page'] ?? 12);
+        $productsPerPage = (int) old('products_per_page', $settings['products_per_page'] ?? 12) === 20 ? 20 : 12;
         $catalogMessages = [
             'categoriesSelected' => translate('categories selected'),
             'productsSelected' => translate('products selected'),
@@ -217,9 +217,9 @@
             border-radius: 1px;
             opacity: .72;
         }
-        .catalog-index-shell .catalog-density-icon-six {
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+        .catalog-index-shell .catalog-density-icon-twenty {
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 1fr);
         }
         .catalog-index-shell .catalog-density-icon-twelve {
             grid-template-columns: repeat(3, 1fr);
@@ -491,7 +491,7 @@
                         <div class="catalog-section-title">
                             <div>
                                 <h6>{{ translate('Advertising') }}</h6>
-                                <p>{{ translate('Optional full-page images shown after the selected letter') }}</p>
+                                <p>Imagen destacada junto a los productos de la letra seleccionada</p>
                             </div>
                             <button type="button" class="btn btn-soft-primary btn-sm" id="add-advertising-row">
                                 <i class="las la-plus"></i>
@@ -503,7 +503,7 @@
                                 <thead>
                                     <tr>
                                         <th>{{ translate('Advertising Image') }}</th>
-                                        <th width="190">{{ translate('Show After Letter') }}</th>
+                                        <th width="190">Mostrar con la letra</th>
                                         <th width="80" class="text-center">{{ translate('Options') }}</th>
                                     </tr>
                                 </thead>
@@ -551,18 +551,6 @@
                             <label class="font-weight-bold mb-2">Productos por página</label>
                             <div class="catalog-density-options">
                                 <label class="catalog-density-option">
-                                    <input type="radio" name="products_per_page" value="6" @checked($productsPerPage === 6)>
-                                    <span class="catalog-density-card">
-                                        <span class="catalog-density-icon catalog-density-icon-six" aria-hidden="true">
-                                            @for ($i = 0; $i < 6; $i++)<span></span>@endfor
-                                        </span>
-                                        <span class="catalog-density-copy">
-                                            <strong>6 productos</strong>
-                                            <small>Tarjetas e imágenes más grandes</small>
-                                        </span>
-                                    </span>
-                                </label>
-                                <label class="catalog-density-option">
                                     <input type="radio" name="products_per_page" value="12" @checked($productsPerPage === 12)>
                                     <span class="catalog-density-card">
                                         <span class="catalog-density-icon catalog-density-icon-twelve" aria-hidden="true">
@@ -570,7 +558,19 @@
                                         </span>
                                         <span class="catalog-density-copy">
                                             <strong>12 productos</strong>
-                                            <small>Formato compacto con más productos</small>
+                                            <small>Tarjetas amplias e imágenes más grandes</small>
+                                        </span>
+                                    </span>
+                                </label>
+                                <label class="catalog-density-option">
+                                    <input type="radio" name="products_per_page" value="20" @checked($productsPerPage === 20)>
+                                    <span class="catalog-density-card">
+                                        <span class="catalog-density-icon catalog-density-icon-twenty" aria-hidden="true">
+                                            @for ($i = 0; $i < 20; $i++)<span></span>@endfor
+                                        </span>
+                                        <span class="catalog-density-copy">
+                                            <strong>20 productos</strong>
+                                            <small>Formato compacto para catálogos extensos</small>
                                         </span>
                                     </span>
                                 </label>

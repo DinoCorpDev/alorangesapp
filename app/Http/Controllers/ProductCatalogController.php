@@ -95,7 +95,7 @@ class ProductCatalogController extends Controller
         $settings['advisor_email_1'] = $existing['settings']['advisor_email_1'] ?? '';
         $settings['advisor_email_2'] = $existing['settings']['advisor_email_2'] ?? '';
         $settings['advertising_items'] = $this->catalogAdvertisingItems($existing['settings'] ?? []);
-        $settings['products_per_page'] = (int) ($existing['settings']['products_per_page'] ?? 12);
+        $settings['products_per_page'] = (int) ($existing['settings']['products_per_page'] ?? 12) === 20 ? 20 : 12;
 
         $categories = Category::whereIn('id', $existing['category_ids'] ?? [])
             ->orderBy('order_level')->orderBy('name')->get();
@@ -271,7 +271,7 @@ class ProductCatalogController extends Controller
             'advertising_images.*' => 'nullable|string|max:255',
             'advertising_letters' => 'nullable|array',
             'advertising_letters.*' => 'nullable|string|max:1',
-            'products_per_page' => 'required|integer|in:6,12',
+            'products_per_page' => 'required|integer|in:12,20',
         ]);
 
         $categoryIds = array_values(array_unique($request->category_ids));
