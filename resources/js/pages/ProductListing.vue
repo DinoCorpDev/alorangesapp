@@ -1,5 +1,8 @@
 <template>
     <v-container class="search mb-5" fluid>
+        <div class="d-flex d-sm-none">
+            <SearchInput  :showInput="true" :placeholder="'Escribe lo que buscas'" style="max-width: 500px; margin-bottom: 25px;  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;" />
+        </div>
         <v-row class="filter-bar-wrap mb-5">
             <v-col cols="12">
                 <div class="filter-bar">
@@ -26,7 +29,7 @@
         <v-row class="d-flex flex-wrap">
             <v-col cols="12">
                 <h5 class="search-results" v-if="queryParam.keyword">
-                    {{ $t("search_results_for") }} "{{ queryParam.keyword }}"
+                    Resultados para {{ queryParam.keyword }}
                 </h5>
             </v-col>
             <v-col cols="12" sm="6" md="4" lg="2" v-if="loading">
@@ -35,12 +38,12 @@
             <template v-else>
                 <template v-if="products.length > 0">
                     <v-col cols="6" sm="4" md="4" lg="2" v-for="(product, i) in products" :key="i">
-                        <ProductBox :product-details="product" />
+                        <ProductBox :productDetails="product" />
                     </v-col>
                 </template>
                 <template v-else>
                     <v-col cols="12">
-                        {{ $t("no_product_found") }}
+                        {{ $t("Producto no encontrado") }}
                     </v-col>
                 </template>
             </template>
@@ -50,9 +53,10 @@
 
 <script>
 import ProductBox from "../components/product/ProductBox.vue";
-
+import SearchInput from "../components/global/SearchInput.vue";
 export default {
     components: {
+        SearchInput,
         ProductBox
     },
     data() {
@@ -93,8 +97,6 @@ export default {
         this.queryParam.maxPrice = this.$route.query.maxPrice || this.queryParam.maxPrice;
         this.queryParam.attributeValues = this.$route.query.attributeValues || this.queryParam.attributeValues;
 
-        console.log(this.queryParam);
-
         if (this.queryParam.sortBy !== "popular") {
             let selectedSort = this.sortingOptions.find(sort => sort.value === this.queryParam.sortBy);
             this.sortingDefault = selectedSort;
@@ -124,6 +126,7 @@ export default {
             url += params.categoryIds ? `&category_ids=${params.categoryIds}` : "";
             url += params.attributeValues ? `&attribute_values=${params.attributeValues}` : "";
             url += params.keyword ? `&keyword=${params.keyword}` : "";
+            url += `&form=search`;
             url += params.sortBy ? `&sort_by=${params.sortBy}` : "";
             url += params.minPrice ? `&min_price=${params.minPrice}` : "";
             url += params.maxPrice ? `&max_price=${params.maxPrice}` : "";

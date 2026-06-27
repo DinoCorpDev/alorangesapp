@@ -38,24 +38,28 @@ class WishlistController extends Controller
      */
     public function store(Request $request)
     {
-        if(Auth::check()){
+        if (Auth::check()) {
             $wishlist = Wishlist::where('user_id', Auth::user()->id)->where('product_id', $request->id)->first();
-            if($wishlist == null){
+
+            if ($wishlist == null) {
                 $wishlist = new Wishlist;
                 $wishlist->user_id = Auth::user()->id;
                 $wishlist->product_id = $request->id;
                 $wishlist->save();
             }
+
             return view('frontend.partials.wishlist');
         }
+
         return 0;
     }
 
     public function remove(Request $request)
     {
         $wishlist = Wishlist::findOrFail($request->id);
-        if($wishlist!=null){
-            if(Wishlist::destroy($request->id)){
+
+        if ($wishlist != null) {
+            if (Wishlist::destroy($request->id)) {
                 return view('frontend.partials.wishlist');
             }
         }

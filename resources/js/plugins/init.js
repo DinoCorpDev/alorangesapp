@@ -16,7 +16,7 @@ export default function init(store, router) {
         function (error) {
             if (error.response.status == 401) {
                 store.dispatch("auth/logout");
-                router.push({ name: "Login" });
+                router.push({ name: "Home2" });
             }
 
             return Promise.reject(error);

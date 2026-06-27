@@ -8,12 +8,13 @@ use Illuminate\Http\Request;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
+use App\Models\Localidad;
 
 class AddressController extends Controller
 {
     public function addresses()
     {
-        return new AddressCollection(Address::where('user_id', auth('api')->user()->id)->latest()->get());
+        return new AddressCollection(Address::where('user_id', auth('api')->user()->id)->orderBy("id", "desc")->get());
     }
 
     public function createShippingAddress(Request $request)
@@ -31,6 +32,7 @@ class AddressController extends Controller
         $address->country_id = $request->country;
         $address->state = State::find($request->state)->name;
         $address->state_id = $request->state;
+        $address->localidad_id = $request->localidad;
         $address->city = City::find($request->city)->name;
         $address->city_id = $request->city;
         $address->neighborhood = $request->neighborhood;
@@ -51,6 +53,56 @@ class AddressController extends Controller
                 'details' => $address->details,
                 'country' => $address->country,
                 'state' => $address->state,
+                'localidad_id' => $address->localidad_id,
+                'city' => $address->city,
+                'neighborhood' => $address->neighborhood,
+                'postal_code' => $address->postal_code,
+                'phone' => $address->phone,
+                'default_shipping' => $address->default_shipping,
+                'default_billing' => $address->default_billing,
+                'default_service' => $address->default_service
+            ],
+            'message' => translate('¡Dirección agregada satisfactoriamente!')
+        ]);
+    }
+
+    public function createShippingAddressRegister(Request $request)
+    {
+        $shipping_count = Address::where('user_id', $request->customer_id)->where('default_shipping', 1)->count();
+        $billing_count = Address::where('user_id', $request->customer_id)->where('default_billing', 1)->count();
+        $service_count = Address::where('user_id', $request->customer_id)->where('default_service', 1)->count();
+
+        $address = new Address;
+        $address->user_id = $request->customer_id;
+        $address->address = $request->address;
+        $address->name = $request->name;
+        $address->details = $request->details;
+        $address->country = Country::find($request->country)->name;
+        $address->country_id = $request->country;
+        $address->state = State::find($request->state)->name;
+        $address->state_id = $request->state;
+        $address->localidad_id = $request->localidad;
+        $address->city = City::find($request->city)->name;
+        $address->city_id = $request->city;
+        $address->neighborhood = $request->neighborhood;
+        $address->postal_code = $request->postal_code;
+        $address->phone = $request->phone;
+        $address->default_shipping = $shipping_count > 0 ? 0 : 1;
+        $address->default_billing = $billing_count > 0 ? 0 : 1;
+        $address->default_service = $service_count > 0 ? 0 : 1;
+        $address->save();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id'      => $address->id,
+                'user_id' => $address->user_id,
+                'address' => $address->address,
+                'name' => $address->name,
+                'details' => $address->details,
+                'country' => $address->country,
+                'state' => $address->state,
+                'localidad_id' => $address->localidad_id,
                 'city' => $address->city,
                 'neighborhood' => $address->neighborhood,
                 'postal_code' => $address->postal_code,
@@ -99,13 +151,16 @@ class AddressController extends Controller
         }
 
         $address->address = $request->address;
+        $address->name = $request->name;
         $address->country = Country::find($request->country)->name;
         $address->country_id = $request->country;
         $address->state = State::find($request->state)->name;
         $address->state_id = $request->state;
+        $address->localidad_id = $request->localidad;
         $address->city = City::find($request->city)->name;
         $address->city_id = $request->city;
         $address->postal_code = $request->postal_code;
+        $address->neighborhood = $request->neighborhood;
         $address->phone = $request->phone;
         $address->save();
 
@@ -174,7 +229,24 @@ class AddressController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => State::where('country_id', $country_id)->where('status', 1)->get()
+            'data' => State::where('country_id', $country_id)->where('status', 1)->orderBy('name', 'asc')->get()
+        ]);
+    }
+
+    public function get_localidad_by_state_id($state_id)
+    {
+        $array = array();
+        $localidad = Localidad::where('state_id', $state_id)->orderBy('localidad', 'asc')->get();
+
+        foreach($localidad as $l){
+            $arr = [ "text" => $l->localidad, "value" => $l->id ];
+            array_push($array, $arr);
+        }
+
+
+        return response()->json([
+            'success' => true,
+            'data' => $array
         ]);
     }
 
@@ -182,7 +254,29 @@ class AddressController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => City::where('state_id', $state_id)->where('status', 1)->get()
+            'data' => City::where('state_id', $state_id)->where('status', 1)->orderBy('name', 'asc')->get()
         ]);
+    }
+
+    public function setFavorite(Request $request){
+        $address = Address::findOrFail($request->id);
+        if (auth('api')->user()->id != $address->user_id) {
+            return response()->json(null, 401);
+        }
+
+        $address->favorite = $request->favorite;
+        $address->update();
+
+        if($request->favorite == 1)
+            return response()->json([
+                'success' => true,
+                'message' => translate('Address has been successfully placed as a favorite.'),
+            ]);
+        else
+            return response()->json([
+                'success' => true,
+                'message' => translate('Address has been successfully removed as a favorite.'),
+            ]);
+
     }
 }

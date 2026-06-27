@@ -22,6 +22,7 @@ class RefundItemsCollection extends JsonResource
                 'id' => $product ? $product->id : null,
                 'name' => $product ? $product->getTranslation('name') : translate('Product has been removed'),
                 'thumbnail' => $product? api_asset($product->thumbnail_img) : '',
+                'thumbnail_image' => $product? api_asset($product->thumbnail_img) : '',
                 'combinations' => $this->orderDetail->variation ? filter_variation_combinations($this->orderDetail->variation->combinations) : [],
             ],
         ];

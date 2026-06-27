@@ -1,14 +1,21 @@
 <template>
     <v-app class="d-flex flex-column">
         <Navbar v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
-        <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" />
+        <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" @toggleMenu="toggleMenu" />
 
-        <v-main class="aiz-main-wrap">
-            <!-- prettier-ignore -->
-            <router-view :key="['ShopDetails','ShopCoupons','ShopProducts'].includes($route.name) ? null : $route.path"></router-view>
+        <v-main class="aiz-main-wrap" :style="{ marginTop: $route.meta.hasHeader ? '160px' : '0px' }">
+            <Breadcrumb />
+            <v-navigation-drawer v-model="userNavDrawerActive" fixed temporary right style="z-index: 999">
+                <SideMenu class="pa-3" />
+            </v-navigation-drawer>
+            <router-view
+                :key="['ShopDetails', 'ShopCoupons', 'ShopProducts'].includes($route.name) ? null : $route.path"
+            ></router-view>
         </v-main>
 
         <Footer v-if="$route.meta.hasFooter" :class="[{ 'd-none': routerLoading }]" />
+
+        <WhatsAppButton />
 
         <AddToCartDialog />
         <LoginDialog v-if="!isAuthenticated" />
@@ -25,6 +32,9 @@ import LoginDialog from "./auth/LoginDialog.vue";
 import Navbar from "./header/Navbar.vue";
 import NavbarAuth from "./header/NavbarAuth.vue";
 import SnackBar from "./inc/SnackBar";
+import Breadcrumb from "./header/Breadcrumb.vue";
+import WhatsAppButton from "./global/WhatsAppButton.vue";
+import SideMenu from "./user/SideMenu";
 
 export default {
     metaInfo() {
@@ -32,13 +42,26 @@ export default {
             title: this.appMetaTitle
         };
     },
+    data() {
+        return {
+            userNavDrawerActive: false
+        };
+    },
     components: {
         AddToCartDialog,
         Footer,
+        WhatsAppButton,
         LoginDialog,
+        Breadcrumb,
         Navbar,
         NavbarAuth,
+        SideMenu,
         SnackBar
+    },
+    watch: {
+        $route(to, from) {
+            window.scrollTo(0, 0); // Esto forzará el scroll al tope en cada cambio de ruta
+        }
     },
     computed: {
         ...mapGetters("auth", ["isAuthenticated"]),
@@ -47,6 +70,7 @@ export default {
     },
     methods: {
         ...mapActions("auth", ["getUser", "checkSocialLoginStatus"]),
+        ...mapActions("wishlist", ["fetchWislistProducts", "fetchWislistServices", "fetchWislistBrands"]),
         ...mapActions("cart", ["fetchCartProducts"]),
         ...mapMutations("auth", ["setSociaLoginStatus"]),
         changeRTL() {
@@ -56,12 +80,23 @@ export default {
                 this.$vuetify.rtl = false;
             }
         },
+        toggleMenu() {
+            this.userNavDrawerActive = !this.userNavDrawerActive;
+        },
         async getTempCartData() {
             if (this.isAuthenticated && this.getTempUserId) {
                 const res = await this.call_api("post", "temp-id-cart-update", {
                     temp_user_id: this.getTempUserId
                 });
                 this.fetchCartProducts();
+            }
+        },
+        async getCartData() {
+            if (this.isAuthenticated) {
+                this.fetchCartProducts();
+                this.fetchWislistProducts();
+                this.fetchWislistServices();
+                this.fetchWislistBrands();
             }
         }
     },
@@ -71,6 +106,7 @@ export default {
         setTimeout(() => {
             this.checkSocialLoginStatus();
             this.getTempCartData();
+            this.getCartData();
         }, 200);
     }
 };
@@ -80,5 +116,15 @@ export default {
 .absolute-full {
     background: #fff;
     z-index: 10000;
+}
+
+.v-main.aiz-main-wrap {
+    padding-top: 160px;
+}
+
+@media (max-width: 960px) {
+    .v-main.aiz-main-wrap {
+        padding-top: 124px;
+    }
 }
 </style>

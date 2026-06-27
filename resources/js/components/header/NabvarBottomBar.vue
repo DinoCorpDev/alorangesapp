@@ -38,6 +38,7 @@ export default {
 
 <style lang="scss" scoped>
 .bar {
+    background-color: #dfdfdf;
     display: flex;
     justify-content: space-between;
     align-items: center;

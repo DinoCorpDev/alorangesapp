@@ -1,21 +1,27 @@
 <template>
     <v-container class="user-layout" fluid>
         <v-row>
-            <v-col lg="3" class="user-layout-sidebar d-lg-block">
+            <v-col lg="3" class="user-layout-sidebar d-none d-lg-block" style="background-color: #fafcfc">
                 <SideMenu class="d-none d-sm-block" />
-                <div class="user-layout-button d-sm-none">
+                <!-- <div class="user-layout-button d-sm-none">
                     <h6>Perfil</h6>
-                    <CustomButton @click="userNavDrawerActive = !userNavDrawerActive" dark>
+                    <CustomButton @click.stop="showMenu" color="orange">
                         <BarsIcon />
                         <span>{{ $t("Menu") }}</span>
                     </CustomButton>
-                </div>
+                </div> -->
             </v-col>
-            <v-col cols="12" lg="9" class="user-layout-content">
-                <router-view />
+            <v-col cols="12" lg="9" class="user-layout-content" style="background-color: #fafcfc">
+                <v-container>
+                    <v-row>
+                        <v-col cols="12" lg="12">
+                            <router-view />
+                        </v-col>
+                    </v-row>
+                </v-container>
             </v-col>
         </v-row>
-        <v-navigation-drawer v-model="userNavDrawerActive" absolute temporary right>
+        <v-navigation-drawer v-model="userNavDrawerActive" fixed temporary right style="z-index: 999">
             <SideMenu class="pa-3" />
         </v-navigation-drawer>
     </v-container>
@@ -42,13 +48,18 @@ export default {
     computed: {
         ...mapGetters("auth", ["currentUser"]),
         ...mapState("app", ["previewAvatar"])
+    },
+    methods:{
+        showMenu(){
+            this.userNavDrawerActive = !this.userNavDrawerActive;
+        }
     }
 };
 </script>
 
 <style lang="scss" scoped>
 .user-layout {
-    min-height: 85vh;
+    // min-height: 85vh;
 
     &-sidebar {
         background-color: #7c7c7c;

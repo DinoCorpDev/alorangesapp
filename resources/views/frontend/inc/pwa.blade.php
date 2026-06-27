@@ -6,13 +6,13 @@
 <!-- Add to homescreen for Chrome on Android -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="The Shop">
-<link rel="icon" sizes="512x512" href="{{ uploaded_asset(get_setting('site_icon')) }}">
+<link rel="icon" sizes="512x512" href="{{ static_asset('web-assets/img/icons/IconoAloranges.png') }}">
 
 <!-- Add to homescreen for Safari on iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="The Shop">
-<link rel="apple-touch-icon" href="{{ uploaded_asset(get_setting('site_icon')) }}">
+<link rel="apple-touch-icon" href="{{ static_asset('web-assets/img/icons/IconoAloranges.png') }}">
 
 
 <link href="{{ static_asset('web-assets/img/icons/splash-640x1136.png') }}" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
@@ -28,7 +28,7 @@
 
 <!-- Tile for Win8 -->
 <meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="{{ uploaded_asset(get_setting('site_icon')) }}">
+<meta name="msapplication-TileImage" content="{{ static_asset('web-assets/img/icons/IconoAloranges.png') }}">
 
 <script type="text/javascript">
     // Initialize the service worker

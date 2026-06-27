@@ -56,7 +56,7 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-    background-color: #ffffff;
+    background-color: #fafcfc;
 }
 
 .invoice-div {

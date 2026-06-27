@@ -9,29 +9,18 @@
         </div>
         <div class="col-2">
             <div class="dropdown float-right">
-                <button
-                    class="btn btn-primary dropdown-toggle"
-                    id="dropdownMenuButton"
-                    data-toggle="dropdown"
-                    type="button"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                >
+                <button class="btn btn-primary dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" type="button"
+                    aria-haspopup="true" aria-expanded="false">
                     Status:
 
                     {{ $order->status == null ? '' : $order->status }}
 
                 </button>
-                <div
-                    class="dropdown-menu"
-                    aria-labelledby="dropdownMenuButton"
-                >
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     @foreach ($permission_status_orders as $key => $permission)
                         @can($permission->name)
-                            <a
-                                class="dropdown-item"
-                                href="{{ route('order.status.change', ['order_id' => $order->id, 'status' => $permission->name]) }}"
-                            >
+                            <a class="dropdown-item"
+                                href="{{ route('order.status.change', ['order_id' => $order->id, 'status' => $permission->name]) }}">
                                 {{ $permission->name }}
                             </a>
                         @endcan
@@ -104,11 +93,8 @@
                                             <tr>
                                                 <td class="">{{ translate('Receipt') }}:</td>
                                                 <td class="text-right fw-700">
-                                                    <a
-                                                        href="{{ my_asset($manual_payment_data->reciept) }}"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
+                                                    <a href="{{ my_asset($manual_payment_data->reciept) }}" target="_blank"
+                                                        rel="noopener noreferrer">
                                                         {{ translate('Download') }}
                                                     </a>
                                                 </td>
@@ -126,31 +112,38 @@
                         <div class="col-md-3 mr-auto ml-0">
                             <div class="mb-3">
                                 <label class="mb-0">{{ translate('Payment Status') }}</label>
-                                <select
-                                    class="form-control aiz-selectpicker"
-                                    id="update_payment_status"
-                                    data-minimum-results-for-search="Infinity"
-                                    data-selected="{{ $order->payment_status }}"
-                                    @if ($order->payment_status == 'paid' || $order->delivery_status == 'cancelled') disabled @endif
-                                >
+                                <select class="form-control aiz-selectpicker" id="update_payment_status"
+                                    data-minimum-results-for-search="Infinity" data-selected="{{ $order->payment_status }}"
+                                    @if ($order->payment_status == 'paid' || $order->delivery_status == 'cancelled') disabled @endif>
                                     <option value="paid">{{ translate('Paid') }}</option>
                                     <option value="unpaid">{{ translate('Unpaid') }}</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label class="mb-0">{{ translate('Delivery Status') }}</label>
-                                <select
-                                    class="form-control aiz-selectpicker"
-                                    id="update_delivery_status"
+                                <select class="form-control aiz-selectpicker" id="update_delivery_status"
                                     data-minimum-results-for-search="Infinity"
                                     data-selected="{{ $order->delivery_status }}"
-                                    @if ($order->delivery_status == 'delivered' || $order->delivery_status == 'cancelled') disabled @endif
-                                >
-                                    <option value="confirmed">{{ translate('Confirmed') }}</option>
-                                    <option value="processed">{{ translate('Processed') }}</option>
-                                    <option value="shipped">{{ translate('Shipped') }}</option>
-                                    <option value="delivered">{{ translate('Delivered') }}</option>
-                                    <option value="cancelled">{{ translate('Cancel') }}</option>
+                                    @if ($order->delivery_status == 'transportadora' || $order->delivery_status == 'cancelled') disabled @endif>
+                                    <option value="verificacion">{{ translate('En Verificacion') }}</option>
+                                    <option value="facturacion">{{ translate('Facturacion') }}</option>
+                                    <option value="alistamiento">{{ translate('Alistamiento') }}</option>
+                                    <option value="transportadora">{{ translate('Recogido por transportadora') }}</option>
+                                    <option value="entregado">{{ translate('Entregado a Cliente') }}</option>
+                                    <option value="cancelled">{{ translate('Cancelado') }}</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="mb-0">{{ translate('Service Status') }}</label>
+                                <select class="form-control aiz-selectpicker" id="update_service_status"
+                                    data-minimum-results-for-search="Infinity" data-selected="{{ $order->service_status }}"
+                                    @if ($order->service_status == 'verificacion' || $order->service_status == 'cancelled') disabled @endif>
+                                    <option value="comprado">{{ translate('Comprado') }}</option>
+                                    <option value="agendamiento">{{ translate('Agendamiento') }}</option>
+                                    <option value="preparacion">{{ translate('En Preparacion') }}</option>
+                                    <option value="verificacion">{{ translate('Verificacion de Adecuacion') }}</option>
+                                    <option value="concluida">{{ translate('Instalacion Concluida') }}</option>
+                                    <option value="cancelled">{{ translate('Cancelado') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -185,28 +178,12 @@
                     <table class="aiz-table table-bordered">
                         <thead>
                             <tr class="">
-                                <th
-                                    class="text-center"
-                                    width="5%"
-                                    data-breakpoints="lg"
-                                >#</th>
+                                <th class="text-center" width="5%" data-breakpoints="lg">#</th>
                                 <th width="40%">{{ translate('Product') }}</th>
-                                <th
-                                    class="text-center"
-                                    data-breakpoints="lg"
-                                >{{ translate('Qty') }}</th>
-                                <th
-                                    class="text-center"
-                                    data-breakpoints="lg"
-                                >{{ translate('Unit Price') }}</th>
-                                <th
-                                    class="text-center"
-                                    data-breakpoints="lg"
-                                >{{ translate('Unit Tax') }}</th>
-                                <th
-                                    class="text-center"
-                                    data-breakpoints="lg"
-                                >{{ translate('Total') }}</th>
+                                <th class="text-center" data-breakpoints="lg">{{ translate('Qty') }}</th>
+                                <th class="text-center" data-breakpoints="lg">{{ translate('Unit Price') }}</th>
+                                <th class="text-center" data-breakpoints="lg">{{ translate('Unit Tax') }}</th>
+                                <th class="text-center" data-breakpoints="lg">{{ translate('Total') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -216,10 +193,8 @@
                                     <td>
                                         @if ($orderDetail->product != null)
                                             <div class="media">
-                                                <img
-                                                    src="{{ uploaded_asset($orderDetail->product->thumbnail_img) }}"
-                                                    class="size-60px mr-3"
-                                                >
+                                                <img src="{{ uploaded_asset($orderDetail->product->thumbnail_img) }}"
+                                                    class="size-60px mr-3">
                                                 <div class="media-body">
                                                     <h4 class="fs-14 fw-400">{{ $orderDetail->product->name }}</h4>
                                                     @if ($orderDetail->variation)
@@ -321,28 +296,19 @@
                                     in_array($order->delivery_status, $refund_request_order_status) &&
                                     $refund_request == null &&
                                     $today_date <= $last_refund_date)
-                                <a
-                                    href="{{ route('admin.refund_request.create', $order->id) }}"
-                                    class="btn btn-sm btn-primary"
-                                >{{ translate('Create Refund') }}</a>
+                                <a href="{{ route('admin.refund_request.create', $order->id) }}"
+                                    class="btn btn-sm btn-primary">{{ translate('Create Refund') }}</a>
                             @endif
                         </div>
                         <div class="card-body">
 
                             @if ($refund_request != null)
-                                <table
-                                    class="table table-striped table-bordered"
-                                    cellspacing="0"
-                                    width="100%"
-                                >
+                                <table class="table table-striped table-bordered" cellspacing="0" width="100%">
                                     <thead>
                                         <tr>
                                             <th width="10%">#</th>
                                             <th>{{ translate('Name') }}</th>
-                                            <th
-                                                class="text-center"
-                                                data-breakpoints="lg"
-                                            >{{ translate('Qty') }}</th>
+                                            <th class="text-center" data-breakpoints="lg">{{ translate('Qty') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -351,10 +317,8 @@
                                                 <td>{{ $key + 1 }}</td>
                                                 <td>
                                                     <div class="media">
-                                                        <img
-                                                            src="{{ uploaded_asset($refundRequestItem->orderDetail->product->thumbnail_img) }}"
-                                                            class="size-60px mr-3"
-                                                        >
+                                                        <img src="{{ uploaded_asset($refundRequestItem->orderDetail->product->thumbnail_img) }}"
+                                                            class="size-60px mr-3">
                                                         <div class="media-body">
                                                             <h4 class="fs-14 fw-400">
                                                                 {{ $refundRequestItem->orderDetail->product->name }}
@@ -441,29 +405,23 @@
                                                         <strong class="">{{ translate('Options') }}:</strong>
                                                     </td>
                                                     <td>
-                                                        <a
-                                                            class="btn btn-soft-info btn-icon btn-circle btn-sm"
+                                                        <a class="btn btn-soft-info btn-icon btn-circle btn-sm"
                                                             onclick="show_refund_request_info('{{ $refund_request->id }}');"
                                                             title="{{ translate('Refund Request Info') }}"
-                                                            href="javascript:void(0)"
-                                                        >
+                                                            href="javascript:void(0)">
                                                             <i class="las la-eye"></i>
                                                         </a>
                                                         @if ($refund_request->admin_approval == 0)
-                                                            <a
-                                                                class="btn btn-soft-success btn-icon btn-circle btn-sm"
+                                                            <a class="btn btn-soft-success btn-icon btn-circle btn-sm"
                                                                 onclick="accept_refund_request({{ $refund_request->id }},{{ $refund_request->amount }})"
                                                                 title="{{ translate('Accept Refund Request') }}"
-                                                                href="javascript:void(0)"
-                                                            >
+                                                                href="javascript:void(0)">
                                                                 <i class="las la-check"></i>
                                                             </a>
-                                                            <a
-                                                                class="btn btn-soft-danger btn-icon btn-circle btn-sm"
+                                                            <a class="btn btn-soft-danger btn-icon btn-circle btn-sm"
                                                                 onclick="reject_refund_request('{{ route('admin.refund_request.reject', $refund_request->id) }}')"
                                                                 title="{{ translate('Reject Refund Request') }}"
-                                                                href="javascript:void(0)"
-                                                            >
+                                                                href="javascript:void(0)">
                                                                 <i class="las la-times"></i>
                                                             </a>
                                                         @endif
@@ -492,10 +450,7 @@
                                     <th>{{ translate('Seller Earning') }}</th>
                                     <th data-breakpoints="lg">{{ translate('Details') }}</th>
                                     <th class="text-center">{{ translate('Type') }}</th>
-                                    <th
-                                        data-breakpoints="lg"
-                                        class="text-right"
-                                    >{{ translate('Calculated At') }}</th>
+                                    <th data-breakpoints="lg" class="text-right">{{ translate('Calculated At') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -529,51 +484,26 @@
                     <h3 class="fs-16 mb-0">{{ translate('Tracking information') }}</h3>
                 </div>
                 <div class="card-body">
-                    <form
-                        action="{{ route('orders.add_tracking_information') }}"
-                        method="POST"
-                    >
+                    <form action="{{ route('orders.add_tracking_information') }}" method="POST">
                         @csrf
-                        <input
-                            type="hidden"
-                            name="order_id"
-                            value="{{ $order->id }}"
-                        >
+                        <input type="hidden" name="order_id" value="{{ $order->id }}">
                         <div class="form-group mb-1">
                             <label class="mb-0">{{ translate('Courier name') }}:</label>
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                name="courier_name"
-                                value="{{ $order->courier_name }}"
-                                required
-                            >
+                            <input type="text" class="form-control form-control-sm" name="courier_name"
+                                value="{{ $order->courier_name }}" required>
                         </div>
                         <div class="form-group mb-1">
                             <label class="mb-0">{{ translate('Tracking number') }}:</label>
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                name="tracking_number"
-                                value="{{ $order->tracking_number }}"
-                                required
-                            >
+                            <input type="text" class="form-control form-control-sm" name="tracking_number"
+                                value="{{ $order->tracking_number }}" required>
                         </div>
                         <div class="form-group mb-1">
                             <label class="mb-0">{{ translate('Tracking url') }}:</label>
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                name="tracking_url"
-                                value="{{ $order->tracking_url }}"
-                                required
-                            >
+                            <input type="text" class="form-control form-control-sm" name="tracking_url"
+                                value="{{ $order->tracking_url }}" required>
                         </div>
                         <div class="text-right">
-                            <button
-                                class="btn btn-sm btn-primary"
-                                type="submit"
-                            >
+                            <button class="btn btn-sm btn-primary" type="submit">
                                 {{ translate('Save') }}
                             </button>
                         </div>
@@ -585,7 +515,7 @@
                     <h3 class="fs-16 mb-0">{{ translate('Order updates') }}</h3>
                 </div>
                 <div class="card-body">
-                    @foreach ($order->order_udpates as $order_udpate)
+                    @foreach ($order->orderUpdates as $order_udpate)
                         <div class="mb-3">
                             <div class="p-2 bg-soft-secondary rounded">
                                 {{ $order_udpate->translatable_note ? translate($order_udpate->note) : $order_udpate->note }}
@@ -603,67 +533,33 @@
 
 @section('modal')
     <!-- Refund Information Modal -->
-    <div
-        class="modal fade"
-        id="refund_request_info_modal"
-    >
+    <div class="modal fade" id="refund_request_info_modal">
         <div class="modal-dialog">
-            <div
-                class="modal-content"
-                id="refund-request-info-modal-content"
-            >
+            <div class="modal-content" id="refund-request-info-modal-content">
 
             </div>
         </div>
     </div>
 
     {{-- Accept refund request Modal --}}
-    <div
-        id="accept_refund_request_modal"
-        class="modal fade"
-    >
+    <div id="accept_refund_request_modal" class="modal fade">
         <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-zoom">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title h6">{{ translate('Accept Refund Request.') }}</h4>
-                    <button
-                        type="button"
-                        class="close"
-                        data-dismiss="modal"
-                        aria-hidden="true"
-                    ></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                 </div>
-                <form
-                    class="form-horizontal member-block"
-                    action="{{ route('admin.refund_request.accept') }}"
-                    method="POST"
-                >
+                <form class="form-horizontal member-block" action="{{ route('admin.refund_request.accept') }}"
+                    method="POST">
                     @csrf
-                    <input
-                        type="hidden"
-                        name="refund_request_id"
-                        id="refund_request_id"
-                        value=""
-                    >
+                    <input type="hidden" name="refund_request_id" id="refund_request_id" value="">
 
                     <div class="modal-body">
                         <div class="form-group row">
-                            <label
-                                class="col-md-3 col-from-label"
-                                for="amount"
-                            >{{ translate('Amount') }}</label>
+                            <label class="col-md-3 col-from-label" for="amount">{{ translate('Amount') }}</label>
                             <div class="col-md-9">
-                                <input
-                                    type="number"
-                                    lang="en"
-                                    min="0"
-                                    step="0.01"
-                                    name="amount"
-                                    id="amount"
-                                    value=""
-                                    class="form-control"
-                                    required
-                                >
+                                <input type="number" lang="en" min="0" step="0.01" name="amount"
+                                    id="amount" value="" class="form-control" required>
                             </div>
                         </div>
                         <div class="alert alert-info">
@@ -674,23 +570,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary mt-2"
-                            data-dismiss="modal"
-                        >{{ translate('Cancel') }}</button>
-                        <button
-                            type="submit"
-                            name="button"
-                            value="manual"
-                            class="btn btn-success"
-                        >{{ translate('Pay Manually') }}</button>
-                        <button
-                            type="submit"
-                            name="button"
-                            value="wallet"
-                            class="btn btn-primary"
-                        >{{ translate('Pay in Wallet') }}</button>
+                        <button type="button" class="btn btn-secondary mt-2"
+                            data-dismiss="modal">{{ translate('Cancel') }}</button>
+                        <button type="submit" name="button" value="manual"
+                            class="btn btn-success">{{ translate('Pay Manually') }}</button>
+                        <button type="submit" name="button" value="wallet"
+                            class="btn btn-primary">{{ translate('Pay in Wallet') }}</button>
                     </div>
                 </form>
             </div>
@@ -698,35 +583,21 @@
     </div>
 
     {{-- Reject Refund request Modal --}}
-    <div
-        id="reject_refund_request_modal"
-        class="modal fade"
-    >
+    <div id="reject_refund_request_modal" class="modal fade">
         <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-zoom">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title h6">{{ translate('Reject Refund Request.') }}</h4>
-                    <button
-                        type="button"
-                        class="close"
-                        data-dismiss="modal"
-                        aria-hidden="true"
-                    ></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body text-center">
                     <p class='fs-14'>{{ translate('Do you really want to reject this refund Request?') }}
                 </div>
                 <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-secondary mt-2"
-                        data-dismiss="modal"
-                    >{{ translate('Cancel') }}</button>
-                    <a
-                        href=""
-                        id="reject_refund_request_link"
-                        class="btn btn-primary"
-                    >{{ translate('Reject') }}</a>
+                    <button type="button" class="btn btn-secondary mt-2"
+                        data-dismiss="modal">{{ translate('Cancel') }}</button>
+                    <a href="" id="reject_refund_request_link"
+                        class="btn btn-primary">{{ translate('Reject') }}</a>
                 </div>
             </div>
         </div>
@@ -739,6 +610,18 @@
             var order_id = {{ $order->id }};
             var status = $('#update_delivery_status').val();
             $.post('{{ route('orders.update_delivery_status') }}', {
+                _token: '{{ @csrf_token() }}',
+                order_id: order_id,
+                status: status
+            }, function(data) {
+                window.location.reload();
+            });
+        });
+
+        $('#update_service_status').on('change', function() {
+            var order_id = {{ $order->id }};
+            var status = $('#update_service_status').val();
+            $.post('{{ route('orders.update_service_status') }}', {
                 _token: '{{ @csrf_token() }}',
                 order_id: order_id,
                 status: status

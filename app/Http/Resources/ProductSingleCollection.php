@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\Category;
+use App\Models\ProductCategory;
 
 class ProductSingleCollection extends JsonResource
 {
@@ -14,11 +16,20 @@ class ProductSingleCollection extends JsonResource
      */
     public function toArray($request)
     {
-        $productArray = [
+        $productCategories = ProductCategory::where('product_id',$this->id)->first();
+        $category = Category::where('id',$productCategories->category_id)->first();
+
+        $images=[];
+        array_push($images, [
+            'src' => $this->productImage($this->thumbnail_img),
+            'type' => 'image']);
+        return [
             'id' => (int) $this->id,
             'name' => $this->getTranslation('name'),
             'slug' => $this->slug,
             'metaTitle' => $this->meta_title,
+            'category_name' => $category->name,
+            'tax' => $this->tax,
             'brand' => [
                 'id' => optional($this->brand)->id,
                 'name' => optional($this->brand)->getTranslation('name'),
@@ -27,6 +38,7 @@ class ProductSingleCollection extends JsonResource
             ],
             'photos' => $this->convertPhotos($this),
             'thumbnail_image' => api_asset($this->thumbnail_img),
+            'images' => $images,
             'tags' => explode(',', $this->tags),
             'featured' => (int) $this->featured,
             'stock' => (int) $this->stock,
@@ -52,99 +64,9 @@ class ProductSingleCollection extends JsonResource
                 'count_2' => (int) $this->reviews_2_count,
                 'count_1' => (int) $this->reviews_1_count,
             ],
-            'description' => $this->getTranslation('description'),
+            'description' => $this->description,
             'variations' => filter_product_variations($this->variations, $this),
             'variation_options' => generate_variation_options($this->variation_combinations),
-
-            'intake' => $this->intake,
-            'material' => $this->material,
-            'unit_metering' => $this->unit_metering,
-            'medida_producto' => $this->width . " - " . $this->height . " - " . $this->length,
-            'medidas_de_embalaje' => $this->medidas_de_embalaje,
-            'engaste' => $this->engaste,
-            'peso_de_producto' => $this->peso_de_producto,
-            'peso_de_envio' => $this->peso_de_envio,
-            'tipo_de_coneccion' => $this->tipo_de_coneccion,
-            'eficiencia' => $this->eficiencia,
-            'caracteristica1' => $this->caracteristica1,
-            'caracteristica2' => $this->caracteristica2,
-            'caracteristica3' => $this->caracteristica3,
-            'caracteristica4' => $this->caracteristica4,
-            'caracteristica5' => $this->caracteristica5,
-            'caracteristica6' => $this->caracteristica6,
-            'caracteristica7' => $this->caracteristica7,
-            'manual_de_producto' => $this->manual_de_producto,
-            'ficha_tecnica_del_producto' => $this->ficha_tecnica_del_producto,
-            'manual_de_instalacion' => $this->manual_de_instalacion,
-            'beneficio1' => $this->beneficio1,
-            'beneficio2' => $this->beneficio2,
-            'beneficio3' => $this->beneficio3,
-            'beneficio4' => $this->beneficio4,
-            'beneficio5' => $this->beneficio5,
-            'postventa' => $this->postventa,
-            'vida_util' => $this->vida_util,
-            'plastico' => $this->plastico,
-            'peso_plastico' => $this->peso_plastico,
-            'carton' => $this->carton,
-            'peso_carton' => $this->peso_carton,
-            'papel' => $this->papel,
-            'peso_papel' => $this->peso_papel,
-            'metal' => $this->metal,
-            'peso_metal' => $this->peso_metal,
-            'vidrio' => $this->vidrio,
-            'peso_vidrio' => $this->peso_vidrio,
-            'madera' => $this->madera,
-            'peso_madera' => $this->peso_madera,
-            'textil' => $this->textil,
-            'peso_textil' => $this->peso_textil,
-            'bateria_electrico' => $this->bateria_electrico,
-            'peso_bateria_electrico' => $this->peso_bateria_electrico,
-            'impacto_ambiental' => $this->impacto_ambiental,
-            'reference' => $this->reference,
-            'currency' => $this->currency,
-            'warranty_text' => $this->warranty_text,
-            'shipping' => $this->shipping,
-            'imagenes' => [
-                array(
-                    'src' => api_asset($this->thumbnail_img),
-                    'type' => 'image'
-                ),
-                array(
-                    'src' => api_asset($this->imagen1),
-                    'type' => 'image'
-                ),
-                array(
-                    'src' => api_asset($this->imagen2),
-                    'type' => 'image'
-                ),
-                array(
-                    'src' => api_asset($this->imagen3),
-                    'type' => 'image'
-                ),
-                array(
-                    'src' => api_asset($this->imagen4),
-                    'type' => 'image'
-                )
-            ],
-            'videos' => [
-                array(
-                    'src' => api_asset($this->video),
-                    'type' => 'video'
-                ),
-                array(
-                    'src' => api_asset($this->video2),
-                    'type' => 'video'
-                ),
-                array(
-                    'src' => api_asset($this->video3),
-                    'type' => 'video'
-                ),
-                array(
-                    'src' => api_asset($this->video4),
-                    'type' => 'video'
-                )
-            ],
-            'ficha_tecnica_del_producto' => api_asset($this->ficha_tecnica_del_producto),
             'shop' => [
                 'name' => $this->shop->name,
                 'logo' => api_asset($this->shop->logo),
@@ -155,16 +77,6 @@ class ProductSingleCollection extends JsonResource
             'earn_point' => (float) $this->earn_point,
             'is_digital' => $this->digital == 1 ? true : false,
         ];
-
-        $productArray['imagenes'] = array_filter($productArray['imagenes'], function ($value) {
-            return !empty($value['src']);
-        });
-
-        $productArray['videos'] = array_filter($productArray['videos'], function ($value) {
-            return !empty($value['src']);
-        });
-
-        return $productArray;
     }
 
     public function with($request)
@@ -180,9 +92,18 @@ class ProductSingleCollection extends JsonResource
         $result = array();
 
         foreach (explode(',', $this->photos) as $item) {
-            array_push($result, api_asset($item));
+            array_push($result, api_asset_new($item));
         }
 
         return $result;
+    }
+
+    private function productImage($image)
+    {
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $image;
+        }
+
+        return api_asset($image);
     }
 }

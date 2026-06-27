@@ -61,7 +61,7 @@ export default {
             const errors = [];
             if (!this.$v.form.orderCode.$dirty) return errors;
             !this.$v.form.orderCode.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },

@@ -85,10 +85,10 @@
                                     class="text-capitalize">{{ translate(str_replace('_', ' ', $order->delivery_status)) }}</span>
                             </td>
                             <td>
-                                @if ($order->payment_status == 'paid')
+                                @if ($order->payment_status == 'APPROVED')
                                     <span class="badge badge-inline badge-success">{{ translate('Paid') }}</span>
                                 @else
-                                    <span class="badge badge-inline badge-danger">{{ translate('Unpaid') }}</span>
+                                    <span class="badge badge-inline badge-danger">{{ $order->payment_status }}</span>
                                 @endif
                             </td>
                             <td class="text-right">

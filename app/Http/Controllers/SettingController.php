@@ -236,7 +236,7 @@ class SettingController extends Controller
 
     public function initSetting()
     {
-        $data['url'] = $_SERVER['SERVER_NAME'];
+        /* $data['url'] = $_SERVER['SERVER_NAME'];
         $request_data_json = json_encode($data);
         $gate = "https://activation.activeitzone.com/check_activation";
 
@@ -261,7 +261,7 @@ class SettingController extends Controller
             $user = User::where('user_type', 'admin')->first();
             auth()->login($user);
             return redirect()->route('admin.dashboard');
-        }
+        } */
     }
 
 

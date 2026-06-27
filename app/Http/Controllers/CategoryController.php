@@ -27,7 +27,7 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $sort_search = null;
-        $categories = Category::orderBy('created_at', 'desc');
+        $categories = Category::orderBy('order_level', 'asc')->orderBy('name', 'asc');
 
         if ($request->has('search')) {
             $sort_search = $request->search;
@@ -95,7 +95,7 @@ class CategoryController extends Controller
 
         $category->attributes()->sync($request->filtering_attributes);
 
-        $category_translation = CategoryTranslation::firstOrNew(['lang' => env('DEFAULT_LANGUAGE'), 'category_id' => $category->id]);
+        $category_translation = CategoryTranslation::firstOrNew(['lang' => env('DEFAULT_LANGUAGE', 'en'), 'category_id' => $category->id]);
         $category_translation->name = $request->name;
         $category_translation->save();
 
@@ -144,7 +144,10 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
 
-        if ($request->lang == env("DEFAULT_LANGUAGE")) {
+        // Ensure lang has a valid value
+        $lang = $request->lang ?? env("DEFAULT_LANGUAGE", "en");
+
+        if ($lang == env("DEFAULT_LANGUAGE", "en")) {
             $category->name = $request->name;
         }
 
@@ -186,7 +189,7 @@ class CategoryController extends Controller
 
         $category->attributes()->sync($request->filtering_attributes);
 
-        $category_translation = CategoryTranslation::firstOrNew(['lang' => $request->lang, 'category_id' => $category->id]);
+        $category_translation = CategoryTranslation::firstOrNew(['lang' => $lang, 'category_id' => $category->id]);
         $category_translation->name = $request->name;
         $category_translation->save();
 
@@ -219,6 +222,18 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($request->id);
         $category->featured = $request->status;
+
+        if ($category->save()) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $category = Category::findOrFail($request->id);
+        $category->status = $request->status;
 
         if ($category->save()) {
             return 1;

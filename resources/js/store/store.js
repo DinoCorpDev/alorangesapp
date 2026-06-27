@@ -7,6 +7,7 @@ import cartModule from "./modules/cart";
 import recentlyViewed from "./modules/recentlyViewed";
 import snackBar from "./modules/snackbar";
 import wishlistModule from "./modules/wishlist";
+import breadcrumb from "./modules/breadcrumb";
 import followModule from "./modules/follow";
 import compareList from "./modules/compareList";
 
@@ -18,6 +19,7 @@ const store = new Vuex.Store({
         auth: authModule,
         address: addressModule,
         wishlist: wishlistModule,
+        breadcrumb: breadcrumb,
         follow: followModule,
         cart: cartModule,
         snackbar: snackBar,

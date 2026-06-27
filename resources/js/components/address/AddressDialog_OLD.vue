@@ -169,42 +169,42 @@ export default {
             const errors = [];
             if (!this.$v.form.address.$dirty) return errors;
             !this.$v.form.address.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         postalCodeErrors() {
             const errors = [];
             if (!this.$v.form.postal_code.$dirty) return errors;
             !this.$v.form.postal_code.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         countryErrors() {
             const errors = [];
             if (!this.$v.form.country.$dirty) return errors;
             !this.$v.form.country.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         stateErrors() {
             const errors = [];
             if (!this.$v.form.state.$dirty) return errors;
             !this.$v.form.state.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         cityErrors() {
             const errors = [];
             if (!this.$v.form.city.$dirty) return errors;
             !this.$v.form.city.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         phoneErrors() {
             const errors = [];
             if (!this.$v.form.phone.$dirty) return errors;
             !this.$v.form.phone.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },

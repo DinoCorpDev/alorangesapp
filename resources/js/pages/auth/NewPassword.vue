@@ -25,8 +25,12 @@
                             </p>
 
                             <div class="inputs mb-5">
-                                <label class="black--text text-uppercase">{{ $t("email_address") }}</label>
+                                <label class="black--text text-uppercase"
+                                    >Correo electrónico o número de teléfono</label
+                                >
                                 <CustomInput
+                                    placeholder="Correo electrónico o número de teléfono"
+                                    class="place-holder"
                                     type="email"
                                     v-model="form.email"
                                     :error-messages="emailErrors"
@@ -71,7 +75,7 @@
                             <CustomButton
                                 block
                                 color="black"
-                                text="Reset Password"
+                                text="Cambiar contraseña"
                                 type="submit"
                                 @click="resetPassword"
                                 :loading="loading"
@@ -149,27 +153,27 @@ export default {
         emailErrors() {
             const errors = [];
             if (!this.$v.form.email.$dirty) return errors;
-            !this.$v.form.email.requiredIf && errors.push(this.$i18n.t("this_field_is_required"));
-            !this.$v.form.email.email && errors.push(this.$i18n.t("this_field_is_required_a_valid_email"));
+            !this.$v.form.email.requiredIf && errors.push(this.$i18n.t("Este campo es requerido"));
+            !this.$v.form.email.email && errors.push(this.$i18n.t("Este campo es requerido_a_valid_email"));
             return errors;
         },
         codeErrors() {
             const errors = [];
             if (!this.$v.form.code.$dirty) return errors;
-            !this.$v.form.code.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.code.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         passwordErrors() {
             const errors = [];
             if (!this.$v.form.password.$dirty) return errors;
-            !this.$v.form.password.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.password.required && errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.password.minLength && errors.push(this.$i18n.t("password_must_be_minimum_6_characters"));
             return errors;
         },
         confirmPasswordErrors() {
             const errors = [];
             if (!this.$v.form.confirmPassword.$dirty) return errors;
-            !this.$v.form.confirmPassword.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.confirmPassword.required && errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.confirmPassword.sameAsPassword &&
                 errors.push(this.$i18n.t("password_and_confirm_password_should_match"));
             return errors;
@@ -256,6 +260,60 @@ export default {
 
             @media (min-width: 600px) {
                 font-size: 15px;
+            }
+        }
+    }
+}
+
+.theme--light {
+    .v-input {
+        &::v-deep {
+            .v-input__slot {
+                background: #f5f5f5;
+
+                &:hover {
+                    background: #dfdfdf;
+                }
+            }
+        }
+
+        &.v-text-field--outlined {
+            &::v-deep {
+                &:not(.v-input--has-state) {
+                    .v-input__slot {
+                        &:hover,
+                        fieldset {
+                            border-color: #f5f5f5;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.place-holder {
+    font-family: "Roboto", sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+
+    &::v-deep {
+        .v-input__control,
+        .v-input__slot {
+            min-height: 38px;
+        }
+
+        ::placeholder {
+            visibility: hidden;
+        }
+
+        :hover::placeholder {
+            visibility: visible;
+            font-style: italic;
+        }
+        &:not(.v-input--has-state) {
+            .v-input__slot fieldset {
+                color: #dfdfdf;
             }
         }
     }

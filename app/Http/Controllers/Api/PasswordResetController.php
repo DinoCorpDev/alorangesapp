@@ -43,14 +43,14 @@ class PasswordResetController extends Controller
             $array['view'] = 'emails.verification';
             $array['from'] = env('MAIL_FROM_ADDRESS');
             $array['subject'] = translate('Password Reset');
-            $array['content'] = translate('Password reset code is').': '.$user->verification_code;
+            $array['content'] = $user->verification_code;
     
             Mail::to($user->email)->queue(new EmailManager($array));
 
             return response()->json([
                 'success' => true,
                 'email' => true,
-                'message' => translate('A password reset code has been sent to your email.')
+                'message' => translate('El código de verificación para cambio de contraseña ha sido enviado a su email.')
             ], 200);
 
         }else{

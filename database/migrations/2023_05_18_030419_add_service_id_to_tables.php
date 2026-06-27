@@ -13,19 +13,19 @@ class AddServiceIdToTables extends Migration
      */
     public function up()
     {
+        Schema::table('carts', function (Blueprint $table) {
+            $table->integer('service_id')->after('product_variation_id')->nullable();
+        });
+
+        Schema::table('order_details', function (Blueprint $table) {
+            $table->integer('service_id')->after('product_variation_id')->nullable();
+        });
+
         Schema::table('reviews', function (Blueprint $table) {
             $table->integer('service_id')->after('product_id')->nullable();
         });
 
         Schema::table('wishlists', function (Blueprint $table) {
-            $table->integer('service_id')->after('product_id')->nullable();
-        });
-
-        Schema::table('carts', function (Blueprint $table) {
-            $table->integer('service_id')->after('product_id')->nullable();
-        });
-
-        Schema::table('order_details', function (Blueprint $table) {
             $table->integer('service_id')->after('product_id')->nullable();
         });
     }
@@ -37,19 +37,19 @@ class AddServiceIdToTables extends Migration
      */
     public function down()
     {
-        Schema::table('reviews', function (Blueprint $table) {
-            $table->dropColumn('service_id');
-        });
-
-        Schema::table('wishlists', function (Blueprint $table) {
-            $table->dropColumn('service_id');
-        });
-
         Schema::table('carts', function (Blueprint $table) {
             $table->dropColumn('service_id');
         });
 
         Schema::table('order_details', function (Blueprint $table) {
+            $table->dropColumn('service_id');
+        });
+
+        Schema::table('reviews', function (Blueprint $table) {
+            $table->dropColumn('service_id');
+        });
+
+        Schema::table('wishlists', function (Blueprint $table) {
             $table->dropColumn('service_id');
         });
     }

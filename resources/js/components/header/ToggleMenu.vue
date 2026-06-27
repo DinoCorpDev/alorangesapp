@@ -99,8 +99,9 @@
                 <v-list-item :to="{ name: 'PactoAmbiental' }"> {{ $t("Information") }} </v-list-item>
                 <v-list-item :to="{ name: 'Upgrade' }"> {{ $t("Requests") }} </v-list-item>
                 <v-list-item :to="{ name: 'PactoAmbiental' }"> {{ $t("Contact") }} </v-list-item>
-                <v-list-item class="v-list-item--caption text-uppercase"> © Idovela 2023 </v-list-item>
+                <v-list-item class="v-list-item--caption text-uppercase"> © Aloranges 2024 </v-list-item>
             </template>
+
             <template v-else>
                 <v-divider />
                 <v-list-item class="v-list-item--caption">

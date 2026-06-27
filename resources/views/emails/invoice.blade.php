@@ -82,59 +82,45 @@
                     <tr>
                         <td>
                             <table>
-                                <tbody>
+                            <tbody>
+                                <tr>
+                                    <td class="img m-center"
+                                        style="font-size:0pt; line-height:0pt; text-align:left; padding-bottom: 20px;">
+                                            <a href="{{ env('APP_URL') }}">
+                                                <img style="max-width: 150px; height: auto;" src="{{url('https://dinolabs.dev/wp-content/uploads/2024/10/Alorangeslogo.png')}}" />
+                                            </a>
+                                    </td>        
+                                </tr>
                                     <tr>
-                                        <td>
-                                            @if (get_setting('invoice_logo') != null)
-                                                <img src="{{ uploaded_asset(get_setting('invoice_logo')) }}"
-                                                    height="30" style="display:inline-block;margin-bottom:10px">
-                                            @else
-                                                <img src="{{ static_asset('assets/img/logo.png') }}" height="30"
-                                                    style="display:inline-block;margin-bottom:10px">
-                                            @endif
-                                        </td>
+                                        <td class="">Email:
+                                            info@aloranges.com</td>
                                     </tr>
                                     <tr>
-                                        <td style="" class="bold">{{ get_setting('site_name') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="">{{ get_setting('invoice_address') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="">{{ translate('Email') }}:
-                                            {{ get_setting('invoice_email') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="">{{ translate('Phone') }}:
-                                            {{ get_setting('invoice_phone') }}</td>
+                                        <td class="">Telefono:
+                                            +57 3244364040</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </td>
                         <td>
                             <table class="text-right">
-                                <tbody>
+                            <tbody>
                                     <tr>
-                                        <td style="font-size: 2rem;" class="bold">{{ translate('INVOICE') }}
+                                        <td class="">
+                                            <span class=" ">Factura Código:</span>
+                                            <span class="bold">{{ $combined_order->code }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="">
-                                            <span class=" ">{{ translate('Order Code') }}:</span>
-                                            <span class="bold"
-                                                style="color: #ED2939">{{ $combined_order->code }}</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="">
-                                            <span class=" ">{{ translate('Order Date') }}:</span>
+                                            <span class=" ">Día de Orden:</span>
                                             <span
                                                 class="bold">{{ $combined_order->created_at->format('d.m.Y') }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <span class=" ">{{ translate('Delivery type') }}:</span>
+                                            <span class=" ">Tipo de entrega:</span>
                                             <span class="bold"
                                                 style="text-transform: capitalize">{{ translate($combined_order->orders->first()->delivery_type) }}</span>
                                         </td>
@@ -148,38 +134,14 @@
         </div>
 
         <div style="margin:8px 8px 15px 8px; clear:both">
-            <div style="padding:10px 14px; border:1px solid #DEDEDE;border-radius:3px;width:45%;float:left;">
-                <table class="">
-                    <tbody>
-                        @php
-                            $billing_address = json_decode($combined_order->billing_address);
-                        @endphp
-                        <tr>
-                            <td class="bold">{{ translate('Billing address') }}:</td>
-                        </tr>
-                        <tr>
-                            <td class="">{{ $billing_address->address }},
-                                {{ $billing_address->postal_code }}</td>
-                        </tr>
-                        <tr>
-                            <td class="">{{ $billing_address->city }},
-                                {{ $billing_address->state }}, {{ $billing_address->country }}</td>
-                        </tr>
-                        <tr>
-                            <td class="">{{ translate('Phone') }}: {{ $billing_address->phone }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div style="padding:10px 14px; border:1px solid #DEDEDE;border-radius:3px;width:45%;float:right">
+            <div style="padding:10px 14px; width:45%;float:right">
                 <table class="text-right">
                     <tbody>
                         @php
                             $shipping_address = json_decode($combined_order->shipping_address);
                         @endphp
                         <tr>
-                            <td class="bold">{{ translate('Shipping address') }}:</td>
+                            <td class="bold">Dirección de envío:</td>
                         </tr>
                         <tr>
                             <td class="">{{ $shipping_address->address }},
@@ -198,16 +160,16 @@
             </div>
         </div>
 
-        <div style="margin:0 8px;border:1px solid #DEDEDE;border-radius:3px;padding:0 7px">
+        <div style="margin:0 8px;padding:0 7px">
             <table class="padding">
                 <thead>
-                    <tr>
+                    <tr style="background-color: #F58634;">
                         <td width="5%" class="text-left bold">{{ translate('S/L') }}</td>
-                        <td width="45%" class="text-left bold">{{ translate('Product Name') }}</td>
-                        <td width="13%" class="text-left bold">{{ translate('Qty') }}</td>
-                        <td width="15%" class="text-left bold">{{ translate('Unit Price') }}</td>
-                        <td width="10%" class="text-left bold">{{ translate('Unit Tax') }}</td>
-                        <td width="12%" class="text-right bold">{{ translate('Total') }}</td>
+                        <td width="45%" class="text-left bold">Nombre del producto</td>
+                        <td width="13%" class="text-left bold">Cantidad</td>
+                        <td width="15%" class="text-left bold">Precio Unitario</td>
+                        <td width="10%" class="text-left bold">Impuesto Unitario</td>
+                        <td width="12%" class="text-right bold">Total</td>
                     </tr>
                 </thead>
             </table>
@@ -271,30 +233,30 @@
                     <tbody>
                         <tr>
                             <td class="text-left" style="border-bottom:1px dotted #B8B8B8">
-                                {{ translate('Sub Total') }}</td>
+                                Subtotal</td>
                             <td class="bold" style="border-bottom:1px dotted #B8B8B8">
-                                {{ format_price($total - $totalTax) }}</td>
+                                {{ format_price($combined_order->grand_total) }}</td>
                         </tr>
                         <tr class="">
                             <td class="text-left" style="border-bottom:1px dotted #B8B8B8">
-                                {{ translate('Total Tax') }}</td>
+                                Impuesto total</td>
                             <td class="bold" style="border-bottom:1px dotted #B8B8B8">
                                 {{ format_price($totalTax) }}</td>
                         </tr>
                         <tr>
                             <td class="text-left" style="border-bottom:1px dotted #B8B8B8">
-                                {{ translate('Shipping Cost') }}</td>
+                                Costo de envío</td>
                             <td class="bold" style="border-bottom:1px dotted #B8B8B8">
                                 {{ format_price($combined_order->orders->sum('shipping_cost')) }}</td>
                         </tr>
                         <tr class="">
                             <td class="text-left" style="border-bottom:1px solid #DEDEDE">
-                                {{ translate('Coupon Discount') }}</td>
+                                Cupon de descuento</td>
                             <td class="bold" style="border-bottom:1px solid #DEDEDE">
                                 {{ format_price($combined_order->orders->sum('coupon_discount')) }}</td>
                         </tr>
-                        <tr>
-                            <td class="text-left bold">{{ translate('Grand Total') }}</td>
+                        <tr style="background-color: #F58634;">
+                            <td class="text-left bold">Total de la compra</td>
                             <td class="bold">{{ format_price($combined_order->grand_total) }}</td>
                         </tr>
                     </tbody>

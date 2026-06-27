@@ -44,6 +44,7 @@ class SellerInvoiceNotification extends Notification
         $combined_order = $this->order->combined_order;
         $array['subject'] = translate('Order has been placed') . ' - ' . $combined_order->code;
         $array['order'] = $this->order;
+
         return (new MailMessage)
             ->view('emails.seller_invoice', ['array' => $array, 'order' => $this->order, 'combined_order' => $combined_order])
             ->from(env('MAIL_FROM_ADDRESS'))

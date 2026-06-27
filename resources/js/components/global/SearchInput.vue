@@ -2,15 +2,16 @@
     <div class="search-input">
         <input
             @keyup.enter="search()"
-            class="search-input-input d-none d-sm-block"
-            :placeholder="placeholder"
+            class="search-input-input"
+            placeholder="Escribe lo que buscas"
             v-model="searchKeyword"
             type="search"
             required
+            :class="{'show-input' : showInput}"
         />
         <button class="search-input-button" type="button" @click.stop.prevent="search()">
             <SearchIcon />
-            <span class="ml-2 d-none d-sm-block">
+            <span class="search-input-label ml-2">
                 {{ buttonLabel }}
             </span>
         </button>
@@ -30,6 +31,10 @@ export default {
         buttonLabel: {
             type: String,
             default: "Buscar"
+        },
+        showInput: {
+            type: Boolean,
+            default: false
         }
     },
     components: {
@@ -57,29 +62,132 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.search-input {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    width: 100%;
+    max-width: 836px;
+
+    border-radius: 6px;
+    overflow: hidden;
+
+    box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 8px;
+
+    @media (max-width: 699px) {
+        justify-content: flex-end;
+    }
+
+    &-input,
+    &-label {
+        display: none;
+
+        @media (min-width: 700px) {
+            display: block;
+        }
+    }
+
+    &-input {
+        flex: 1;
+        min-width: 0;
+
+        height: 40px;
+
+        font-family: "Roboto";
+        font-size: 15px;
+        letter-spacing: 0.5px;
+
+        background-color: #ffffff;
+        border: 1px solid transparent;
+
+        outline: none;
+
+        padding: 0 1rem;
+
+        transition: all 0.2s ease-in-out;
+
+        appearance: none;
+        -webkit-appearance: none;
+
+        &:focus {
+            border-color: #f58634;
+        }
+
+        &::placeholder {
+            color: rgb(180, 180, 180);
+        }
+    }
+
+    &-button {
+        height: 40px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex-shrink: 0;
+
+        border: none;
+
+        color: #ffffff;
+        background-color: #f58634 !important;
+
+        padding: 0 14px;
+
+        transition: all 0.2s ease-in-out;
+
+        cursor: pointer;
+
+        @media (min-width: 960px) {
+            padding: 0 2rem;
+        }
+
+        &:hover {
+            background-color: #e97318 !important;
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        :deep(svg) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            path {
+                fill: #ffffff;
+            }
+        }
+
+        span {
+            color: #ffffff;
+
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            line-height: 1;
+
+            margin-top: 1px;
+
+            @media (min-width: 960px) {
+                font-size: 14px;
+            }
+        }
+    }
+}
+
+.show-input {
+    display: block !important;
+}
+
 .v-application {
     &.theme--light {
         .search-input {
             &:hover {
                 .search-input-input {
-                    border-color: #000000;
-                }
-
-                .search-input-button {
-                    background-color: #000000;
-                    border-color: #000000;
-
-                    &::v-deep {
-                        svg {
-                            path {
-                                fill: #ffffff;
-                            }
-                        }
-                    }
-
-                    span {
-                        color: #ffffff;
-                    }
+                    background-color: #ffffff;
                 }
             }
         }
@@ -87,90 +195,15 @@ export default {
 
     &.theme--dark {
         .search-input {
-            &:hover {
-                .search-input-button {
-                    background-color: #ffffff;
-                }
-            }
+            background-color: #1f1f1f;
 
             &-input {
+                background-color: #1f1f1f;
                 color: #ffffff;
 
                 &::placeholder {
-                    color: rgba(#ffffff, 0.5);
+                    color: rgba(255, 255, 255, 0.5);
                 }
-            }
-        }
-    }
-}
-
-.search-input {
-    display: flex;
-    flex: 1;
-    max-width: 836px;
-    justify-content: flex-end;
-
-    &-input {
-        font-family: "Roboto";
-        font-size: 15px;
-        letter-spacing: 0.5px;
-
-        border: 1px solid #dfdfdf;
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
-        outline: none;
-
-        width: 100%;
-        padding: 0.5rem 1rem;
-
-        transition: all 0.2s ease-in-out;
-
-        &::placeholder {
-            color: rgba(#000000, 0.5);
-        }
-    }
-
-    &-button {
-        display: flex;
-        align-items: center;
-
-        background-color: #dfdfdf;
-
-        border: 1px solid #dfdfdf;
-        border-radius: 5px;
-
-        padding: 0 10px;
-        height: 40px;
-
-        transition: all 0.2s ease-in-out;
-
-        @media (min-width: 600px) {
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-
-        @media (min-width: 960px) {
-            padding: 0.5rem 2rem;
-        }
-
-        &::v-deep {
-            svg {
-                path {
-                    fill: #040405;
-                }
-            }
-        }
-
-        span {
-            color: #000000;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            line-height: 1;
-            margin-top: 3px;
-
-            @media (min-width: 960px) {
-                font-size: 14px;
             }
         }
     }

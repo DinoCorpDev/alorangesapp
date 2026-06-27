@@ -1,0 +1,26 @@
+{
+    "arrowParens": "avoid",
+    "bracketSameLine": false,
+    "overrides": [
+        {
+            "files": "*.vue",
+            "options": {
+                "printWidth": 120,
+                "singleAttributePerLine": true,
+                "htmlWhitespaceSensitivity": "strict"
+            }
+        },
+        {
+            "files": "*.yml",
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ],
+    "printWidth": 120,
+    "semi": true,
+    "singleQuote": false,
+    "tabWidth": 4,
+    "trailingComma": "none",
+    "vueIndentScriptAndStyle": false
+}

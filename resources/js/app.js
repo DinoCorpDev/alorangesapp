@@ -21,6 +21,7 @@ import theShop from "./components/TheShop";
 import DynamicLink from "./components/inc/DynamicLink";
 import Banner from "./components/inc/Banner";
 import ProductBox from "./components/product/ProductBox";
+import axios from 'axios';
 
 window.Vue = require("vue");
 
@@ -32,6 +33,7 @@ Vue.use(plugins);
 Vue.use(VueRouter);
 Vue.use(VueMeta);
 Vue.use(Vuelidate);
+Vue.use(axios);
 Vue.mixin(Mixin);
 Vue.component("dynamic-link", DynamicLink);
 Vue.component("banner", Banner);

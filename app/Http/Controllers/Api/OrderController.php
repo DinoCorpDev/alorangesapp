@@ -8,7 +8,6 @@ use App\Http\Resources\OrderSingleCollection;
 use App\Models\Address;
 use App\Models\Cart;
 use App\Models\City;
-use App\Models\CollectionCart;
 use App\Models\CollectionOrderDetail;
 use App\Models\CombinedOrder;
 use App\Models\Coupon;
@@ -28,17 +27,47 @@ use DB;
 use Illuminate\Http\Request;
 use Notification;
 use PDF;
+use App\Http\Services\WompiServices;
+use Illuminate\Notifications\AnonymousNotifiable;
+use App\Jobs\ConsultarEstadoPagoWompi;
 
 class OrderController extends Controller
 {
     public function index()
+    {
+        $ordersQuery = CombinedOrder::where('user_id', auth('api')->user()->id)->latest()->paginate(12);
+        $orders = new OrderCollection($ordersQuery);
+
+        // Despacha jobs por cada orden
+        foreach ($ordersQuery as $combinedOrder) {
+            ConsultarEstadoPagoWompi::dispatch($combinedOrder->id);
+        }
+
+        // Devuelve la orden SIN esperar el resultado de Wompi
+        return $orders;
+    }
+
+    public function getResultTransactionPSE($reference){
+        try {
+            $wompiResult = (new WompiServices)->wompiGetTransactionFacturas($reference);
+            return $wompiResult;
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => "No se encuentra información del pago",
+                'status' => 404
+            ]);
+        }
+    }
+
+    public function getOrders(Request $request)
     {
         return new OrderCollection(CombinedOrder::with([
             'user',
             'orders.orderDetails.variation.product',
             'orders.orderDetails.variation.combinations',
             'orders.shop'
-        ])->where('user_id', auth('api')->user()->id)->latest()->paginate(12));
+        ])->where('user_id', $request->user_id)->latest()->get());
     }
 
     public function show($order_code)
@@ -51,8 +80,18 @@ class OrderController extends Controller
             'orders.collectionDetails.collection.productos.product'
         ])->first();
 
+        $wompiResult = (new WompiServices)->wompiGetTransactionFacturas($order->code);
+        $wompiResultTransaction = (new WompiServices)->wompiGetTransactionComplete($order->code);
+
+        $order->orders[0]['payment_status'] = $wompiResult;
+        if (!empty($wompiResultTransaction['data'])) {
+            $order->orders[0]['manual_payment'] = $wompiResultTransaction['data'][0];
+        }
+        
         if ($order) {
             if (auth('api')->user()->id == $order->user_id) {
+                $order_updates = OrderUpdate::where('order_id', $order->id)->get();
+                $order->order_updates = $order_updates;
                 return new OrderSingleCollection($order);
             } else {
                 return response()->json([
@@ -205,10 +244,10 @@ class OrderController extends Controller
         }
 
         $cartItems = Cart::whereIn('id', $cart_item_ids)->with(['variation.product'])->get();
-        $cartCollections = CollectionCart::with(['collection'])->whereIn('id', $cart_collection_ids)->get();
+        $cartCollections = Cart::whereIn('id', $cart_collection_ids)->with(['collection'])->get();
 
         $shippingAddress = Address::find($request->shipping_address_id);
-        $billingAddress = Address::find($request->billing_address_id);
+        $billingAddress = Address::find($request->billing_address_id); 
         $shippingCity = City::with('zone')->find($shippingAddress->city_id);
         $user = auth('api')->user();
 
@@ -242,14 +281,14 @@ class OrderController extends Controller
                 'message' => translate('Sorry, delivery is not available in this shipping address.')
             ]);
 
-        foreach ($cartItems as $cartItem) {
-            if (!$cartItem->variation->stock) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $cartItem->variation->product->getTranslation('name') . ' ' . translate('is out of stock.')
-                ]);
-            }
-        }
+        // foreach ($cartItems as $cartItem) {
+        //     if (!$cartItem->stock) {
+        //         return response()->json([
+        //             'success' => false,
+        //             'message' => $cartItem->product->getTranslation('name') . ' ' . translate('is out of stock.')
+        //         ]);
+        //     }
+        // }
 
         if ($request->delivery_type == 'standard') {
             $shipping_cost = $shippingCity->zone->standard_delivery_cost;
@@ -257,13 +296,19 @@ class OrderController extends Controller
             $shipping_cost = $shippingCity->zone->express_delivery_cost;
         }
 
+        /**
+         * Se setea la variable en 0 para no enviar costo de envio, en caso de requerirlo
+         * se debe quitar el seteo en cero y configurarlo con base los requisitos.
+         * a la fecha 24 de septiempre de 2024 envia 10 dolares
+         */
+        $shipping_cost = 0;
         // generate array of shops cart items
         $shops_cart_items = array();
         $club_points = 0;
 
         foreach ($cartItems as $cartItem) {
             $cart_ids = array();
-            $product = $cartItem->variation->product;
+            $product = $cartItem->product;
             if (isset($shops_cart_items[$product->shop_id])) {
                 $cart_ids = $shops_cart_items[$product->shop_id];
             }
@@ -278,11 +323,11 @@ class OrderController extends Controller
             }
         }
 
-        foreach ($cartCollections as $cartCollection) {
-            $cart_ids = array();
-            array_push($cart_ids, $cartCollection->id);
-            $shops_cart_items[("collection_" . $cartCollection->id)] = $cart_ids;
-        }
+        // foreach ($cartCollections as $cartCollection) {
+        //     $cart_ids = array();
+        //     array_push($cart_ids, $cartCollection->id);
+        //     $shops_cart_items[("collection_" . $cartCollection->id)] = $cart_ids;
+        // }
 
         // get coupon data based on request
         $coupons = collect();
@@ -296,7 +341,7 @@ class OrderController extends Controller
 
         $combined_order = new CombinedOrder;
         $combined_order->user_id = $user->id;
-        $combined_order->code = date('Ymd-His') . rand(10, 99);
+        $combined_order->code = $request->code;
         $combined_order->shipping_address = json_encode($shippingAddress);
         $combined_order->billing_address = json_encode($billingAddress);
         $combined_order->save();
@@ -322,13 +367,12 @@ class OrderController extends Controller
 
             //shop total amount calculation
             foreach ($shop_cart_items as $cartItem) {
-                $itemPriceWithoutTax = variation_discounted_price($cartItem->variation->product, $cartItem->variation, false) * $cartItem->quantity;
-                $itemTax = product_variation_tax($cartItem->variation->product, $cartItem->variation) * $cartItem->quantity;
+                $itemPriceWithoutTax = variation_discounted_price($cartItem->product, $cartItem, false) * $cartItem->quantity;
+                $itemTax = product_variation_tax($cartItem->product, $cartItem) * $cartItem->quantity;
 
                 $shop_subTotal += $itemPriceWithoutTax;
                 $shop_tax += $itemTax;
             }
-
             $shop_total = $shop_subTotal + $shipping_cost + $shop_tax;
 
             //shop total amount calculation
@@ -372,6 +416,7 @@ class OrderController extends Controller
                 'coupon_discount' => $shop_coupon_discount,
                 'delivery_type' => $request->delivery_type,
                 'payment_type' => $request->payment_type,
+                'metodo_pago_contraentrega' => $request->metodo_pago_contraentrega,
             ]);
 
             $package_number++;
@@ -392,8 +437,8 @@ class OrderController extends Controller
             }
 
             foreach ($shop_cart_items as $cartItem) {
-                $itemPriceWithoutTax = variation_discounted_price($cartItem->variation->product, $cartItem->variation, false);
-                $itemTax = product_variation_tax($cartItem->variation->product, $cartItem->variation);
+                $itemPriceWithoutTax = variation_discounted_price($cartItem->product, $cartItem->variation, false);
+                $itemTax = product_variation_tax($cartItem->product, $cartItem->variation);
 
                 $orderDetail = OrderDetail::create([
                     'order_id' => $order->id,
@@ -449,12 +494,13 @@ class OrderController extends Controller
         $combined_order->grand_total = $grand_total;
         $combined_order->save();
 
+        $adminEmail = (new AnonymousNotifiable)->route('mail', 'ventasonlinealoranges@gmail.com');
         //Invioce mail send to the customer and seller
         try {
-            Notification::send($user, new OrderPlacedNotification($combined_order));
-            foreach ($combined_order->orders as $order) {
-                Notification::send($order->orderDetails->first()->product->shop->user, new SellerInvoiceNotification($order));
-            }
+            Notification::send([$user, $adminEmail],new OrderPlacedNotification($combined_order));
+            // foreach ($combined_order->orders as $order) {
+            //     Notification::send($order->orderDetails->first()->product->shop->user, new SellerInvoiceNotification($order));
+            // }
         } catch (\Exception $e) {
             // dd($e);
         }
@@ -465,8 +511,7 @@ class OrderController extends Controller
         }
 
         // clear user's cart
-        Cart::destroy($request->cart_item_ids);
-        CollectionCart::destroy($request->cart_collection_ids);
+        Cart::destroy(array_merge($cart_item_ids, $cart_collection_ids));
 
         if ($request->payment_type == 'wallet') {
             $user->balance -= $combined_order->grand_total;
@@ -479,7 +524,7 @@ class OrderController extends Controller
             $wallet->details = 'Order Placed. Order Code ' . $combined_order->code;
             $wallet->save();
 
-            $this->paymentDone($combined_order, $request->payment_type);
+            $this->paymentDone($combined_order, $request->payment_type, $request->payment_status);
         }
 
         if ($request->payment_type == 'cash_on_delivery' || $request->payment_type == 'wallet' || strpos($request->payment_type, 'offline_payment')  !== false) {
@@ -526,13 +571,13 @@ class OrderController extends Controller
         ]);
     }
 
-    public function paymentDone($combined_order, $payment_method, $payment_info = null)
+    public function paymentDone($combined_order, $payment_method, $payment_info = null, $payment_status = 'unpaid')
     {
         foreach ($combined_order->orders as $order) {
             // commission calculation
             calculate_seller_commision($order);
 
-            $order->payment_status = 'paid';
+            $order->payment_status = $payment_status;
             $order->payment_type = $payment_method;
             $order->payment_details = $payment_info;
             $order->save();

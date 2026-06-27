@@ -195,14 +195,14 @@ export default {
             const errors = [];
             if (!this.$v.rechargeAmount.$dirty) return errors;
             !this.$v.rechargeAmount.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         transactionIdErrors() {
             const errors = [];
             if (!this.$v.transactionId.$dirty) return errors;
             !this.$v.transactionId.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },

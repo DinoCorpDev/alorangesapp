@@ -8,6 +8,7 @@ const loadState = () => ({
     cartDrawerOpen: false,
     mobileSideMenuOpen: false,
     showLoginDialog: false,
+    showLostPasswordDialog: false,
     showAddToCartDialog: false,
     showConversationDialog: false,
     cartDialogProductSlug: null,
@@ -32,6 +33,9 @@ export default {
         },
         showLoginDialog(state) {
             return state.showLoginDialog;
+        },
+        showLostPasswordDialog(state) {
+            return state.showLostPasswordDialog;
         },
         showAddToCartDialog(state) {
             return state.showAddToCartDialog;
@@ -93,7 +97,7 @@ export default {
         logout(state) {
             localStorage.removeItem("shopAccessToken");
             const newState = loadState();
-            Object.keys(newState).forEach(key => {
+            Object.keys(newState).forEach((key) => {
                 state[key] = newState[key];
             });
         },

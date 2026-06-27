@@ -14,8 +14,7 @@ class OrderSingleCollection extends JsonResource
      * @return array
      */
     public function toArray($request)
-    {   
-        
+    {
         return [
             'id' => $this->id,
             'code' => $this->code,
@@ -27,12 +26,13 @@ class OrderSingleCollection extends JsonResource
             ],
             'shipping_address' => json_decode($this->shipping_address),
             'billing_address' => json_decode($this->billing_address),
-            'grand_total' => (double) $this->grand_total,
+            'grand_total' => (float) $this->grand_total,
             'orders' => OrderResource::collection($this->orders),
-            'date' => $this->created_at->toFormattedDateString()
+            'date' => $this->created_at->toFormattedDateString(),
+            'order_updates' => $this->order_updates
         ];
     }
-    
+
     public function with($request)
     {
         return [

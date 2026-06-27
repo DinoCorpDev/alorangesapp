@@ -14,11 +14,13 @@
 // @import "main";
 
 // Theme overrides
+
 .v-application {
-    font-family: "Overpass", sans-serif;
+    font-family: "Causten", sans-serif;
+    font-size: 16px;
 
     &.theme--light {
-        background: #dfdfdf;
+        background: #fafcfc;
         color: #000000;
     }
 
@@ -27,21 +29,21 @@
     }
 }
 
-// .v-menu__content {
-//     &.theme--dark {
-//         .v-list {
-//             background: #18191a;
-//         }
-//     }
-// }
-
 .rounded-section {
     border-radius: 10px;
 }
-
 .v-divider {
     border-color: #dfdfdf !important;
     // border-width: 2px 0 0;
+}
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+}
+
+.w-100 {
+    width: 100% !important;
 }
 
 .h-100 {
@@ -58,14 +60,14 @@ a {
 
 h1 {
     font-size: var(--font-size-h1);
-    font-weight: 300;
+    font-weight: 400;
     line-height: calc(43px + (122 - 43) * var(--screen-size));
     letter-spacing: -1.5px;
 }
 
 h2 {
     font-size: var(--font-size-h2);
-    font-weight: 300;
+    font-weight: 400;
     line-height: calc(45px + (76 - 45) * var(--screen-size));
     letter-spacing: -0.5px;
 }
@@ -99,7 +101,8 @@ h6 {
 
 .body1,
 .body2 {
-    font-family: "Roboto";
+    font-family: var(--font-size-body1);
+    overflow-x: hidden;
 }
 
 .body1,
@@ -157,8 +160,3 @@ a {
 .overflow-uw::-webkit-scrollbar-track:active {
     background: #d4d4d4;
 }
-
-// html * {
-//     background: rgba(255, 0, 0, 0.1);
-//     box-shadow: 0 0 0 1px red;
-// }

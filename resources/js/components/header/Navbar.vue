@@ -1,47 +1,69 @@
 <template>
-    <v-app-bar
-        ref="layoutNavbar"
-        class="layout-navbar"
-        :color="$vuetify.theme.dark ? '#000000' : '#FAFCFC'"
-        elevation="0"
-        prominent
-        dense
-        shrink-on-scroll
-        :fixed="headerFixed"
-    >
-        <v-container class="pa-0 fill-height justify-space-between" fluid>
-            <router-link :to="{ name: 'Home2' }" class="layout-navbar-brand">
-                <LogoIdovela :large="logoLarge" />
-            </router-link>
-            <div class="layout-navbar-nav">
-                <CustomButton color="grey" icon="la-store-alt" text="Ir a tienda" :to="{ name: 'Shop' }" />
-                <CustomButton v-if="!userIsLoggedIn" color="grey" text="Iniciar Sesión" :to="{ name: 'Login' }" />
-                <DoubleButton v-else />
-                <ToggleMenu />
+    <div>
+        <TopBar />
+        <v-app-bar
+            ref="layoutNavbar"
+            class="layout-navbar"
+            :color="$vuetify.theme.dark ? '#000000' : '#FAFCFC'"
+            elevation="0"
+            prominent
+            shrink-on-scroll
+            fixed
+        >
+            <div class="w-100">
+                <v-container class="logo-container fill-height justify-space-between" fluid>
+                <router-link :to="{ name: 'Home2' }" class="layout-navbar-brand">
+                    <LogoAloranges :large="logoLarge" class="d-none d-sm-block" />
+                    <!-- <img src="./Logo Aloranges.png" alt="" class="d-block d-sm-none"> -->
+                    <LogoAlorange class="d-block d-sm-none" style="max-width: 175px; height: auto" />
+                </router-link>
+                <div class="layout-navbar-nav">
+                    <!-- <CustomButton color="orange2" icon="la-store-alt" text="Ir a tienda" :to="{ name: 'Shop' }" /> -->
+                    <CustomButton color="orange3" :to="{ name: 'Shop' }">
+                        <span class="d-none d-sm-flex">Tienda</span>
+                        <Cart class="cart-icon ml-sm-2" style="margin-bottom: 4px" />
+                    </CustomButton>
+                    <CustomButton
+                        v-if="!userIsLoggedIn"
+                        color="orange"
+                        text="Iniciar Sesión"
+                        @click="showLoginDialog(true)"
+                    />
+                    <DoubleButton v-else />
+                    <div style="display: none">
+                        <ToggleMenu />
+                    </div>
+                </div>
+            </v-container>
             </div>
-        </v-container>
-    </v-app-bar>
+        </v-app-bar>
+    </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 
 import CustomButton from "../global/CustomButton.vue";
 import DoubleButton from "./DoubleButton.vue";
-import LogoIdovela from "./LogoIdovela.vue";
+import LogoAloranges from "./LogoAloranges.vue";
+import LogoAlorange from "../icons/LogoAlorange.vue";
 import ToggleMenu from "./ToggleMenu.vue";
+import Cart from "../icons/CartIcon.vue";
+import TopBar from "./TopBar.vue";
 
 export default {
     name: "LayoutNavbar",
     components: {
         CustomButton,
         DoubleButton,
-        LogoIdovela,
-        ToggleMenu
+        LogoAlorange,
+        LogoAloranges,
+        Cart,
+        ToggleMenu,
+        TopBar
     },
     data() {
         return {
-            headerFixed: false,
             logoLarge: false,
             scrollThreshold: 10
         };
@@ -54,12 +76,12 @@ export default {
         window.addEventListener("scroll", this.handleScroll, { passive: true });
     },
     methods: {
+        ...mapMutations("auth", ["showLoginDialog"]),
         handleScroll() {
             const currentScroll = this.$refs.layoutNavbar.currentScroll;
             const windowWidth = window.innerWidth;
 
-            this.headerFixed = currentScroll >= this.scrollThreshold;
-            this.logoLarge = windowWidth < 960 ? false : this.headerFixed;
+            this.logoLarge = windowWidth < 960 ? false : currentScroll >= this.scrollThreshold;
         }
     }
 };
@@ -71,11 +93,43 @@ export default {
 }
 
 .layout-navbar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    width: 100%;
     min-height: 60px;
     z-index: 10;
-
+    background-color: white !important;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 4px 6px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
     @media (max-width: 600px) {
         max-height: 60px;
+    }
+
+    @media (min-width: 600px) {
+        min-height: 96px;
+    }
+
+    .logo-container {
+        padding: 0;
+
+        @media (min-width: 600px) {
+            padding-top: 1rem;
+        }
+    }
+
+    &.v-app-bar--is-scrolled {
+        .logo-container {
+            @media (min-width: 600px) {
+                padding-top: 0.5rem;
+            }
+
+            &::v-deep {
+                .logo-idovela-large {
+                    height: 40px;
+                }
+            }
+        }
     }
 
     &::v-deep {

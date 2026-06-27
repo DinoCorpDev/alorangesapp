@@ -20,4 +20,9 @@ class Brand extends Model
     {
         return $this->hasMany(BrandTranslation::class);
     }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }

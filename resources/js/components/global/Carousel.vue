@@ -11,41 +11,45 @@
             </v-btn>
         </template>
         <template v-if="slides.length > 0">
-            <v-carousel-item v-for="(slide, i) in slides" :key="i">
-                <img v-if="slide.type === 'image'" class="carousel-item-image" :src="slide.src" />
-                <video v-if="slide.type === 'video'" class="carousel-item-video" controls>
-                    <source :src="slide.src" type="video/mp4" />
-                </video>
-                <v-responsive v-if="slide.type === 'iframe'" :aspect-ratio="aspectRatio">
-                    <iframe
-                        :src="`${slide.src}?controls=0&autoplay=1&fs=0&modestbranding&rel=0&showinfo=0&disablekb=0`"
-                        frameborder="0"
-                        allowfullscreen
-                    ></iframe>
-                </v-responsive>
-                <v-row class="carousel-item-content" v-if="type == 'description'">
-                    <v-col cols="12" sm="7" md="5" lg="4">
-                        <div class="mb-4">
-                            <h4 class="carousel-item-title mb-3">{{ title }}</h4>
-                            <p class="carousel-item-description body1 mb-8">{{ description }}</p>
-                            <div class="carousel-item-hashtags">
-                                <span v-for="(hashtag, i) in hashtags" :key="i">
-                                    # {{ hashtag }}
-                                    <span v-if="i < hashtags.length - 1">•</span>
-                                </span>
+            <div  class="d-flex align-center justify-center">
+                <v-carousel-item v-for="(slide, i) in slides" :key="i" >
+                    <div style="width: 100%; display: flex; justify-content: center;">
+                        <img v-if="slide.type === 'image'" class="carousel-item-image" :src="slide.src" />
+                    </div>
+                    <video v-if="slide.type === 'video'" class="carousel-item-video" controls>
+                        <source :src="slide.src" type="video/mp4" />
+                    </video>
+                    <v-responsive v-if="slide.type === 'iframe'" :aspect-ratio="aspectRatio">
+                        <iframe
+                            :src="`${slide.src}?controls=0&autoplay=1&fs=0&modestbranding&rel=0&showinfo=0&disablekb=0`"
+                            frameborder="0"
+                            allowfullscreen
+                        ></iframe>
+                    </v-responsive>
+                    <v-row class="carousel-item-content" v-if="type == 'description'">
+                        <v-col cols="12" sm="7" md="5" lg="4">
+                            <div class="mb-4">
+                                <h4 class="carousel-item-title mb-3">{{ title }}</h4>
+                                <p class="carousel-item-description body1 mb-8">{{ description }}</p>
+                                <div class="carousel-item-hashtags">
+                                    <span v-for="(hashtag, i) in hashtags" :key="i">
+                                        # {{ hashtag }}
+                                        <span v-if="i < hashtags.length - 1">•</span>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <v-row class="carousel-item-actions">
-                            <v-col cols="6">
-                                <custom-button block color="white" text="Ir a planes" />
-                            </v-col>
-                            <v-col cols="6">
-                                <custom-button block color="white" text="Ver más" />
-                            </v-col>
-                        </v-row>
-                    </v-col>
-                </v-row>
-            </v-carousel-item>
+                            <v-row class="carousel-item-actions">
+                                <v-col cols="6">
+                                    <custom-button block color="white" text="Ir a planes" />
+                                </v-col>
+                                <v-col cols="6">
+                                    <custom-button block color="white" text="Ver más" />
+                                </v-col>
+                            </v-row>
+                        </v-col>
+                    </v-row>
+                </v-carousel-item>
+            </div>
         </template>
         <v-carousel-item v-else>
             <img class="carousel-item-image" :src="itemPlaceholderUrl" />
@@ -182,6 +186,12 @@ export default {
             max-width: 100%;
             width: 100%;
             height: 100%;
+            @media (min-width: 800px) {
+                max-width: 100%;
+                width: 70%;
+                height: auto;
+            }
+            
             object-fit: cover;
             object-position: center;
 
@@ -218,7 +228,11 @@ export default {
 
 .v-carousel {
     border-radius: 10px;
-    background-color: #242526;
+    background-color: #f4f5f7;
+    border: 1px solidrgb(194, 194, 194)7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &::v-deep {
         .v-window__next,
@@ -240,6 +254,9 @@ export default {
 
         .v-window__container {
             height: 100% !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .v-carousel__controls {
@@ -269,6 +286,13 @@ export default {
                 }
             }
         }
+    }
+}
+.v-responsive__content{
+    &::v-deep {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 </style>

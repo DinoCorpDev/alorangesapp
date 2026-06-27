@@ -8,6 +8,7 @@ use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Api\CategoryController as ApiCategoryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
@@ -39,9 +40,11 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ClubPointController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\DigitalProductController;
 use App\Http\Controllers\Payment\AuthorizenetPaymentController;
 use App\Http\Controllers\ProductBulkUploadController;
+use App\Http\Controllers\ProductCatalogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,8 +79,12 @@ Route::get('/demo/cron_2', [DemoController::class, 'cron_2']);
 Route::get('/insert_translation_keys', [DemoController::class, 'insert_trasnalation_keys']);
 Route::get('/customer-products/admin', [SettingController::class, 'initSetting']);
 
+// Explicit login routes to ensure /login uses the local LoginController implementation
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+
 Auth::routes(['register' => false]);
-Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/logout', [LoginController::class, 'logout']);
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function () {
 
@@ -87,37 +94,58 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 
     Route::post('/language', [LanguageController::class, 'changeLanguage'])->name('language.change');
 
-    Route::resource('categories', CategoryController::class);
+    Route::get('/categories/update-alegra', [ApiCategoryController::class, 'alegra'])->name('categories.alegra');
+    Route::resource('categories', CategoryController::class)->except(['edit', 'destroy']);
     Route::get('/categories/edit/{id}', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::get('/categories/destroy/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::post('/categories/featured', [CategoryController::class, 'updateFeatured'])->name('categories.featured');
+    Route::post('/categories/status', [CategoryController::class, 'updateStatus'])->name('categories.status');
+    Route::get('/product-catalogs', [ProductCatalogController::class, 'index'])->name('product_catalogs.index');
+    Route::get('/product-catalogs/category-products', [ProductCatalogController::class, 'categoryProducts'])->name('product_catalogs.category_products');
+    Route::post('/product-catalogs', [ProductCatalogController::class, 'store'])->name('product_catalogs.store');
+    Route::get('/product-catalogs/configuration', [ProductCatalogController::class, 'configurationDefaults'])->name('product_catalogs.configuration.defaults');
+    Route::post('/product-catalogs/configuration', [ProductCatalogController::class, 'updateConfigurationDefaults'])->name('product_catalogs.configuration.defaults.update');
+    Route::get('/product-catalogs/{catalog}/configuration', [ProductCatalogController::class, 'configuration'])->name('product_catalogs.configuration');
+    Route::put('/product-catalogs/{catalog}/configuration', [ProductCatalogController::class, 'updateConfiguration'])->name('product_catalogs.configuration.update');
+    Route::get('/product-catalogs/{catalog}/edit', [ProductCatalogController::class, 'edit'])->name('product_catalogs.edit');
+    Route::put('/product-catalogs/{catalog}', [ProductCatalogController::class, 'update'])->name('product_catalogs.update');
+    Route::delete('/product-catalogs/{catalog}', [ProductCatalogController::class, 'destroy'])->name('product_catalogs.destroy');
+    Route::get('/product-catalogs/{catalog}/download', [ProductCatalogController::class, 'download'])->name('product_catalogs.download');
 
-    Route::resource('brands', BrandController::class);
+    Route::resource('brands', BrandController::class)->except(['edit', 'destroy']);
     Route::get('/brands/edit/{id}', [BrandController::class, 'edit'])->name('brands.edit');
     Route::get('/brands/destroy/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
     Route::post('/brands/import', [BrandController::class, 'import'])->name('brands.import');
 
-    Route::resource('attributes', AttributeController::class)->except(['destroy']);
+    Route::resource('attributes', AttributeController::class)->except(['edit', 'destroy']);
     Route::get('/attributes/edit/{id}', [AttributeController::class, 'edit'])->name('attributes.edit');
 
-    Route::resource('attribute_values', AttributeValueController::class)->except(['destroy']);;
+    Route::resource('attribute_values', AttributeValueController::class)->except(['edit', 'destroy']);
     Route::get('/attribute_values/edit/{id}', [AttributeValueController::class, 'edit'])->name('attribute_values.edit');
 
+    // Plans
+    Route::resource('/plans', PlanController::class);
+    // Route::get('/plans/edit/{id}', [PlanController::class, 'edit']);
+    // Route::post('/plans/{id}', [PlanController::class, 'update']);
+    // Route::get('/plans/destroy/{id}', [PlanController::class, 'destroy']);
+
     // Collection
-    Route::resource('/collection', CollectionController::class);
+    Route::resource('/collection', CollectionController::class)->except(['edit', 'update', 'destroy']);
     Route::group(['prefix' => 'collection'], function () {
         Route::post('/import', [CollectionController::class, 'import'])->name('collection.import');
+
         Route::get('/{id}/edit', [CollectionController::class, 'edit'])->name('collection.edit');
         Route::post('/update/{id}', [CollectionController::class, 'update'])->name('collection.update');
+        Route::post('/published', [CollectionController::class, 'updatePublished'])->name('collection.published');
         Route::get('/destroy/{id}', [CollectionController::class, 'destroy'])->name('collection.destroy');
-        Route::get('/collection/{id}', [CollectionController::class, 'show'])->name('collection');
+
         Route::get('/add/{id}', [CollectionController::class, 'add'])->name('collection.add');
         Route::get('/add/{id}/product/{idProduct}', [CollectionController::class, 'addProduct'])->name('collection.addProduct');
         Route::get('/destroy/{id}/product', [CollectionController::class, 'destroyProduct'])->name('collection.destroyProduct');
     });
 
     // Product
-    Route::resource('/product', ProductController::class);
+    Route::resource('/product', ProductController::class)->except(['edit', 'update', 'destroy']);
     Route::group(['prefix' => 'product'], function () {
         Route::post('/new-attribte', [ProductController::class, 'new_attribute'])->name('product.new_attribute');
         Route::post('/get-attribte-value', [ProductController::class, 'get_attribute_values'])->name('product.get_attribute_values');
@@ -139,7 +167,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     });
 
     // Service
-    Route::resource('/service', ServiceController::class);
+    Route::resource('/service', ServiceController::class)->except(['edit', 'update', 'destroy']);
     Route::group(['prefix' => 'service'], function () {
         Route::post('/new-attribte', [ServiceController::class, 'new_attribute'])->name('service.new_attribute');
         Route::post('/get-attribte-value', [ServiceController::class, 'get_attribute_values'])->name('service.get_attribute_values');
@@ -175,13 +203,13 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         });
     });
 
-    Route::resource('digitalproducts', DigitalProductController::class);
+    Route::resource('digitalproducts', DigitalProductController::class)->except(['destroy']);
     Route::controller(DigitalProductController::class)->group(function () {
         Route::get('/digitalproducts/destroy/{id}', 'destroy')->name('digitalproducts.destroy');
         Route::get('/digitalproducts/download/{id}', 'download')->name('digitalproducts.download');
     });
 
-    Route::resource('customers', CustomerController::class);
+    Route::resource('customers', CustomerController::class)->except(['destroy']);
     Route::get('customers_ban/{customer}', [CustomerController::class, 'ban'])->name('customers.ban');
     Route::get('/customers/login/{id}', [CustomerController::class, 'login'])->name('customers.login');
     Route::get('/customers/destroy/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
@@ -194,12 +222,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 
     //Blog
     //Blog cateories
-    Route::resource('blog-category', BlogCategoryController::class);
+    Route::resource('blog-category', BlogCategoryController::class)->except(['edit', 'destroy']);
     Route::get('/blog-category/edit/{id}', [BlogCategoryController::class, 'edit'])->name('blog-category.edit');
     Route::get('/blog-category/destroy/{id}', [BlogCategoryController::class, 'destroy'])->name('blog-category.destroy');
 
     // Blogs
-    Route::resource('blog', BlogController::class);
+    Route::resource('blog', BlogController::class)->except(['edit', 'destroy']);
     Route::controller(BlogController::class)->group(function () {
         Route::get('/blog/edit/{id}', 'edit')->name('blog.edit');
         Route::get('/blog/destroy/{id}', 'destroy')->name('blog.destroy');
@@ -234,7 +262,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::post('/currency/update_status', [CurrencyController::class, 'update_status'])->name('currency.update_status');
 
     // Language
-    Route::resource('/languages', LanguageController::class);
+    Route::resource('/languages', LanguageController::class)->except(['destroy']);
     Route::post('/languages/save_default_language', [LanguageController::class, 'save_default_language'])->name('languages.save_default_language');
     Route::post('/languages/update_status', [LanguageController::class, 'update_status'])->name('languages.update_status');
     Route::post('/languages/update_rtl_status', [LanguageController::class, 'update_rtl_status'])->name('languages.update_rtl_status');
@@ -250,20 +278,20 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         Route::view('/banners', 'backend.website_settings.banners')->name('website.banners');
         Route::view('/pages', 'backend.website_settings.pages.index')->name('website.pages');
         Route::view('/appearance', 'backend.website_settings.appearance')->name('website.appearance');
-        Route::resource('custom-pages', PageController::class);
+        Route::resource('custom-pages', PageController::class)->except(['edit', 'destroy']);
         Route::get('/custom-pages/edit/{id}', [PageController::class, 'edit'])->name('custom-pages.edit');
         Route::get('/custom-pages/destroy/{id}', [PageController::class, 'destroy'])->name('custom-pages.destroy');
     });
 
-    Route::resource('roles', RoleController::class);
+    Route::resource('roles', RoleController::class)->except(['edit', 'destroy']);
     Route::get('/roles/edit/{id}', [RoleController::class, 'edit'])->name('roles.edit');
     Route::get('/roles/destroy/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
-    Route::resource('staffs', StaffController::class);
+    Route::resource('staffs', StaffController::class)->except(['destroy']);
     Route::get('/staffs/destroy/{id}', [StaffController::class, 'destroy'])->name('staffs.destroy');
 
     // Offers
-    Route::resource('offers', OfferController::class);
+    Route::resource('offers', OfferController::class)->except(['destroy']);
     Route::get('/offers/destroy/{id}', [OfferController::class, 'destroy'])->name('offers.destroy');
     Route::post('/offers/update_status', [OfferController::class, 'update_status'])->name('offers.update_status');
     Route::post('/offers/product_discount', [OfferController::class, 'product_discount'])->name('offers.product_discount');
@@ -273,8 +301,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/subscribers', [SubscriberController::class, 'index'])->name('subscribers.index');
 
     // Orders
-    Route::resource('orders', OrderController::class);
+    Route::resource('orders', OrderController::class)->except(['destroy']);
     Route::post('/orders/update_delivery_status', [OrderController::class, 'update_delivery_status'])->name('orders.update_delivery_status');
+    Route::post('/orders/update_service_status', [OrderController::class, 'update_service_status'])->name('orders.update_service_status');
     Route::post('/orders/update_payment_status', [OrderController::class, 'update_payment_status'])->name('orders.update_payment_status');
     Route::get('/orders/destroy/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/orders/invoice/{order_id}', [InvoiceController::class, 'invoice_download'])->name('orders.invoice.download');
@@ -283,7 +312,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/orders/update/status/{order_id}', [OrderController::class, 'order_status'])->name('order.status.change');
 
     //Coupons
-    Route::resource('coupon', CouponController::class);
+    Route::resource('coupon', CouponController::class)->except(['destroy']);
     Route::post('/coupon/get_form', [CouponController::class, 'get_coupon_form'])->name('coupon.get_coupon_form');
     Route::post('/coupon/get_form_edit', [CouponController::class, 'get_coupon_form_edit'])->name('coupon.get_coupon_form_edit');
     Route::get('/coupon/destroy/{id}', [CouponController::class, 'destroy'])->name('coupon.destroy');
@@ -301,7 +330,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::post('/reviews/published', [ReviewController::class, 'updatePublished'])->name('reviews.published');
 
     Route::any('/uploaded-files/file-info', [AizUploadController::class, 'file_info'])->name('uploaded-files.info');
-    Route::resource('/uploaded-files', AizUploadController::class);
+    Route::resource('/uploaded-files', AizUploadController::class)->except(['destroy']);
     Route::get('/uploaded-files/destroy/{id}', [AizUploadController::class, 'destroy'])->name('uploaded-files.destroy');
 
 
@@ -330,12 +359,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::resource('states', StateController::class);
     Route::post('/states/status', [StateController::class, 'updateStatus'])->name('states.status');
 
-    Route::resource('cities', CityController::class);
+    Route::resource('cities', CityController::class)->except(['edit', 'destroy']);
     Route::get('/cities/edit/{id}', [CityController::class, 'edit'])->name('cities.edit');
     Route::get('/cities/destroy/{id}', [CityController::class, 'destroy'])->name('cities.destroy');
     Route::post('/cities/status', [CityController::class, 'updateStatus'])->name('cities.status');
 
-    Route::resource('zones', ZoneController::class);
+    Route::resource('zones', ZoneController::class)->except(['destroy']);
     Route::get('/zones/destroy/{id}', [ZoneController::class, 'destroy'])->name('zones.destroy');
 
 
@@ -343,7 +372,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::view('/system/server-status', 'backend.system.server_status')->middleware('permission:server_status')->name('server_status');
 
     // tax
-    Route::resource('taxes', TaxController::class);
+    Route::resource('taxes', TaxController::class)->except(['destroy']);
     Route::post('/tax/status_update', [TaxController::class, 'updateStatus'])->name('tax.status_update');
     Route::get('/taxes/destroy/{id}', [TaxController::class, 'destroy'])->name('taxes.destroy');
 
@@ -358,4 +387,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 //Authorize-Net-Payment
 Route::get('/authorizenet/cardtype', [AuthorizenetPaymentController::class, 'cardType'])->name('authorizenet.cardtype');
 
-Route::get('/addons/multivendor', [MultiVendorController::class, 'helloFromMultiVendor']);
+if (class_exists(MultiVendorController::class)) {
+    Route::get('/addons/multivendor', [MultiVendorController::class, 'helloFromMultiVendor']);
+}
+

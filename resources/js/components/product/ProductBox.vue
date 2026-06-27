@@ -1,10 +1,5 @@
 <template>
     <div class="product-box">
-        <div class="product-box-header">
-            <button type="button" class="icon" @click="addNewWishlist(productDetails.id)">
-                <FavoriteIcon />
-            </button>
-        </div>
         <div class="product-box-image">
             <v-img
                 :src="productDetails.thumbnail_image || productPlaceholderUrl"
@@ -14,48 +9,85 @@
             <div class="product-box-image-hover">
                 <CustomButton
                     block
-                    color="black"
+                    color="orange"
                     text="Ver Detalles"
                     :to="{ name: 'ProductDetails', params: { slug: productDetails.slug } }"
-                />
+                />.
             </div>
         </div>
         <div class="product-box-body">
-            <p class="product-box-reference mb-3">{{ productDetails.reference || "--" }}</p>
+            <p class="product-box-reference mb-3" v-if="productDetails.reference">
+                {{ productDetails.reference || "--" }}
+            </p>
             <h2 class="product-box-name mb-1">{{ productDetails.name || "--" }}</h2>
-            <p class="product-box-brand-name mb-3">{{ productDetails.brandName || "--" }}</p>
+            <p class="product-box-brand-name mb-3" v-if="productDetails.brandName">
+                {{ productDetails.brandName || "--" }}
+            </p>
             <template v-if="productDetails.base_price > productDetails.base_discounted_price">
-                <del class="product-box-price discounted">{{ format_price(productDetails.base_price) }}</del>
+                <del class="product-box-price discounted">{{ formatearMoneda(productDetails.base_price) }}</del>
             </template>
-            <span class="product-box-price">{{ format_price(productDetails.base_discounted_price) }}</span>
+            <span class="product-box-price">{{ formatearMoneda(productDetails.base_discounted_price) }}</span>
             <template v-if="boxStyle == 'two'">
-                <v-divider class="my-4" />
-                <p class="product-box-description">{{ productDetails.description || "--" }}</p>
+                <!-- <v-divider class="my-4" /> -->
+                <p class="product-box-description" v-if="productDetails.description">
+                    {{ productDetails.description || "--" }}
+                </p>
             </template>
         </div>
-        <div class="product-box-footer pt-0">
-            <CustomButton
-                block
-                color="nero"
-                text="Agregar a Compras"
-                @click="addCart()"
-                :loading="actionLoading"
-                :disabled="actionLoading"
-            />
+        <div class="product-box-footer pt-0 d-flex">
+            <CustomButton color="orange" @click="addCart()" :loading="actionLoading" :disabled="actionLoading">
+                Añadir <Cart class="ml-1" />
+            </CustomButton>
+            <template v-if="isThisWishlisted(productDetails.id)">
+                <v-tooltip bottom color="black">
+                    <template v-slot:activator="{ on, attrs }">
+                        <button
+                            type="button"
+                            class="icon active"
+                            @click="removeFromWishlist(productDetails.id)"
+                            v-bind="attrs"
+                            v-on="on"
+                        >
+                            <WishIcon />
+                        </button>
+                    </template>
+                    <span>Quitar de favoritos</span>
+                </v-tooltip>
+            </template>
+            <template v-else>
+                <v-tooltip bottom color="black">
+                    <template v-slot:activator="{ on, attrs }">
+                        <button
+                            type="button"
+                            class="icon"
+                            @click="addNewWishlist(productDetails.id)"
+                            v-bind="attrs"
+                            v-on="on"
+                        >
+                            <WishIcon />
+                        </button>
+                    </template>
+                    <span>Añadir de favoritos</span>
+                </v-tooltip>
+            </template>
         </div>
     </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapMutations, mapGetters } from "vuex";
 
 import CustomButton from "../global/CustomButton.vue";
 import FavoriteIcon from "../icons/Favorite.vue";
+import Cart from "../icons/CartIconSmall.vue";
+import WishIcon from "../icons/WishIcon.vue";
 
 export default {
     name: "ProductBox",
     components: {
         CustomButton,
+        WishIcon,
+        Cart,
         FavoriteIcon
     },
     props: {
@@ -63,27 +95,55 @@ export default {
         productDetails: { type: Object, required: true, default: {} },
         actionLoading: false
     },
+    mounted() {
+        this.productDetails.type = "product";
+    },
     data() {
         return {
+            isAddingToCart: false,
             productPlaceholderUrl: "/public/assets/img/item-placeholder.png"
         };
+    },
+    computed: {
+        ...mapGetters("wishlist", ["isThisWishlisted"])
     },
     methods: {
         ...mapActions("wishlist", ["addNewWishlist", "removeFromWishlist"]),
         ...mapActions("cart", ["addToCart", "updateQuantity"]),
-        async addCart() {
-            this.actionLoading = true;
-            this.addToCart({
-                variation_id: this.productDetails.id,
-                qty: 1
+        ...mapMutations("auth", ["showAddToCartDialog"]),
+        addCart() {
+            if (!this.isAddingToCart && !this.productDetails.is_variant) {
+                this.isAddingToCart = true; // Marcar que está en proceso
+
+                this.addToCart({
+                    product_id: this.productDetails,
+                    qty: 1
+                })
+                    .then(() => {
+                        this.snack({
+                            message: this.$i18n.t("Producto agregado al carrito"),
+                            color: "green"
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error al agregar al carrito:", error);
+                        this.snack({
+                            message: this.$i18n.t("Error agregando el producto"),
+                            color: "red"
+                        });
+                    })
+                    .finally(() => {
+                        this.isAddingToCart = false;
+                    });
+            }
+        },
+        formatearMoneda(valor) {
+            return valor.toLocaleString('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
             });
-            this.snack({
-                message: this.$i18n.t("product_added_to_cart"),
-                color: "green"
-            });
-            setTimeout(() => {
-                this.actionLoading = false;
-            }, 2000);
         }
     }
 };
@@ -99,38 +159,32 @@ export default {
 }
 
 .product-box {
+    border: 1px solid #e4e4e4;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important;
     display: flex;
     flex-direction: column;
     border-radius: 10px;
-    background-color: #f5f5f5;
+    background-color: transparent;
     height: 100%;
     overflow: hidden;
     box-sizing: border-box;
 
-    &-header,
     &-body,
     &-image-hover,
     &-footer {
         padding: 0.5rem;
 
         @media (min-width: 600px) {
-            padding: 0.65rem 0.85rem;
+            padding: 0.65rem 0.7rem;
         }
-    }
-
-    &-header {
-        background-color: #f5f5f5;
-        display: flex;
-        justify-content: flex-end;
-
         &::v-deep {
             .icon {
                 line-height: 0.5;
 
                 @media (max-width: 600px) {
                     svg {
-                        height: 14px;
-                        width: 14px;
+                        height: 32px;
+                        width: 32px;
                     }
                 }
 
@@ -145,8 +199,9 @@ export default {
                     }
                 }
 
-                &:active {
+                &.active {
                     path {
+                        fill: #f38637;
                         opacity: 1;
                     }
                 }
@@ -156,9 +211,9 @@ export default {
 
     &-image {
         position: relative;
-        background-color: #dfdfdf;
         cursor: pointer;
-
+        padding: 10px 10px 0px 10px;
+        background: transparent;
         &::after {
             content: "";
             display: block;
@@ -173,7 +228,7 @@ export default {
         }
 
         &-hover {
-            width: 100%;
+            width: 90%;
             position: absolute;
             bottom: 0;
             opacity: 0;
@@ -205,12 +260,14 @@ export default {
     }
 
     &-footer {
-        .v-btn {
-            @media (max-width: 600px) {
-                font-size: 11px;
-                height: 30px !important;
-            }
-        }
+        // .v-btn {
+        //     @media (max-width: 600px) {
+        //         font-size: 11px;
+        //         height: 30px !important;
+        //     }
+        // }
+        display: flex;
+        justify-content: space-between
     }
 
     &-reference {

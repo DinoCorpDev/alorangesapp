@@ -14,6 +14,7 @@ use App\Http\Controllers\Payment\AuthorizenetPaymentController;
 use App\Http\Controllers\Payment\PayfastPaymentController;
 use App\Http\Controllers\Payment\RazorpayPaymentController;
 use App\Http\Controllers\Payment\MercadopagoPaymentController;
+use App\Http\Controllers\Payment\IyzicoPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,7 +77,7 @@ Route::group(['prefix' => 'payment'], function () {
     //Mercadopago <ends>
 
     //Iyzico
-    Route::any('/iyzico/payment/callback/{payment_type}/{amount?}/{payment_method?}/{combined_order_id?}/{customer_package_id?}/{seller_package_id?}', [IyzicoController::class, 'callback'])->name('iyzico.callback');
+    Route::any('/iyzico/payment/callback/{payment_type}/{amount?}/{payment_method?}/{combined_order_id?}/{customer_package_id?}/{seller_package_id?}', [IyzicoPaymentController::class, 'callback'])->name('iyzico.callback');
 });
 
 Route::any('/social-login/redirect/{provider}', [LoginController::class, 'redirectToProvider'])->name('social.login');
@@ -87,10 +88,12 @@ Route::get('/category/{slug}', [HomeController::class, 'index'])->name('products
 
 Route::get('/service/{slug}', [HomeController::class, 'index'])->name('service');
 
+Route::get('/collection/{slug}', [HomeController::class, 'index'])->name('collection');
+
 Route::get('/blog-details/{slug}', [HomeController::class, 'index'])->name('blog.details');
 
 //Address
-Route::resource('addresses', AddressController::class);
+Route::resource('addresses', AddressController::class)->except(['update', 'destroy']);
 Route::controller(AddressController::class)->group(function () {
     Route::post('/get-states', 'getStates')->name('get-state');
     Route::post('/get-cities', 'getCities')->name('get-city');

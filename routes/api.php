@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ClubPointController;
+use App\Http\Controllers\Api\CollectionController;
+use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\FollowController;
@@ -26,8 +28,8 @@ use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\WishlistController;
+// use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\Payment\PaymentController;
-use App\Http\Controllers\CollectionController;
 
 Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
 
@@ -42,6 +44,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
             Route::post('signup', [AuthController::class, 'signup']);
             Route::post('verify', [AuthController::class, 'verify']);
             Route::post('resend-code', [AuthController::class, 'resend_code']);
+
+            Route::post('verify-data', [AuthController::class, 'verifyData']);
 
             Route::post('password/create', [PasswordResetController::class, 'create']);
             Route::post('password/reset', [PasswordResetController::class, 'reset']);
@@ -63,7 +67,10 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
     Route::post('subscribe', [SubscribeController::class, 'subscribe']);
 
     Route::get('all-categories', [CategoryController::class, 'index']);
+    Route::get('categories-home', [CategoryController::class, 'categories_home']);
+    Route::get('categories/update-alegra', [CategoryController::class, 'alegra'])->name('categories.alegra');
     Route::get('categories/first-level', [CategoryController::class, 'first_level_categories']);
+    Route::get('category/by-name/{name}', [CategoryController::class, 'get_category_by_name']);
     Route::get('all-brands', [BrandController::class, 'index']);
     Route::get('all-offers', [OfferController::class, 'index']);
     Route::get('offer/{slug}', [OfferController::class, 'show']);
@@ -83,13 +90,21 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
         Route::get('random/{limit}/{product_id?}', [ProductController::class, 'random_products']);
         Route::get('latest/{limit}', [ProductController::class, 'latest_products']);
         Route::get('reviews/{product_id}', [ReviewController::class, 'index']);
+        Route::get('/update-alegra', [ProductController::class, 'alegra'])->name('product.alegra');
+        Route::post('/payment-card-wompi', [ProductController::class, 'wompiPaymentCard'])->name('product.wompi.card');
+        Route::post('/payment-wompi-pse', [ProductController::class, 'wompiPaymentPSE'])->name('product.wompi.pse');
+        Route::post('/transaction-wompi', [ProductController::class, 'getTransactionWompi'])->name('product.wompi.transaction');
+        Route::get('/payment-wompi-banks', [ProductController::class, 'getPSEBanksOptions'])->name('product.wompi.banks');
+        Route::get('/{letter}', [ProductController::class, 'products_by_letter']);
     });
 
     Route::group(['prefix' => 'collection'], function () {
-        Route::get('/details/{collection_slug}', [CollectionController::class, 'details']);
+        // Route::get('/', [CollectionController::class, 'index']);
+        Route::get('/details/{collection_slug}', [CollectionController::class, 'show']);
     });
 
     Route::group(['prefix' => 'service'], function () {
+        Route::get('/', [ServiceController::class, 'index']);
         Route::get('/details/{service_slug}', [ServiceController::class, 'show']);
         Route::post('get-by-ids', [ServiceController::class, 'get_by_ids']);
         Route::get('search', [ServiceController::class, 'search']);
@@ -108,17 +123,24 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
     Route::get('search.ajax/{keyword}', [ProductController::class, 'ajax_search']);
 
     Route::get('all-countries', [AddressController::class, 'get_all_countries']);
+    Route::get('all-codigo-ciiu', [AuthController::class, 'get_all_ciiu']);
+    Route::get('all-codigo-postal', [AuthController::class, 'get_all_codigo_postal']);
+    Route::get('all-subscriber', [AuthController::class, 'get_all_subscriber']);
     Route::get('states/{country_id}', [AddressController::class, 'get_states_by_country_id']);
     Route::get('cities/{state_id}', [AddressController::class, 'get_cities_by_state_id']);
+    Route::get('localidades/{state_id}', [AddressController::class, 'get_localidad_by_state_id']);
 
     Route::post('carts', [CartController::class, 'index']);
     Route::post('carts/add', [CartController::class, 'add']);
-    Route::post('carts/addCollection', [CartController::class, 'addCollection']);
+    // Route::post('carts/addCollection', [CartController::class, 'addCollection']);
     Route::post('carts/change-quantity', [CartController::class, 'changeQuantity']);
     Route::post('carts/destroy', [CartController::class, 'destroy']);
 
     Route::group(['prefix' => 'user'], function () {
         Route::post('address/create', [AddressController::class, 'createShippingAddress']);
+        Route::post('address/createRegister', [AddressController::class, 'createShippingAddressRegister']);
+        Route::post('info/updateAvatar', [UserController::class, 'updateAvatar']);
+        Route::post('delete-account/{id}',[UserController::class,'deleteAccount']);
     });
 
     Route::post('payment/image', [OrderController::class, 'paymentImage']);
@@ -128,6 +150,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
         Route::group(['prefix' => 'checkout'], function () {
             Route::get('get-shipping-cost/{address_id}', [OrderController::class, 'get_shipping_cost']);
             Route::post('order/store', [OrderController::class, 'store']);
+            Route::post('order/resultPse/{reference}',[OrderController::class, 'getResultTransactionPSE'],'get_result_pse_payment');
             Route::post('coupon/apply', [CouponController::class, 'apply']);
         });
 
@@ -141,28 +164,47 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
 
             Route::get('info', [UserController::class, 'info']);
             Route::post('info/update', [UserController::class, 'updateInfo']);
+            Route::post('info/updateEmpresa', [UserController::class, 'updateInfoEmpresa']);
+            Route::post('info/updatePassword', [UserController::class, 'updatePassword']);
+            Route::post('info/updateTerms', [UserController::class, 'updateTerms']);
+
+
 
             Route::get('coupons', [CouponController::class, 'index']);
 
             Route::get('orders', [OrderController::class, 'index']);
+            Route::post('orders', [OrderController::class, 'getOrders']);
             Route::get('orders/downloads', [OrderController::class, 'productDownloads']);
             Route::get('orders/product/download/{id}', [OrderController::class, 'download']);
             Route::get('order/{order_code}', [OrderController::class, 'show']);
             Route::get('order/cancel/{order_id}', [OrderController::class, 'cancel']);
             Route::get('order/invoice-download/{order_code}', [OrderController::class, 'invoice_download']);
-
             Route::get('review/check/{product_id}', [ReviewController::class, 'check_review_status']);
             Route::post('review/submit', [ReviewController::class, 'submit_review']);
 
             Route::apiResource('wishlists', WishlistController::class)->except(['update', 'show']);
+            Route::get('wishlists/services', [WishlistController::class, 'favoriteServices']);
+            Route::get('wishlists/brands', [WishlistController::class, 'favoriteBrands']);
+            Route::post('wishlists/services', [WishlistController::class, 'storeService']);
+            Route::post('wishlists/brands', [WishlistController::class, 'storeBrand']);
+            Route::delete('wishlists/services/{services_id}', [WishlistController::class, 'destroyService']);
+            Route::delete('wishlists/brands/{brands_id}', [WishlistController::class, 'destroyBrand']);
             Route::apiResource('follow', FollowController::class)->except(['update', 'show']);
 
             Route::get('addresses', [AddressController::class, 'addresses']);
             Route::post('address/create', [AddressController::class, 'createShippingAddress']);
             Route::post('address/update', [AddressController::class, 'updateShippingAddress']);
             Route::get('address/delete/{id}', [AddressController::class, 'deleteShippingAddress']);
+            Route::post('address/setFavorite', [AddressController::class, 'setFavorite']);
             Route::get('address/default-shipping/{id}', [AddressController::class, 'defaultShippingAddress']);
             Route::get('address/default-billing/{id}', [AddressController::class, 'defaultBillingAddress']);
+
+
+            Route::get('companies', [CompanyController::class, 'companies']);
+            Route::post('companies/create', [CompanyController::class, 'createCompany']);
+            Route::post('companies/update', [CompanyController::class, 'updateCompany']);
+            Route::post('companies/setFavorite', [CompanyController::class, 'setFavorite']);
+            Route::get('companies/delete/{id}', [CompanyController::class, 'deleteCompany']);
 
             # conversation
             Route::get('querries', [ConversationController::class, 'index']);

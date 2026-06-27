@@ -8,7 +8,6 @@ use App\Http\Resources\ShopResource;
 use App\Models\Brand;
 use App\Models\Cart;
 use App\Models\Collection;
-use App\Models\CollectionCart;
 use App\Models\CollectionProduct;
 use App\Models\Product;
 use App\Models\ProductVariation;
@@ -21,60 +20,50 @@ class CartController extends Controller
     public function index(Request $request)
     {
         if (auth('api')->check()) {
-            $carts = Cart::with(['product', 'variation.combinations.attribute', 'variation.combinations.attribute_value'])->where('user_id', auth('api')->user()->id)->get();
-            $collections = CollectionCart::with(['collection'])->where('user_id', auth('api')->user()->id)->get();
+            $product_carts = Cart::with(['product', 'variation.combinations.attribute', 'variation.combinations.attribute_value'])
+                ->where('user_id', auth('api')->user()->id)
+                ->whereNotNull('product_id')
+                ->get();
+            $collection_carts = Cart::with(['collection'])
+                ->where('user_id', auth('api')->user()->id)
+                ->whereNotNull('collection_id')
+                ->get();
         } elseif ($request->has('temp_user_id') && $request->temp_user_id) {
-            $carts = Cart::with(['product', 'variation.combinations.attribute', 'variation.combinations.attribute_value'])->where('temp_user_id', $request->temp_user_id)->get();
-            $collections = CollectionCart::with(['collection'])->where('temp_user_id', $request->temp_user_id)->get();
-        }
-
-        foreach ($collections as $value) {
-            $_products = CollectionProduct::with(['product'])->where("id_collection", $value->collection->id)->get();
-            $value->products = $_products;
-
-            if ($value->collection->marca != "" && $value->collection->marca != NULL) {
-                $value->brand = Brand::where('id', $value->collection->marca)->first();
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'cart_items' => new CartCollection($carts),
-            'cart_collections' => $collections
-        ], 200);
-    }
-
-    public function indexOld(Request $request)
-    {
-        if (auth('api')->check()) {
-            $carts = Cart::with(['product', 'variation.combinations.attribute', 'variation.combinations.attribute_value'])->where('user_id', auth('api')->user()->id)->get();
-        } elseif ($request->has('temp_user_id') && $request->temp_user_id) {
-            $carts = Cart::with(['product', 'variation.combinations.attribute', 'variation.combinations.attribute_value'])->where('temp_user_id', $request->temp_user_id)->get();
+            $product_carts = Cart::with(['product', 'variation.combinations.attribute', 'variation.combinations.attribute_value'])
+                ->where('temp_user_id', $request->temp_user_id)
+                ->whereNotNull('product_id')
+                ->get();
+            $collection_carts = Cart::with(['collection'])
+                ->where('temp_user_id', $request->temp_user_id)
+                ->whereNotNull('collection_id')
+                ->get();
         } else {
-            $carts = collect();
+            $product_carts = collect();
+            $collection_carts = collect();
         }
 
-        $shops = array();
+        $product_carts = $product_carts->filter(function ($cart_item) {
+            return $cart_item->product;
+        });
 
-        foreach ($carts as $key => $cart_item) {
-            //if variation no found remove from cart item
-            if (!$cart_item->variation || !$cart_item->product) {
-                $cart_item->delete();
-                $carts->forget($key);
-            } elseif (!in_array($cart_item->product->shop_id, $shops)) {
-                array_push($shops, $cart_item->product->shop_id);
-            }
-        }
+        $carts = $product_carts->merge($collection_carts);
+
+        $product_shops = $product_carts->pluck('product.shop_id')->unique()->toArray();
+        $collection_shops = $collection_carts->pluck('collection.shop_id')->unique()->toArray();
+
+        $shops = array_unique(array_merge($product_shops, $collection_shops));
+
         return response()->json([
             'success' => true,
-            'cart_items' => new CartCollection($carts),
-            'shops' => new ShopCollection(Shop::with('categories')->withCount(['products', 'reviews'])->find($shops))
+            'cart_items' => new CartCollection($carts)
         ]);
     }
 
     public function add(Request $request)
     {
-        $product = Product::with("shop")->findOrFail($request->variation_id);
+        $data = $request->product_id;
+
+        $productToSell = Product::findOrFail($data['id']);
 
         $user_id = (auth('api')->check()) ? auth('api')->user()->id : null;
         $temp_user_id = $request->temp_user_id;
@@ -82,74 +71,30 @@ class CartController extends Controller
         $cart = Cart::updateOrCreate([
             'user_id' => $user_id,
             'temp_user_id' => $temp_user_id,
-            'product_id' => $product->id
-        ], ['quantity' => DB::raw('quantity + ' . $request->qty)]);
-
-        $productData = [
-            'cart_id' => (int) $cart->id,
-            'product_id' => (int) $cart->product_id,
-            'shop_id' => (int) $product->shop_id,
-            'earn_point' => (float) $cart->product->earn_point,
-            'name' => $product->name,
-            'thumbnail' => api_asset($product->thumbnail_img),
-            'regular_price' => (float) $product->lowest_price,
-            'dicounted_price' => (float) $product->lowest_price,
-            'tax' => (float) $product->lowest_price,
-            'stock' => (int) $product->stock,
-            'min_qty' => (int) $product->min_qty,
-            'max_qty' => (int) $product->max_qty,
-            'standard_delivery_time' => (int) $product->standard_delivery_time,
-            'express_delivery_time' => (int) $product->express_delivery_time,
-            'qty' => (int) $request->qty,
-        ];
-
-        return response()->json([
-            'success' => true,
-            'data' => $productData,
-            'message' => translate('Product added to cart successfully'),
-        ], 200);
-    }
-
-    public function addOld(Request $request)
-    {
-        $product_variation = ProductVariation::with(['product.shop', 'combinations.attribute', 'combinations.attribute_value'])->findOrFail($request->variation_id);
-
-        $user_id = (auth('api')->check()) ? auth('api')->user()->id : null;
-        $temp_user_id = $request->temp_user_id;
-
-        $cart = Cart::updateOrCreate([
-            'user_id' => $user_id,
-            'temp_user_id' => $temp_user_id,
-            'product_id' => $product_variation->product->id,
-            'product_variation_id' => $product_variation->id
-        ], [
-            'quantity' => DB::raw('quantity + ' . $request->qty)
+            'product_id' => $productToSell['id'],
+            'quantity' => (int) $request->qty,
         ]);
 
         $product = [
             'cart_id' => (int) $cart->id,
             'product_id' => (int) $cart->product_id,
-            'shop_id' => (int) $product_variation->product->shop_id,
+            'shop_id' => (int) $productToSell->shop_id,
             'earn_point' => (float) $cart->product->earn_point,
-            'variation_id' => (int) $cart->product_variation_id,
-            'name' => $product_variation->product->name,
-            'combinations' => filter_variation_combinations($product_variation->combinations),
-            'thumbnail' => api_asset($product_variation->product->thumbnail_img),
-            'regular_price' => (float) variation_price($product_variation->product, $product_variation),
-            'dicounted_price' => (float) variation_discounted_price($product_variation->product, $product_variation),
-            'tax' => (float) product_variation_tax($product_variation->product, $product_variation),
-            'stock' => (int) $product_variation->stock,
-            'min_qty' => (int) $product_variation->product->min_qty,
-            'max_qty' => (int) $product_variation->product->max_qty,
-            'standard_delivery_time' => (int) $product_variation->product->standard_delivery_time,
-            'express_delivery_time' => (int) $product_variation->product->express_delivery_time,
+            'name' => $productToSell->name,
+            'thumbnail_image' => $productToSell->thumbnail_img,
+            'regular_price' => (float) variation_price($productToSell, $productToSell),
+            'dicounted_price' => (float) variation_discounted_price($productToSell, $productToSell),
+            'stock' => (int) $productToSell->stock,
+            'min_qty' => (int) $productToSell->min_qty,
+            'max_qty' => (int) $productToSell->max_qty,
+            'standard_delivery_time' => (int) $productToSell->standard_delivery_time,
+            'express_delivery_time' => (int) $productToSell->express_delivery_time,
             'qty' => (int) $request->qty,
         ];
 
         return response()->json([
             'success' => true,
             'data' => $product,
-            'shop' => new ShopResource($product_variation->product->shop),
             'message' => translate('Product added to cart successfully'),
         ], 200);
     }
@@ -158,12 +103,6 @@ class CartController extends Controller
     {
         $collection = Collection::findOrFail($request->variation_id);
         $user_id = (auth('api')->check()) ? auth('api')->user()->id : null;
-
-        $cart = CollectionCart::updateOrCreate([
-            'user_id' => $user_id,
-            'temp_user_id' => $user_id,
-            'collection_id' => $collection->id
-        ], ['quantity' => DB::raw('quantity + ' . $request->qty)]);
 
         return response()->json([
             'success' => true,
@@ -181,79 +120,92 @@ class CartController extends Controller
 
         if ($isCollection == false) {
             $cart = Cart::find($request->cart_id);
-            if ($cart != null) {
-                if ((auth('api')->check() && auth('api')->user()->id == $cart->user_id) || ($request->has('temp_user_id') && $request->temp_user_id == $cart->temp_user_id)) {
 
-                    if ($request->type == 'plus' && ($cart->product->max_qty == 0 || $cart->quantity < $cart->product->max_qty)) {
-                        $cart->update([
-                            'quantity' => DB::raw('quantity + 1')
-                        ]);
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart updated')
-                        ]);
-                    } elseif ($request->type == 'plus' && $cart->quantity == $cart->product->max_qty) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => translate('Max quantity reached')
-                        ]);
-                    } elseif ($request->type == 'minus' && $cart->quantity > $cart->product->min_qty) {
-                        $cart->update([
-                            'quantity' => DB::raw('quantity - 1')
-                        ]);
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart updated')
-                        ]);
-                    } elseif ($request->type == 'minus' && $cart->quantity == $cart->product->min_qty) {
-                        $cart->delete();
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart deleted due to minimum quantity')
-                        ]);
-                    }
+            if (!$cart) {
+                return response()->json([
+                    'success' => false,
+                    'message' => translate('Cart not found'),
+                ]);
+            }
+
+            $isOwner = (auth('api')->check() && auth('api')->user()->id == $cart->user_id);
+            $isTempOwner = $request->has('temp_user_id') && $request->temp_user_id == $cart->temp_user_id;
+
+            if (!$isOwner && !$isTempOwner) {
+                return response()->json(null, 401);
+            }
+
+            $type = $request->type;
+            $validTypes = ['set', 'plus', 'minus'];
+
+            if (!in_array($type, $validTypes)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => translate('Invalid operation type'),
+                ]);
+            }
+
+            $minQty = $cart->product->min_qty ?? 1;
+            $maxQty = $cart->product->max_qty ?? 0;
+
+            if ($type === 'set') {
+                $newQty = intval($request->qty);
+
+                if ($newQty < $minQty || ($maxQty > 0 && $newQty > $maxQty)) {
                     return response()->json([
                         'success' => false,
-                        'message' => translate('Something went wrong')
+                        'message' => translate('Invalid quantity'),
                     ]);
-                } else {
-                    return response()->json(null, 401);
+                }
+
+                $cart->update(['quantity' => $newQty]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => translate('Cart updated'),
+                ]);
+            }
+
+            if ($type === 'plus') {
+                if ($maxQty > 0 && $cart->quantity >= $maxQty) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => translate('Max quantity reached'),
+                    ]);
+                }
+
+                $cart->update(['quantity' => DB::raw('quantity + 1')]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => translate('Cart updated'),
+                ]);
+            }
+
+            if ($type === 'minus') {
+                if ($cart->quantity > $minQty) {
+                    $cart->update(['quantity' => DB::raw('quantity - 1')]);
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => translate('Cart updated'),
+                    ]);
+                } elseif ($cart->quantity == $minQty) {
+                    $cart->delete();
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => translate('Cart deleted due to minimum quantity'),
+                    ]);
                 }
             }
+
+            return response()->json([
+                'success' => false,
+                'message' => translate('Something went wrong'),
+            ]);
         } else {
-            $cart = CollectionCart::find($request->cart_id);
-            if ($cart != null) {
-                if ((auth('api')->check() && auth('api')->user()->id == $cart->user_id) || ($request->has('temp_user_id') && $request->temp_user_id == $cart->temp_user_id)) {
-
-                    if ($request->type == 'plus') {
-                        $cart->update([
-                            'quantity' => DB::raw('quantity + 1')
-                        ]);
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart updated')
-                        ]);
-                    } elseif ($request->type == 'minus') {
-                        if ($cart->quantity == 1) {
-                            $cart->delete();
-                        } else {
-                            $cart->update([
-                                'quantity' => DB::raw('quantity - 1')
-                            ]);
-                        }
-                        return response()->json([
-                            'success' => true,
-                            'message' => translate('Cart updated')
-                        ]);
-                    }
-                    return response()->json([
-                        'success' => false,
-                        'message' => translate('Something went wrong')
-                    ]);
-                } else {
-                    return response()->json(null, 401);
-                }
-            }
+            //
         }
     }
 

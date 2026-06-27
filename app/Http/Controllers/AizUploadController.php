@@ -145,8 +145,8 @@ class AizUploadController extends Controller
 
             if (
                 env('DEMO_MODE') == 'On' &&
-                isset($type[$extension]) &&
-                $type[$extension] == 'archive'
+                isset($type[$upload->extension]) &&
+                $type[$upload->extension] == 'archive'
             ) {
                 return '{}';
             }

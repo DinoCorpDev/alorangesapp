@@ -6,6 +6,7 @@ use App\Http\Resources\ManualPaymentResource;
 use App\Models\Addon;
 use App\Models\Blog;
 use App\Models\Category;
+use App\Models\Collection;
 use App\Models\Country;
 use App\Models\Currency;
 use Illuminate\Http\Request;
@@ -30,6 +31,8 @@ class HomeController extends Controller
 
         $meta['meta_title'] = $meta['meta_title'] ? $meta['meta_title'] : config('app.name');
 
+        // dd(Route::currentRouteName());
+
         if (Route::currentRouteName() == 'product') {
             $product = Product::where('slug', $slug)->first();
             if ($product) {
@@ -43,6 +46,13 @@ class HomeController extends Controller
                 $meta['meta_title'] = $category->meta_title ? $category->meta_title : $meta['meta_title'];
                 $meta['meta_description'] = $category->meta_description ? $category->meta_description : $meta['meta_description'];
                 $meta['meta_image'] = $category->meta_image ? api_asset($category->meta_image) : $meta['meta_image'];
+            }
+        } elseif (Route::currentRouteName() == 'collection') {
+            $collection = Collection::where('slug', $slug)->first();
+            if ($collection) {
+                $meta['meta_title'] = $collection->meta_title ? $collection->meta_title : $meta['meta_title'];
+                $meta['meta_description'] = $collection->meta_description ? $collection->meta_description : $meta['meta_description'];
+                $meta['meta_image'] = $collection->meta_image ? api_asset($collection->meta_image) : $meta['meta_image'];
             }
         } elseif (Route::currentRouteName() == 'service') {
             $service = Service::where('slug', $slug)->first();

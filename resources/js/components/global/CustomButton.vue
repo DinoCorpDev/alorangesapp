@@ -12,13 +12,18 @@
         :ripple="false"
         :to="to"
         :width="width"
+        v-bind="$attrs"
+        v-on="$listeners"
         @click.stop="$emit('click')"
-        class="text-uppercase"
+        class="text-uppercase justify-content-center align-items-center flex-direction-column"
         depressed
     >
-        <i v-if="icon" :class="`las ${icon}`" class="mr-3"></i>
-        <template v-if="text">{{ text }}</template>
+        <i v-if="icon && iconPosition == 'left'" :class="`las ${icon} ${text ? 'mr-3' : ''}`"></i>
+        <template v-if="text">
+            <span :class="textClass">{{ text }}</span></template
+        >
         <slot v-else />
+        <i v-if="icon && iconPosition == 'right'" :class="`las ${icon} ${text ? 'ml-3' : ''}`"></i>
     </v-btn>
 </template>
 
@@ -29,6 +34,13 @@ export default {
         text: String,
         width: String,
         icon: {
+            type: String
+        },
+        iconPosition: {
+            type: String,
+            default: "left"
+        },
+        textClass: {
             type: String
         },
         dark: {
@@ -60,7 +72,7 @@ export default {
         },
         href: {
             type: String,
-            default: "#"
+            default: undefined
         },
         to: {
             type: [String, Object]
@@ -79,6 +91,7 @@ export default {
     font-weight: 600;
     letter-spacing: 0;
     transition: all 0.2s ease-in-out;
+    min-width: 10px !important;
 
     @media (max-width: 959px) {
         padding: 0 12px !important;
@@ -92,7 +105,7 @@ export default {
         content: unset;
     }
 
-    border-radius: 5px;
+    border-radius: 100px;
 
     i {
         font-size: 20px;
@@ -104,13 +117,20 @@ export default {
     }
 
     &.v-size--default {
-        height: 38px !important;
+        height: 38px;
     }
 
     &::v-deep {
         .v-btn__content {
             margin-top: 2px;
         }
+    }
+
+    &.text {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translate(-50%, -50%);
     }
 
     &.v-btn--plain {
@@ -162,7 +182,99 @@ export default {
             }
         }
     }
+    &.orange {
+        color: #fff;
+        background-color: #f58634 !important;
 
+        &:hover {
+            color: #000;
+            background-color: rgba(#fcd6ba, 0.8) !important;
+        }
+
+        &:focus,
+        &.v-btn--active {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+    }
+    &.orange-cart {
+        color: #fff;
+        background-color: #f58634 !important;
+        border: 1px solid #f58634;
+        border-radius: 5px !important;
+
+        &:focus,
+        &.v-btn--active {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+    }
+    &.orange-cart2 {
+        color: #fff;
+        background-color: #f58634 !important;
+        border: 1px solid #f58634;
+        border-radius: 5px !important;
+        font-size: 18px;
+        font-weight: 700;
+        &:focus,
+        &.v-btn--active {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+    }
+    &.orange-sidemenu {
+        color: #e58644;
+        background-color: #fbd6bb !important;
+
+        &:hover {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+
+        &:focus,
+        &.v-btn--active {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+    }
+    &.orange2 {
+        color: #000;
+        background-color: #fcd6ba !important;
+
+        &:hover {
+            color: #fff;
+            background-color: rgba(#f58634, 0.8) !important;
+        }
+
+        &:focus,
+        &.v-btn--active {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+    }
+    &.orange3 {
+        color: #f58634;
+        background-color: #fafcfb !important;
+        @media (min-width: 600px) {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+
+        &:hover {
+            color: #fcd6ba;
+            @media (min-width: 600px) {
+                color: #000;
+                background-color: rgba(#fcd6ba, 0.8) !important;
+            }
+            
+        }
+
+        &:focus,
+        &.v-btn--active {
+            color: #fff;
+            background-color: #f58634 !important;
+        }
+    }
     &.grey2 {
         color: #000000;
         background-color: #dfdfdf;
@@ -181,7 +293,7 @@ export default {
 
     &.black {
         color: #ffffff;
-        background-color: rgba(#000000, 0.5) !important;
+        background-color: #000000 !important;
 
         &:hover {
             background-color: rgba(#858585, 0.8) !important;
@@ -247,46 +359,70 @@ export default {
 
         &:focus,
         &.v-btn--active {
-            background-color: #161616;
+            background-color: #f58634;
+        }
+    }
+    &.nero3 {
+        color: #464b52;
+        background-color: transparent;
+        border: 1px solid #707780;
+        border-radius: 8px !important;
+        font-size: 18px;
+        font-weight: 700;
+        &:hover {
+            background-color: rgba(#fcd6ba, 0.8);
+            border: 1px solid rgba(#fcd6ba, 0.8);
+            color: white;
+        }
+
+        &:focus,
+        &.v-btn--active {
+            background-color: rgba(#fcd6ba, 0.8);
         }
     }
 
     &.white {
+        color: #f58634;
+        background-color: #fafcfb!important;
+        border: 1px solid #f58634 !important;    
+        &:hover {
+            color: #fcd6ba;
+            @media (min-width: 600px) {
+                background-color: #f58634 !important;
+                color: #ffffff;
+            }
+        }
+    }
+    &.white2 {
         color: #000;
-        background-color: #f5f5f5 !important;
+        background-color: #ffffff !important;
 
         &:hover {
             background-color: rgba(#161616, 0.8) !important;
-            color: #ffffff;
+            color: #f5f5f5;
         }
 
         &:focus,
         &.v-btn--active {
             background-color: #161616 !important;
-            color: #ffffff;
+            color: #f5f5f5;
+        }
+    }
+
+    &.white3 {
+        color: #000;
+        background-color: #ffffff !important;
+
+        &:hover {
+            background-color: white !important;
+            color: #f5f5f5;
+        }
+
+        &:focus,
+        &.v-btn--active {
+            background-color: #161616 !important;
+            color: #f5f5f5;
         }
     }
 }
-
-// .theme--light {
-//     &.v-btn {
-//         color: #000000;
-
-//         &.v-btn--has-bg {
-//             background-color: #dfdfdf;
-
-//             &:before {
-//                 background-color: #ffffff;
-//             }
-
-//             &.v-btn--disabled {
-//                 color: #000000 !important;
-
-//                 &.v-btn--has-bg {
-//                     background-color: #fafcfc !important;
-//                 }
-//             }
-//         }
-//     }
-// }
 </style>

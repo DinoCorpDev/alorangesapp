@@ -39,9 +39,9 @@ class Order extends Model
         return $this->hasMany(CommissionHistory::class);
     }
 
-    public function order_udpates()
+    public function orderUpdates()
     {
-        return $this->hasMany(OrderUpdate::class)->latest();
+        return $this->hasMany(OrderUpdate::class);
     }
 
     public function refundRequests()

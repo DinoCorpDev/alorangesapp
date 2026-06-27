@@ -10,88 +10,120 @@ use App\Models\Cart;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Company;
+use App\Models\CodigoCiiu;
+use App\Models\CodigoPostal;
+use App\Models\Subscriber;
 use App\Notifications\EmailVerificationNotification;
 use Str;
+use DB;
+use Log;
 
 class AuthController extends Controller
 {
     public function signup(Request $request)
     {
-        if (get_setting('customer_login_with') == 'email') {
-            $user = User::where('email', $request->email)->first();
-        } elseif (get_setting('customer_login_with') == 'phone') {
-            $user = User::where('phone', $request->phone)->first();
-        } else {
-            $user = User::where('phone', $request->phone)->orWhere('email', $request->email)->first();
-        }
+        DB::beginTransaction();
 
-        if ($user != null) {
-            return response()->json([
-                'success' => false,
-                'message' => translate('User already exists.'),
-                'data' => null
-            ]);
-        }
+        try {
 
-        if (!$request->has('phone') || !$request->has('email')) {
-            return response()->json([
-                'success' => false,
-                'message' => translate('Email & phone is required.'),
-                'data' => null
-            ], 200);
-        }
+            $input = json_decode($request->form);
 
-        $user = new User([
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'person_type' => $request->personType,
-            'first_name' => $request->firstName,
-            'second_name' => $request->secondName,
-            'first_lastname' => $request->firstLastname,
-            'second_lastname' => $request->secondLastname,
-            'document_type' => $request->documentType,
-            'document_number' => $request->documentNumber,
-            'company_name' => $request->companyName,
-            'company_type' => $request->companyType,
-            'company_document_type' => $request->companyDocumentType,
-            'company_document_number' => $request->companyDocumentNumber,
-            'phone' => $request->phone,
-            'policies_and_cookies_consent' => $request->policiesAndCookiesConsent,
-            'offers_consent' => $request->offersConsent,
-            'verification_code' => rand(100000, 999999)
-        ]);
-
-        $user->save();
-
-        if ($request->has('temp_user_id') && $request->temp_user_id != null) {
-            Cart::where('temp_user_id', $request->temp_user_id)->update(
-                [
-                    'user_id' => $user->id,
-                    'temp_user_id' => null
-                ]
-            );
-        }
-
-        if (get_setting('customer_otp_with') != 'disabled') {
-            if (get_setting('customer_login_with') == 'email' || (get_setting('customer_login_with') == 'email_phone' && get_setting('customer_otp_with') == 'email')) {
-                $user->notify(new EmailVerificationNotification());
+            if (!$input) {
                 return response()->json([
-                    'success' => true,
-                    'verified' => false,
-                    'message' => translate('A verification code has been sent to your email.')
-                ], 200);
-            } else {
-                (new SmsServices)->phoneVerificationSms($user->phone, $user->verification_code);
-                return response()->json([
-                    'success' => true,
-                    'verified' => false,
-                    'message' => translate('A verification code has been sent to your phone.')
-                ], 200);
+                    'success' => false,
+                    'message' => 'Formato de datos inválido.',
+                    'data' => null
+                ], 400);
             }
-        }
 
-        $tokenResult = $user->createToken('Personal Access Token');
-        return $this->loginSuccess($tokenResult, $user);
+            if (empty($input->email) || empty($input->phone) || empty($input->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Correo, celular y contraseña son requeridos.',
+                    'data' => null
+                ], 400);
+            }
+
+            $user = User::where('email', $input->email)->first();
+
+            if ($user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => translate('El usuario ya existe.'),
+                    'data' => null
+                ], 409);
+            }
+
+            $path_docs = public_path('/docs/');
+            $path_camara = public_path('/camara/');
+            $path_ruts = public_path('/ruts/');
+
+            $docfile = '';
+            $camarafile = '';
+            $rutfile = '';
+
+            // SUBIDA ARCHIVOS
+            if ($request->hasFile('filecamara')) {
+
+                $fileCamara = $request->file('filecamara');
+
+                if (!$fileCamara->isValid()) {
+                    throw new \Exception('Archivo cámara inválido.');
+                }
+
+                $fileNameToStore = time() . '_' . $fileCamara->getClientOriginalName();
+
+                $fileCamara->move($path_camara, $fileNameToStore);
+
+                $camarafile = $fileNameToStore;
+            }
+
+            // USER
+            $user = new User([
+                'email' => $input->email,
+                'password' => Hash::make($input->password),
+                'phone' => $input->phone,
+                'verification_code' => rand(100000, 999999),
+                'document_number' => $input->documentNumber,
+                'document_type' => $input->documentType,
+                'user_type' => 'customer',
+            ]);
+
+            $user->save();
+
+            // COMPANY
+            if (($input->personType ?? '') == 'Juridical') {
+
+                $company = new Company([
+                    'user_id' => $user->id,
+                    'company_razon' => $input->companyRazon ?? null,
+                ]);
+
+                $company->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario registrado correctamente.',
+                'user' => $user
+            ]);
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            Log::error('Error signup: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error durante el registro.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
     public function login(Request $request)
@@ -113,7 +145,7 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => translate('Invalid login information')
+                'message' => translate('Credenciales Invalidas')
             ], 200);
         }
 
@@ -123,7 +155,7 @@ class AuthController extends Controller
             return response()->json(
                 [
                     'success' => false,
-                    'message' => translate('You are banned!'),
+                    'message' => translate('Estas baneado!'),
                 ],
                 200,
             );
@@ -147,7 +179,7 @@ class AuthController extends Controller
                         'success' => true,
                         'verified' => false,
                         'email_verified' => false,
-                        'message' => translate('Please verify your account')
+                        'message' => translate('Por favor verifica tu cuenta')
                     ], 200);
                 } elseif ((get_setting('customer_login_with') == 'phone' || (get_setting('customer_login_with') == 'email_phone' && get_setting('customer_otp_with') == 'phone')) && $user->phone_verified_at == null) {
 
@@ -156,7 +188,7 @@ class AuthController extends Controller
                         'success' => true,
                         'verified' => false,
                         'phone_verified' => false,
-                        'message' => translate('Please verify your account')
+                        'message' => translate('Por favor verifica tu cuenta')
                     ], 200);
                 }
             }
@@ -185,13 +217,13 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => translate('No user found with this email address.')
+                'message' => translate('Usuario no encontrado con este correo.')
             ], 200);
         }
         if ($user->verification_code != $request->code) {
             return response()->json([
                 'success' => false,
-                'message' => translate('Code does not match.')
+                'message' => translate('El codigo no coincide con nuestros registros.')
             ], 200);
         } else {
 
@@ -221,7 +253,7 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => translate('No user found with this email address.')
+                'message' => translate('Usuario no encontrado con este correo.')
             ], 200);
         }
 
@@ -233,14 +265,14 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'verified' => false,
-                'message' => translate('A verification code has been sent to your email.')
+                'message' => translate('Codigo de Verificación enviado al correo.')
             ], 200);
         } else {
             (new SmsServices)->phoneVerificationSms($user->phone, $user->verification_code);
             return response()->json([
                 'success' => true,
                 'verified' => false,
-                'message' => translate('A verification code has been sent to your phone.')
+                'message' => translate('Codigo de verificación enviado al celular.')
             ], 200);
         }
     }
@@ -256,7 +288,7 @@ class AuthController extends Controller
         $request->user()->token()->delete();
 
         return response()->json([
-            'message' => translate('Successfully logged out')
+            'message' => translate('Sesión cerrada')
         ]);
     }
 
@@ -282,7 +314,7 @@ class AuthController extends Controller
                 'phone' => $user->phone,
                 'avatar' => api_asset($user->avatar),
             ],
-            'message' => translate('Successfully logged in'),
+            'message' => translate('Inicio de sesión correcto'),
             'followed_shops' => $user->followed_shops->pluck('id')->toArray()
         ]);
     }
@@ -298,7 +330,66 @@ class AuthController extends Controller
 
         return response()->json([
             'result' => true,
-            'message' => translate('Cart updated'),
+            'message' => translate('Carrito actualizado'),
+        ]);
+    }
+
+    public function verifyData(Request $request)
+    {
+        $user = User::where('first_name', $request->first_name)->where('first_lastname', $request->first_lastname)->where('email', $request->email)->get();
+
+        if ($user->count() == 0) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Error!'
+            ]);
+        } else {
+            return response()->json([
+                'result' => true,
+                'message' => 'Exitoso!'
+            ]);
+        }
+    }
+
+    public function get_all_ciiu()
+    {
+        $array = array();
+        $codigo = CodigoCiiu::all();
+
+        foreach ($codigo as $cod) {
+            $arr = ["text" => $cod->codigo, "value" => $cod->codigo];
+            array_push($array, $arr);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $array
+        ]);
+    }
+
+    public function get_all_codigo_postal()
+    {
+        $array = array();
+        $codigo = CodigoPostal::all();
+
+        foreach ($codigo as $cod) {
+            $arr = ["text" => $cod->codigo, "value" => $cod->codigo];
+            array_push($array, $arr);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $array
+        ]);
+    }
+
+    public function get_all_subscriber()
+    {
+        $subscriber = Subscriber::all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $subscriber
         ]);
     }
 }

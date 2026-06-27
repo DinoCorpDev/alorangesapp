@@ -1,312 +1,179 @@
 <template>
-    <v-container>
-        <v-row class="main mb-6" align="center" tag="main">
-            <v-col cols="12" md="5">
-                <h1 class="home-main-title mb-6 mb-sm-8">
-                    iDOVELA <br />
-                    Para un mundo <br />
-                    más habitable
+    <v-container style="background-color: white">
+        <v-row class="main mx-2 my-2 mx-sm-6 bg-orange-ligth border-style-banner" align="center" tag="main">
+            <v-col class="pa-6 pa-sm-8" cols="12" sm="7" md="7">
+                <h1 class="home-main-title mb-8 mb-sm-8">
+                    ¡Tu proveedor de suministros de papelería, aseo, cafetería, cartonería, tecnología, seguridad
+                    industrial y mucho mas para tu empresas!
                 </h1>
-                <p class="home-main-description mb-6 mb-sm-10">
-                    Mejores espacios conducen a modelos más eficaces de vida. <br />
-                    Las habitats eficientes conducen a una implementación más rápida. Genere valor en su vida con
-                    mejores espacios habitables.
-                </p>
-                <v-row>
-                    <v-col cols="8" sm="6" md="8">
-                        <CustomButton block outlined text="Comunicarse con ventas" />
-                    </v-col>
-                    <v-col cols="4" offset-sm="3" sm="3" offset-md="0" md="8">
-                        <SelectCustom
-                            :clearable="false"
-                            :items="allLanguages"
-                            @input="agree"
-                            itemText="name"
-                            itemValue="code"
-                            placeholder="Seleccionar país"
-                            v-model="selectedCode"
-                        />
-                    </v-col>
-                </v-row>
+                <!-- <h1 class="home-main-title mb-6 mb-sm-8">¡Todo en un solo lugar, rápido, fácil y seguro!</h1> -->
+                <!-- <p class="home-main-description mb-6 d-none d-sm-block">
+                    Tu proveedor de suministros favoritos de <b>P</b>apelería, <b>A</b>seo, <b>C</b>afetería, <b>B</b>otiquín, <b>T</b>ecnología,
+                    <b>C</b>artonería, <b>S</b>eguridad industrial y mucho más está a solo un clic de distancia. </br>Estamos aquí para
+                        hacer tu vida más fácil y divertida.</br><b>¡Explora y disfruta!</b>
+                </p> -->
+                <SearchInput class="search-menu" :showInput="true" :placeholder="'Escribe lo que buscas'" />
             </v-col>
-            <v-col cols="12" md="7">
-                <Carousel class="home-main-carousel" :slides="sliderItems" />
+            <v-col class="pa-0 d-flex" cols="12" sm="5" md="5">
+                <img class="hero-banner-img" src="/public/assets/img/bannerhomeimg-removebg-preview3.png" style="height: auto" />
             </v-col>
         </v-row>
 
         <v-row tag="section" class="preambulo mb-6">
-            <v-col cols="12">
+            <v-col cols="12" class="px-0">
                 <div class="rounded-section px-5 py-8">
-                    <div class="mb-3">
-                        <span class="subtitle1 text-uppercase font-weight-bold"> Preámbulo </span>
-                    </div>
-                    <h2 class="text-uppercase mb-3 mb-md-0">Titulo</h2>
-                    <v-divider class="mb-5" />
-                    <p class="body1 mb-8">
-                        Incluye Lorem Ipsum is simply dummy text of the printing • Lorem Ipsum has been the industry's •
-                        Incluye Lorem Ipsum is simply dummy text of the printing • Lorem Ipsum has been the industry's •
-                        Incluye Lorem Ipsum is simply dummy text. Incluye Lorem Ipsum is simply dummy text of the
-                        printing • Lorem Ipsum has beenthe industry's • Incluye Lorem Ipsum is simply dummy text of the
-                        printing • Lorem Ipsum has been the industry's • Incluye Lorem Ipsum is simply dummy text.
-                    </p>
                     <v-row justify="center">
-                        <v-col cols="12" lg="10">
-                            <v-img
-                                src="/public/assets/img/home/curved-arrows-top-xs.svg"
-                                contain
-                                width="80%"
-                                class="mb-5 mx-auto d-sm-none"
-                            />
-                            <v-img
-                                src="/public/assets/img/home/curved-arrows-top-md.svg"
-                                contain
-                                width="80%"
-                                class="mb-5 mx-auto d-none d-sm-block"
-                            />
+                        <v-col cols="12" lg="12" class="px-0 px-sm-3">
                             <v-row
                                 :no-gutters="
                                     $vuetify.breakpoint.name == 'md' || $vuetify.breakpoint.name == 'lg' ? false : true
                                 "
                             >
-                                <v-col>
-                                    <PolygonElement
-                                        text="Esta Allí"
-                                        icon="/public/assets/img/home/icon-be-there.svg"
-                                        href="#be-there"
+                                <v-col class="center-flex" cols="6" sm="3">
+                                    <v-img
+                                        src="/public/assets/img/Group13.png"
+                                        style="width: 60%; height: auto"
+                                        contain
+                                        class="mb-5"
                                     />
+                                    <h3 style="text-align: center">Domicilios gratis</h3>
+                                    <p class="preambulo-text" style="text-align: center">En compras mínimas</p>
                                 </v-col>
-                                <v-col>
-                                    <PolygonElement
-                                        text="Forma"
-                                        icon="/public/assets/img/home/icon-shape.svg"
-                                        href="#shape"
+                                <v-col class="center-flex" cols="6" sm="3">
+                                    <v-img
+                                        src="/public/assets/img/Group14.png"
+                                        style="width: 40%; height: auto"
+                                        contain
+                                        class="mb-5"
                                     />
+                                    <h3>Apoyo 24/7</h3>
+                                    <p class="preambulo-text">Servicio técnico</p>
                                 </v-col>
-                                <v-col>
-                                    <PolygonElement
-                                        text="Comprobación"
-                                        icon="/public/assets/img/home/icon-validation.svg"
-                                        href="#validation"
+                                <v-col class="center-flex" cols="6" sm="3">
+                                    <v-img
+                                        src="/public/assets/img/Group12.png"
+                                        style="width: 40%; height: auto"
+                                        contain
+                                        class="mb-5"
                                     />
+                                    <h3>Pago seguro</h3>
+                                    <p class="preambulo-text">Múltiples bancos</p>
                                 </v-col>
-                                <v-col>
-                                    <PolygonElement
-                                        text="Tiempo"
-                                        icon="/public/assets/img/home/icon-time.svg"
-                                        href="#time"
+                                <v-col class="center-flex" cols="6" sm="3">
+                                    <v-img
+                                        src="/public/assets/img/Refresh.png"
+                                        style="width: 40%; height: auto"
+                                        contain
+                                        class="mb-5"
                                     />
-                                </v-col>
-                                <v-col>
-                                    <PolygonElement
-                                        text="Listo Para Usar"
-                                        icon="/public/assets/img/home/icon-ready-for-use.svg"
-                                        href="#ready-for-use"
-                                    />
+                                    <h3>Devoluciones</h3>
+                                    <p class="preambulo-text" style="text-align: center">Cambios de productos</p>
                                 </v-col>
                             </v-row>
-                            <v-img
-                                src="/public/assets/img/home/curved-arrows-bottom-xs.svg"
-                                contain
-                                width="80%"
-                                class="mt-5 mx-auto d-sm-none"
-                            />
-                            <v-img
-                                src="/public/assets/img/home/curved-arrows-bottom-md.svg"
-                                contain
-                                width="80%"
-                                class="mt-5 mx-auto d-none d-sm-block"
-                            />
                         </v-col>
                     </v-row>
                 </div>
             </v-col>
         </v-row>
+        <v-row class="center-items ma-2 ma-sm-6">
+            <v-col col="12" sm="12" md="12" class="bg-green-ligth border-style-banner">
+                <CarouselSpaces
+                    title="Categorias"
+                    img="/public/assets/img/home/icon-be-there.svg"
+                    :spaces="itemsArray"
+                />
+            </v-col>
+        </v-row>
 
-        <v-row class="mb-6">
-            <v-col cols="12">
+        <v-row class="mb-6 mt-5">
+            <v-col cols="12" class="d-flex justify-center">
                 <PresentationBanner
                     id="be-there"
                     icon="/public/assets/img/home/icon-be-there.svg"
                     preamble="Escuchar, Comprender y Percibir al Usuario"
-                    title="Estar allí"
-                    image="/public/assets/img/home/img-be-there.png"
+                    title="¡Facilitamos tus procesos con un toque de tecnología!"
+                    image="/public/assets/img/banner2home.png"
+                    style="max-width: 99%"
                 >
                     <template v-slot:description>
-                        Identificamos las necesidades de las personas para mejorar su experiencia del entorno.
-                        Estableciendo la conexión entre el espacio vital y la persona que lo habita, teniendo en cuenta:
-                        la representación antropométrica, la adaptación ergonómica, la evaluación de la propiocepción y
-                        la estimulación espacial.
+                        En <b>Aloranges,</b> nos dedicamos a hacerte la vida más fácil. Somos expertos en satisfacer las
+                        necesidades de tu empresa con
+                        <b>suministros de papelería, cartonería, cafetería, aseo, tecnología y botiquín y mucho mas.</b>
+                        ¡Y ahora, gracias a nuestra app, puedes adquirir todo lo que necesitas con solo un clic! Nos
+                        adaptamos a la nueva era digital para que tus compras sean rápidas y sencillas. ¡Únete a la
+                        diversión y simplifica tu día a día con Aloranges!<br />Somos tu proveedor de suministros
+                        favorito, siempre estamos a solo un clic de distancia.<br />Estamos aquí para hacer tu vida más
+                        fácil y divertida.<br /><b>¡Explora y disfruta!</b>
                     </template>
                 </PresentationBanner>
             </v-col>
         </v-row>
 
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <BannerCategoryProduct
-                    title="Titulo"
-                    descripcion="Ad nulla magna labore dolore cupidatat sit. Officia in commodo excepteur dolore consequat tempor consequat adipisicing id qui ullamco eu tempor. Quis enim velit non mollit deserunt. Et non esse do occaecat cupidatat. Non adipisicing ullamco est sit velit laborum fugiat et occaecat ipsum ut et. Amet aliqua laboris cillum adipisicing dolor velit ad sint nisi aute culpa."
-                    idItem="100"
-                    variant="#e9e9e9"
-                    variant-text="black--text"
-                    img="/public/assets/img/home/opa.png"
-                />
-            </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <PresentationBanner
-                    id="shape"
-                    icon="/public/assets/img/home/icon-shape.svg"
-                    preamble="Planificar y diseñar"
-                    title="Forma"
-                    orientation="right"
-                    image="/public/assets/img/home/img-shape.png"
-                >
-                    <template v-slot:description>
-                        El valor añadido se consigue comprendiendo los gustos subjetivos de las personas que
-                        determinarán la función de la forma, lo que conducirá a la planificación de modelos más
-                        eficientes que permitan el ser allí, resultando en una mejor experiencia.
-                    </template>
-                </PresentationBanner>
-            </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <CarouselActions :products="productsSeeder" title="Integración" />
-            </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <PresentationBanner
-                    id="validation"
-                    icon="/public/assets/img/home/icon-validation.svg"
-                    preamble="Prueba, Validar y Depurar Productos"
-                    title="Comprobación"
-                    image="/public/assets/img/home/img-validation.png"
-                >
-                    <template v-slot:description>
-                        Al evaluar eficazmente los prototipos con respecto a los requisitos del usuario, se revelan las
-                        deficiencias estructurales del diseño, lo que garantiza la corrección continua y, por tanto, el
-                        cumplimiento de las normas de calidad, lo que a su vez asegura la entrega satisfactoria de un
-                        espacio habitable.
-                    </template>
-                </PresentationBanner>
-            </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <PresentationBanner
-                    id="time"
-                    icon="/public/assets/img/home/icon-time.svg"
-                    preamble="Obsolescencia Programada, Material y Atemporalidad"
-                    title="Tiempo"
-                    orientation="right"
-                    image="/public/assets/img/home/img-time.png"
-                >
-                    <template v-slot:description>
-                        Nos esforzamos por interiorizar una sólida comprensión y extracción de los materiales que
-                        componen un espacio vital para garantizar su construcción, uso y mantenimiento a lo largo de su
-                        vida. Nos comprometemos a que sea lo más fácil de usar y respetuoso con el medio ambiente
-                        posible.
-                    </template>
-                </PresentationBanner>
-            </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <BannerCategoryProduct
-                    title="Titulo"
-                    descripcion="Ad nulla magna labore dolore cupidatat sit. Officia in commodo excepteur dolore consequat tempor consequat adipisicing id qui ullamco eu tempor. Quis enim velit non mollit deserunt. Et non esse do occaecat cupidatat. Non adipisicing ullamco est sit velit laborum fugiat et occaecat ipsum ut et. Amet aliqua laboris cillum adipisicing dolor velit ad sint nisi aute culpa."
-                    idItem="100"
-                />
-            </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <PresentationBanner
-                    id="ready-for-use"
-                    icon="/public/assets/img/home/icon-ready-for-use.svg"
-                    preamble="Ejecutar e Implementar la Función"
-                    title="Listo para usar"
-                    image="/public/assets/img/home/img-ready-for-use.png"
-                >
-                    <template v-slot:description>
-                        Un espacio habitable finalizado es el conjunto de objetos que acompañan al usuario en el
-                        cumplimiento de una función determinada elaborada con cuidado al detalle el entorno es
-                        transformando en una experiencia reconfortante.
-                    </template>
-                </PresentationBanner>
-            </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <BannerCategoryProduct
-                    title="Titulo"
-                    descripcion="Ad nulla magna labore dolore cupidatat sit. Officia in commodo excepteur dolore consequat tempor consequat adipisicing id qui ullamco eu tempor. Quis enim velit non mollit deserunt. Et non esse do occaecat cupidatat. Non adipisicing ullamco est sit velit laborum fugiat et occaecat ipsum ut et. Amet aliqua laboris cillum adipisicing dolor velit ad sint nisi aute culpa."
-                    idItem="100"
-                />
-            </v-col>
-        </v-row>
-
-        <v-row tag="section" class="home-portfolio mb-6">
-            <v-col>
-                <h5 class="mb-5">Portafolio</h5>
+        <div class="wrapper-app-banner mb-6 center-items" style="display: flex; justify-content: center">
+            <div style="width: 95%; border-radius: 24px; background-color: #f4f9ec">
                 <v-row>
-                    <v-col cols="12" sm="6" lg="3">
-                        <div class="home-portfolio-wrap">
-                            <h2 class="home-portfolio-title">Explora nuestros productos y Servicios</h2>
+                    <v-col cols="12" class="d-flex d-sm-none justify-start">
+                        <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-start align-start">
+                            <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
                         </div>
                     </v-col>
-                    <v-col cols="12" sm="6" lg="3">
-                        <PortfolioCard
-                            title="Diseño de Espacios"
-                            img="/public/assets/img/home/portfolio-design-img.png"
-                            icon="/public/assets/img/home/portfolio-design-icon.svg"
-                            description="Proyecta tus espacias a la mediada que deseas."
-                            :to="{ name: 'Shop' }"
-                        />
+                    <v-col cols="12" sm="6" class="d-flex align-items-center" style="justify-content: center">
+                        <img class="imgsize-cel" src="/public/assets/img/download-img.svg" />
                     </v-col>
-                    <v-col cols="12" sm="6" lg="3">
-                        <PortfolioCard
-                            title="Servicios"
-                            img="/public/assets/img/home/portfolio-services-img.png"
-                            icon="/public/assets/img/home/portfolio-services-icon.svg"
-                            description="Contrata a profesionales para la instalación y recalibración de tus espacios habitables."
-                            :to="{ name: 'Shop' }"
-                        />
+                    <v-col cols="12" sm="6" class="justify-center d-none d-sm-flex">
+                        <div class="ml-7 mt-7 mt-sm-0 d-flex flex-column justify-center align-start">
+                            <h2 class="banner-title font-weight-bold mb-3">Descarga Nuestra <br />App Móvil</h2>
+                            <div class="Wrapper-AppStore">
+                                <a
+                                    href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share"
+                                    target="_blank"
+                                >
+                                    <img class="imgsize-btn-dwn" src="public/assets/img/Grupo12233.png" />
+                                </a>
+                                <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank">
+                                    <img class="imgsize-btn-dwn ml-5" src="public/assets/img/Grupo12234.png" />
+                                </a>
+                            </div>
+                        </div>
                     </v-col>
-                    <v-col cols="12" sm="6" lg="3">
-                        <PortfolioCard
-                            title="ESP"
-                            img="/public/assets/img/home/portfolio-esp-img.png"
-                            icon="/public/assets/img/home/portfolio-esp-icon.svg"
-                            description="Explora un catalogo de marcas aliadas y descubre el electrodoméstico que buscas para dar funcionalidad a tu hogar."
-                            :to="{ name: 'Shop' }"
-                        />
+                    <v-col cols="12" class="d-flex d-sm-none justify-center align-center">
+                        <div class="Wrapper-AppStore-responsive mb-7 mb-sm-0">
+                            <v-row>
+                                <v-col cols="6" class="pr-1 pl-10 pb-0">
+                                    <a
+                                        href="https://play.google.com/store/apps/details?id=com.aloranges&pcampaignid=web_share"
+                                        target="_blank"
+                                    >
+                                        <img
+                                            class="imgsize-btn-dwn"
+                                            style="width: 100%; height: auto"
+                                            src="public/assets/img/Grupo12233.png"
+                                        />
+                                    </a>
+                                </v-col>
+                                <v-col cols="6" class="pl-1 pr-10 pb-0">
+                                    <a href="https://apps.apple.com/co/app/aloranges/id6740248063" target="_blank">
+                                        <img
+                                            class="imgsize-btn-dwn"
+                                            style="width: 100%; height: auto"
+                                            src="public/assets/img/Grupo12234.png"
+                                        />
+                                    </a>
+                                </v-col>
+                            </v-row>
+                        </div>
                     </v-col>
                 </v-row>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
 
-        <v-row class="mb-6">
-            <v-col cols="12">
-                <v-banner color="#242526" class="rounded temp">
-                    <div class="div-map">
-                        <div class="map">
-                            <v-img class="img-map" src="../../public/assets/img/mapa.png"></v-img>
-                        </div>
-                    </div>
-                </v-banner>
+        <v-row>
+            <v-col col="12" sm="12" md="12" class="py-14">
+                <CarouselBrands></CarouselBrands>
             </v-col>
         </v-row>
+        <RecuperarPassCodigo v-model="showRecuperarPass" :email="this.$route.query.email" />
+        <VerifyAccount v-model="showVerifyAccount" />
     </v-container>
 </template>
 
@@ -323,6 +190,12 @@ import PolygonElement from "../components/global/PolygonElement.vue";
 import PortfolioCard from "../components/global/PortfolioCard.vue";
 import PresentationBanner from "../components/global/PresentationBanner.vue";
 import SelectCustom from "../components/global/SelectCustom.vue";
+import CustomInput from "../components/global/CustomInput.vue";
+import CarouselSpaces from "../components/global/CarouselSpaces.vue";
+import CarouselBrands from "../components/global/CarouselBrands.vue";
+import RecuperarPassCodigo from "../components/auth/RecuperarPassCodigo.vue";
+import VerifyAccount from "../components/auth/VerifyAccount.vue";
+import SearchInput from "../components/global/SearchInput.vue";
 
 export default {
     components: {
@@ -334,10 +207,20 @@ export default {
         PolygonElement,
         PortfolioCard,
         PresentationBanner,
-        SelectCustom
+        SelectCustom,
+        CustomInput,
+        CarouselSpaces,
+        CarouselBrands,
+        RecuperarPassCodigo,
+        VerifyAccount,
+        SearchInput
     },
     data() {
         return {
+            showRecuperarPass: false,
+            showVerifyAccount: false,
+            itemsArray: [
+            ],
             selectedCode: null,
             sliderSeeder,
             sliderItems: [
@@ -371,12 +254,29 @@ export default {
     computed: {
         ...mapGetters("app", ["userLanguageObj", "allLanguages"])
     },
+    created() {
+        if (this.$route.query.modal === "Password") {
+            this.showRecuperarPass = true;
+        }
+        if (
+            this.$route.query.modal == "VerifyAccount" ||
+            this.$route.query.modal == "verifyaccount" ||
+            this.$route.query.modal == "VerifyAccount"
+        ) {
+            this.showVerifyAccount = true;
+        }
+    },
     mounted() {
+        this.getCategories();
         this.$vuetify.theme.dark = true;
 
         this.selectedCode = this.userLanguageObj.code;
 
         this.scrollToCenter();
+        this.updateBreadcrumb();
+        // if(this.$route.query.modal == 'Password'){
+        //     this.showRecuperarPass = true;
+        // }
     },
     methods: {
         ...mapActions("app", ["setLanguage"]),
@@ -385,14 +285,100 @@ export default {
                 this.setLanguage(this.selectedCode);
                 window.location.reload();
             }
+        },
+        updateBreadcrumb() {
+            const newItems = [{ text: "disabled", href: "/", disabled: true }];
+            this.$store.dispatch("breadcrumb/setBreadcrumbItems", newItems);
+        },
+        getCategories() {
+            this.call_api("get", "categories-home").then((res) => {
+                if (res.data.success) {
+                    this.itemsArray = res.data.data.map((category) => {
+                        return {
+                            title: category.name,
+                            img: category.meta_image,
+                            routeName: "Shop" + this.formatearTexto(category.name)
+                        };
+                    });
+                }
+            }).catch((err) => {
+                console.log(err);
+            });
+        },
+        formatearTexto(texto) {
+            return texto
+                .normalize('NFD') // separa las tildes
+                .replace(/[\u0300-\u036f]/g, '') // elimina tildes
+                .replace(/[^a-zA-Z0-9\s]/g, '') // elimina caracteres especiales
+                .trim()
+                .split(/\s+/)
+                .map((palabra, index) => {
+                    if (index === 0) {
+                        return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+                    }
+
+                    return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
+                })
+                .join('');
         }
     }
 };
 </script>
 
 <style lang="scss">
-.v-list-item {
-    // text-transform: uppercase;
+.search-menu {
+    width: 100%;
+    max-width: 100% !important;
+}
+.main {
+    padding: 24px 0;
+}
+
+@media (max-width: 700px) {
+    .main {
+        padding: 16px 8px;
+    }
+    .main .pa-6 {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}
+
+.center-items {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+}
+.wrapper-app-banner {
+    padding: 24px 0;
+    width: 100%;
+    background-position: center;
+    background-size: contain;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.hero-banner-img {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+}
+.imgsize-cel {
+    width: 95%;
+    max-width: 420px;
+    height: auto;
+}
+.imgsize-btn-dwn {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+}
+.title-banner-dwn {
+    font-size: 25px;
+    font-weight: 700;
 }
 </style>
 
@@ -400,9 +386,29 @@ export default {
 .home {
     &-main {
         &-description {
-            font-size: var(--font-size-h5);
+            color: black;
+            font-weight: 400;
+            font-size: 18px;
+            line-height: 24px;
+            text-align: center;
+            @media (min-width: 600px) {
+                font-size: 28px;
+                line-height: 34px;
+                text-align: left;
+            }
         }
-
+        &-title {
+            font-size: 46px;
+            line-height: 54px;
+            font-weight: 600;
+            text-align: center;
+            max-width: 100%;
+            @media (min-width: 600px) {
+                line-height: 62px;
+                font-size: 58px;
+                text-align: left;
+            }
+        }
         &-carousel {
             height: 80vh !important;
             max-height: 786px;
@@ -437,15 +443,80 @@ export default {
 .temp {
     padding: 0 15%;
 }
-
+h3 {
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    @media (min-width: 600px) {
+        font-size: 35px;
+        font-weight: 500;
+        text-align: left;
+    }
+}
+.preambulo-text {
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    @media (min-width: 600px) {
+        font-size: 22px;
+        text-align: left;
+    }
+}
 .theme--dark {
     .preambulo .rounded-section {
         background-color: #18191a;
     }
 }
 
+.imgsize-cel {
+    width: 95%;
+    max-width: 400px;
+    height: auto;
+}
+
+.Wrapper-AppStore {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.Wrapper-AppStore-responsive {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.banner-title {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    @media (min-width: 600px) {
+        font-size: 58px;
+        text-align: left;
+    }
+}
+
 .v-select {
     text-transform: uppercase;
+}
+
+.border-style-banner {
+    border-radius: 20px;
+}
+
+.bg-orange {
+    background: #f58634;
+}
+.bg-orange-ligth {
+    background: #f5cea6;
+}
+.bg-green-ligth {
+    background: #f3f9ec;
+}
+.center-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 @media (min-width: 835px) {
@@ -477,6 +548,26 @@ export default {
         border: 1px solid #59595a;
         border-radius: 50%;
         padding: 20% 0;
+    }
+}
+.Wrapper-AppStore {
+    display: flex;
+}
+.Wrapper-AppStore-responsive {
+    display: flex;
+    flex-direction: column;
+}
+.wrapper-dwn-app {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.banner-title {
+    // font-family: 'Montserrat', Courier, monospace;
+    font-size: 35px;
+    @media (min-width: 600px) {
+        font-size: 58px;
     }
 }
 </style>

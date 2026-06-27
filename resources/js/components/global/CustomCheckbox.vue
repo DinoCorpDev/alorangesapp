@@ -1,5 +1,9 @@
 <template>
-    <div class="custom-checkbox" :class="{ 'error--text': error }" @click="toggleCheckbox">
+    <div
+        class="custom-checkbox"
+        :class="{ 'error--text': error, bordered: bordered, 'bordered-active': isRadioChecked && bordered }"
+        @click="toggleCheckbox"
+    >
         <div class="custom-checkbox-input">
             <input
                 :id="id"
@@ -54,6 +58,10 @@ export default {
             type: String,
             default: "checkbox"
         },
+        bordered: {
+            type: Boolean,
+            default: false
+        },
         name: {
             type: String,
             default: undefined
@@ -71,6 +79,9 @@ export default {
             set(value) {
                 this.$emit("input", value);
             }
+        },
+        isRadioChecked() {
+            return this.isChecked === this.inputValue;
         }
     },
     methods: {
@@ -137,6 +148,21 @@ export default {
         left: 0;
     }
 
+    &.bordered {
+        padding-left: 40px;
+        // border: 1px solid;
+        border-radius: 5px;
+
+        &-checkmark {
+            margin-left: 5px;
+        }
+
+        &-active {
+            color: black;
+            border-color: black;
+        }
+    }
+
     &-checkmark {
         display: inline-flex;
         align-items: center;
@@ -144,7 +170,7 @@ export default {
         height: 24px;
         width: 24px;
         border-radius: 5px;
-        border: 1px solid #000000;
+        border: 1px solid #7e8693;
         background-color: #f5f5f5;
     }
 
@@ -164,7 +190,8 @@ export default {
 
         &:is(:checked) {
             ~ .custom-checkbox-checkmark {
-                background-color: #000000;
+                background-color: #f58634;
+                border-color: #f58634;
             }
         }
 
@@ -181,6 +208,7 @@ export default {
         font-family: "Roboto", sans-serif;
         font-size: var(--font-size-body1);
         cursor: pointer;
+        color: black;
 
         a {
             text-decoration: underline;

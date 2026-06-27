@@ -26,6 +26,7 @@ class OrderResource extends JsonResource
             'manual_payment_data' => $this->manual_payment_data ? json_decode($this->manual_payment_data) : null,
             'delivery_type' => $this->delivery_type,
             'delivery_status' => $this->delivery_status,
+            'metodo_pago_contraentrega' => $this->metodo_pago_contraentrega,
             'payment_status' => $this->payment_status,
             'coupon_discount' => (float) $this->coupon_discount,
             'shipping_cost' => (float) $this->shipping_cost,
@@ -39,6 +40,7 @@ class OrderResource extends JsonResource
             'courier_name' => $this->courier_name,
             'tracking_number' => $this->tracking_number,
             'tracking_url' => $this->tracking_url,
+            'order_updates' => $this->order_updates
         ];
     }
 

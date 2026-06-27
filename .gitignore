@@ -1,7 +1,4 @@
 /node_modules
-/public/hot
-/public/storage
-/public/uploads
 /storage/*.key
 /vendor
 .env
@@ -13,14 +10,13 @@ auth.json
 npm-debug.log
 yarn-error.log
 /.idea
-/.vscode
 /composer.phar
 package-lock.json
+public/*
+public/web-assets/js
+/public/mix-manifest.json
+public/web-assets/css
+lastdb.sql
+/temp
 
-public/mix-manifest.json
-public/css/app.css
-public/js/app.js
-public/js/app.js.LICENSE.txt
-
-# public/web-assets/js
-# public/web-assets/css
+public/uploads/all

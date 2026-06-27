@@ -103,7 +103,7 @@
                             <label class="label">
                                 <input type="checkbox" />
                                 <span class="body-1 black--text text">
-                                    Usar la misma Dirección de envió para que Idovela preste los servicio de
+                                    Usar la misma Dirección de envió para que Aloranges preste los servicio de
                                     instalación, mantenimiento y más.
                                 </span>
                                 <span class="checkmark"></span>

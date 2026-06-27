@@ -10,25 +10,22 @@ let AllOffers = () => import("../pages/AllOffers");
 let OfferDetails = () => import("../pages/OfferDetails");
 let AllBlogs = () => import("../pages/AllBlogs");
 let BlogDetails = () => import("../pages/BlogDetails");
-let TempLanding = () => import("../pages/TempLanding");
 let TestComponents = () => import("../pages/TestComponents");
 let Home2 = () => import("../pages/Home2");
 let Shop = () => import("../pages/Shop");
 let About = () => import("../pages/About");
 let Collection = () => import("../pages/Collection");
 
-let ShopSpaces = () => import("../pages/shop/ShopSpaces");
-let ShopServices = () => import("../pages/shop/ShopServices");
-let ShopHomeAppliances = () => import("../pages/shop/ShopHomeAppliances");
-let ShopBusinessPortal = () => import("../pages/shop/ShopBusinessPortal");
+let ShopCartoneria = () => import("../pages/shop/ShopCartoneria");
+let ShopAseo = () => import("../pages/shop/ShopAseo");
+let ShopPapeleria = () => import("../pages/shop/ShopPapeleria");
+let ShopCafeteria = () => import("../pages/shop/ShopCafeteria");
+let ShopShowApi = () => import("../pages/shop/ShopShowApi.vue");
+let ShopSeguridadIndustrial = ()=> import("../pages/shop/ShopSeguridadIndustrial.vue");
+let ShopTecnologia = ()=> import("../pages/shop/ShopTecnologia.vue");
+
 
 export default [
-    {
-        path: "/",
-        component: TempLanding,
-        name: "TempLanding",
-        meta: { requiresAuth: false, hasHeader: false, hasFooter: false }
-    },
     {
         path: "/test-components",
         component: TestComponents,
@@ -57,31 +54,57 @@ export default [
         path: "/shop",
         component: Shop,
         name: "Shop",
-        redirect: "/shop/spaces",
         meta: { requiresAuth: false },
         children: [
             {
-                path: "spaces",
-                component: ShopSpaces,
-                name: "ShopSpaces",
+                path: "cartoneria",
+                component: ShopCartoneria,
+                name: "ShopCartoneria",
                 meta: { requiresAuth: false, hasBottomBar: false }
             },
             {
-                path: "services",
-                component: ShopServices,
-                name: "ShopServices",
+                path: "aseo",
+                component: ShopAseo,
+                name: "ShopAseo",
                 meta: { requiresAuth: false, hasBottomBar: false }
             },
             {
-                path: "home-appliances",
-                component: ShopHomeAppliances,
-                name: "ShopHomeAppliances",
+                path: "papeleria",
+                component: ShopPapeleria,
+                name: "ShopPapeleria",
                 meta: { requiresAuth: false, hasBottomBar: false }
             },
             {
-                path: "business-portal",
-                component: ShopBusinessPortal,
-                name: "ShopBusinessPortal",
+                path: "cafeteria",
+                component: ShopCafeteria,
+                name: "ShopCafeteria",
+                meta: { requiresAuth: false, hasBottomBar: false }
+            },
+            {
+                path: "ShopShowApi",
+                component: ShopShowApi,
+                name: "ShopShowApi",
+                meta: { requiresAuth: false, hasBottomBar: false }
+            },
+            {
+                path: "tecnologia",
+                component: ShopTecnologia,
+                name: "ShopTecnologia",
+                meta: { requiresAuth: false, hasBottomBar: false }
+            },
+            {
+                path: "seguridad-industrial",
+                component: ShopSeguridadIndustrial,
+                name: "ShopSeguridadIndustrial",
+                meta: { requiresAuth: false, hasBottomBar: false }
+            },
+            {
+                path: ":categorySlug",
+                component: ShopShowApi,
+                name: "ShopDynamicCategory",
+                props: route => ({
+                    category: route.query.category || route.params.categorySlug
+                }),
                 meta: { requiresAuth: false, hasBottomBar: false }
             }
         ]
@@ -93,7 +116,7 @@ export default [
         meta: { requiresAuth: false }
     },
     {
-        path: "/home2",
+        path: "/",
         component: Home2,
         name: "Home2",
         meta: { requiresAuth: false }

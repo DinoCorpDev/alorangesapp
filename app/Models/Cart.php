@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Cart extends Model
 {
     protected $fillable = [
-        'user_id', 'temp_user_id', 'product_id', 'product_variation_id', 'quantity',
+        'user_id',
+        'temp_user_id',
+        'product_id',
+        'product_variation_id',
+        'collection_id',
+        'service_id',
+        'quantity',
     ];
 
     public function product()
@@ -18,5 +24,15 @@ class Cart extends Model
     public function variation()
     {
         return $this->belongsTo(ProductVariation::class, 'product_variation_id');
+    }
+
+    public function collection()
+    {
+        return $this->belongsTo(Collection::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
     }
 }

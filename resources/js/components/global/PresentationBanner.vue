@@ -5,10 +5,9 @@
         no-gutters
     >
         <v-col cols="12" md="5">
-            <div class="panel pa-4">
+            <div class="panel pa-2 pl-md-5">
                 <div>
-                    <v-img :src="icon" class="mt-md-6 mb-6" width="48" />
-                    <h5 class="presentation-banner-preamble mb-2 mb-md-5">{{ preamble }}</h5>
+                    <!-- <h5 class="presentation-banner-preamble mb-2 mb-md-5">{{ preamble }}</h5> -->
                     <h2 class="presentation-banner-title">{{ title }}</h2>
                     <v-divider class="mb-5" />
                     <p class="presentation-banner-description body1">
@@ -86,25 +85,34 @@ export default {
     // max-height: 600px;
 
     &-preamble {
-        font-size: calc(13px + (18 - 13) * var(--screen-size));
+        font-size: calc(13px + (10) * var(--screen-size));
         line-height: calc(24px + (26 - 24) * var(--screen-size));
         font-weight: 700;
         text-transform: uppercase;
     }
 
     &-title {
-        font-size: calc(27px + (60 - 27) * var(--screen-size));
-        line-height: calc(39px + (76 - 39) * var(--screen-size));
-        letter-spacing: 0.25px;
-        font-weight: 300;
-
-        @media (min-width: 960px) {
-            letter-spacing: -0.5px;
+        // font-size: calc(27px + (60 - 27) * var(--screen-size));
+        // line-height: calc(39px + (76 - 39) * var(--screen-size));
+        font-size: 30px;
+        line-height: 36px;
+        font-weight: 600;
+        @media (min-width: 600px) {
+            font-size: 40px;
+            line-height: 47px;
+            letter-spacing: 0.25px;
+            font-weight: 600;
         }
+        
+    }
+
+    &-description{
+        text-align: justify;
+        font-size: 18px;
+        line-height: 25px;
     }
 
     &-image {
-        background-color: #dfdfdf;
         object-fit: cover;
         height: 100%;
         width: 100%;

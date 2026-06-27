@@ -15,6 +15,7 @@ class CategoryCollection extends ResourceCollection
                     'name' => $data->getTranslation('name'),
                     'banner' => api_asset($data->banner),
                     'icon' => api_asset($data->icon),
+                    'meta_image' => api_asset($data->meta_image),
                     'slug' => $data->slug,
                 ];
             })

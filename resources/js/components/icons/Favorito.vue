@@ -1,0 +1,19 @@
+<template>
+    <svg
+        id="Componente_238_3"
+        data-name="Componente 238 – 3"
+        xmlns="http://www.w3.org/2000/svg"
+        width="17.974"
+        height="17.983"
+        viewBox="0 0 17.974 17.983"
+    >
+        <path
+            id="Trazado_3453"
+            data-name="Trazado 3453"
+            d="M95.967,5.986h0v0H77.993v1.8h0V23.96H79.72l0,.007.012-.007h.057v-.036l7.162-4.48.014-.009.014.009,7.187,4.5v.02H94.2l.012.007,0-.007h1.749Z"
+            transform="translate(-77.993 -5.984)"
+            fill="#040405"
+            opacity="1"
+        />
+    </svg>
+</template>

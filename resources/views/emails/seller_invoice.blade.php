@@ -245,7 +245,7 @@
                                 <td class="" style="border-bottom:1px solid #DEDEDE;">
                                     {{ $orderDetail->quantity }}</td>
                                 <td class="" style="border-bottom:1px solid #DEDEDE;">
-                                    {{ format_price($orderDetail->price) }}</td>
+                                    {{ format_price($orderDetail->product->price) }}</td>
                                 <td class="" style="border-bottom:1px solid #DEDEDE;">
                                     {{ format_price($orderDetail->tax) }}</td>
                                 <td class="text-right bold" style="border-bottom:1px solid #DEDEDE;padding-right:20px;">

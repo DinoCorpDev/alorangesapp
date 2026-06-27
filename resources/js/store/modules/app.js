@@ -19,7 +19,7 @@ const loadState = () => ({
     allCountries: shopSetting.allCountries,
     allCurrencies: shopSetting.allCurrencies,
     allLanguages: shopSetting.allLanguages,
-    availableCountries: shopSetting.availableCountries.length > 0 ? shopSetting.availableCountries : ["US"],
+    availableCountries: shopSetting.availableCountries.length > 0 ? shopSetting.availableCountries : ["CO"],
     generalSettings: shopSetting.general_settings,
     addons: shopSetting.addons,
     banners: shopSetting.banners,

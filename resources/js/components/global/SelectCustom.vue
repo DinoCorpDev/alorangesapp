@@ -1,7 +1,6 @@
 <template>
     <v-select
         :clearable="clearable"
-        :dark="dark"
         :error-messages="errorMessages"
         :hide-details="hideDetails"
         :item-text="itemText"
@@ -11,18 +10,57 @@
         :placeholder="placeholder"
         :required="required"
         :value="value"
+        :multiple="multiple"
+        :color="color"
         @blur="$emit('blur', $event)"
         @input="$emit('input', $event)"
-        append-icon="las la-angle-down"
         clear-icon="las la-times"
+        :prepend-inner-icon="icono"
         flat
         outlined
         rounded
         solo
-    ></v-select>
+        style="cursor: pointer;"
+    >
+        
+        
+        <!-- <template v-slot:item="{
+            parent: SelectCustom,
+            item: items
+        }">
+            <i class="las la-star pb-1" style="color: black" v-if="items.favorite"></i>
+            <i class="las la-star pb-1" style="color: grey" v-else></i>
+            <p style="margin: 0;">{{ items.name }}</p>
+        </template> -->
+        <!-- <template v-slot:prepend-inner>
+            <div v-if="itemValue.favorite">
+                <i class="las la-star" style="color: black"></i> 
+            </div>
+            <div v-if="!itemValue.favorite">
+            <i class="las la-star" style="color: grey"></i>
+            </div>
+        </template> -->
+        <!-- <template v-slot:prepend-inner>
+            <div v-if="value">
+                <div v-if="items.default_billing === 1">
+                    <i class="las la-star" style="color: black"></i> 
+                    <i class="las la-cat"></i>
+                </div>
+                <div v-if="items.default_billing === 0">
+                    <i class="las la-star" style="color: grey"></i>
+                    <i class="las la-dog"></i>
+                </div>
+            </div>
+        </template> -->
+
+        <template v-slot:append> <Flecha /> </template>
+
+    </v-select>
 </template>
 
 <script>
+import Flecha from "../../components/icons/Flecha.vue";
+
 export default {
     name: "SelectCustom",
     props: {
@@ -30,13 +68,20 @@ export default {
             type: Boolean,
             default: true
         },
-        dark: {
-            type: Boolean,
-            default: false
-        },
+        // icono: {
+        //     type: String,
+        //     default: "lar la-star",
+        //     get() {
+        //         return this.pruebas ? "las la-star" : this.icono;
+        //     },
+        // },
         errorMessages: {
             type: Array,
             default: () => []
+        },
+        color: {
+            type: String,
+            default: ""
         },
         hideDetails: {
             type: [Boolean, String],
@@ -45,6 +90,10 @@ export default {
         itemText: {
             type: String,
             default: "text"
+        },
+        icono: {
+            type: String,
+            default: "--"
         },
         itemValue: {
             type: String,
@@ -69,8 +118,23 @@ export default {
         value: {
             type: [String, Number, Boolean, Object, Array],
             default: null
+        },
+        multiple: {
+            type: Boolean,
+            default: false
         }
-    }
+    },
+    computed: {
+        // adjustedIcon() {
+        //     return this.pruebas ? "las la-star" : this.icono;
+        // },
+    },
+
+    components: {
+        Flecha
+    },
+
+    
 };
 </script>
 
@@ -106,6 +170,15 @@ export default {
     &.v-text-field--rounded {
         border-radius: 5px;
     }
+    &.cart-select{
+        &::v-deep{
+            v-input__slot{
+                border-color: #d5d6d9 !important;
+                // background-color: transparent !important;
+            }
+        }
+        
+    }
 }
 
 .theme--light {
@@ -119,7 +192,29 @@ export default {
                 }
             }
         }
+        &.cart-select{
+            &::v-deep {
+                .v-input__slot {
+                    background: transparent !important;
 
+                    &:hover {
+                        background: transparent !important;
+                    }
+                }
+            }
+            &.v-text-field--outlined {
+                &::v-deep {
+                    &:not(.v-input--has-state) {
+                        .v-input__slot {
+                            &:hover,
+                            fieldset {
+                                border-color: #d5d6d9;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         &.v-text-field--outlined {
             &::v-deep {
                 &:not(.v-input--has-state) {
@@ -135,30 +230,7 @@ export default {
     }
 }
 
-.theme--dark {
-    .v-select {
-        &::v-deep {
-            .v-input__slot {
-                background: #18191a;
-
-                &:hover {
-                    background: #000000;
-                }
-            }
-        }
-
-        &.v-text-field--outlined {
-            &::v-deep {
-                &:not(.v-input--has-state) {
-                    .v-input__slot {
-                        &:hover,
-                        fieldset {
-                            border-color: #18191a;
-                        }
-                    }
-                }
-            }
-        }
-    }
+.icono-grande {
+    font-size: 25px;
 }
 </style>

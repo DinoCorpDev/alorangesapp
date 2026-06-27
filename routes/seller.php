@@ -20,6 +20,10 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LanguageController;
 
+if (! class_exists(SellerController::class)) {
+    return;
+}
+
 /*
 |--------------------------------------------------------------------------
 | Seller Routes
@@ -83,7 +87,7 @@ Route::group([
         });
     });
 
-    Route::resource('digitalproducts', DigitalProductController::class);
+    Route::resource('digitalproducts', DigitalProductController::class)->except(['destroy']);
     Route::controller(DigitalProductController::class)->group(function () {
         Route::get('/digitalproducts/destroy/{id}', 'destroy')->name('digitalproducts.destroy');
         Route::get('/digitalproducts/download/{id}', 'download')->name('digitalproducts.download');
@@ -95,7 +99,7 @@ Route::group([
     Route::get('/packages/purchase-history', [SellerPackageController::class, 'package_purchase_history'])->name('package_purchase_history');
 
     //coupons
-    Route::resource('coupons', CouponController::class)->names('coupons');
+    Route::resource('coupons', CouponController::class)->names('coupons')->except(['destroy']);
     Route::post('/coupon/get_form', [CouponController::class, 'get_coupon_form'])->name('coupons.get_coupon_form');
     Route::post('/coupon/get_form_edit', [CouponController::class, 'get_coupon_form_edit'])->name('coupons.get_coupon_form_edit');
     Route::get('/coupon/destroy/{id}', [CouponController::class, 'destroy'])->name('coupons.destroy');
@@ -166,7 +170,7 @@ Route::group([
     Route::get('/sellers/commission-log', [AdminCommissionController::class, 'commission_history'])->name('commission_log.index');
 
     // Seller package
-    Route::resource('seller-packages', AdminSellerPackageController::class)->names('seller_packages');
+    Route::resource('seller-packages', AdminSellerPackageController::class)->names('seller_packages')->except(['edit', 'destroy']);
     Route::get('/seller-packages/edit/{id}', [AdminSellerPackageController::class, 'edit'])->name('seller_packages.edit');
     Route::get('/seller-packages/destroy/{id}', [AdminSellerPackageController::class, 'destroy'])->name('seller_packages.destroy');
     Route::get('/seller/package-payments', [AdminSellerPackageController::class, 'package_purchase_history'])->name('package_purchase_history');

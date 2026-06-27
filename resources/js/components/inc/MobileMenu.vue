@@ -3,16 +3,8 @@
         <div class="mobile-bottom-menu d-flex align-center text-center">
             <v-row align="center" dense>
                 <v-col>
-                    <router-link
-                        class="d-inline-flex align-center flex-column"
-                        :to="{ name: 'Home' }"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="13.484"
-                            height="15"
-                            viewBox="0 0 13.484 15"
-                        >
+                    <router-link class="d-inline-flex align-center flex-column" :to="{ name: 'Home' }">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13.484" height="15" viewBox="0 0 13.484 15">
                             <path
                                 id="Path_18928"
                                 data-name="Path 18928"
@@ -21,27 +13,13 @@
                                 fill="#f5a100"
                             />
                         </svg>
-                        <span class="d-block fs-10 mt-1 fw-600">{{
-                            $t("home")
-                        }}</span>
+                        <span class="d-block fs-10 mt-1 fw-600">{{ $t("home") }}</span>
                     </router-link>
                 </v-col>
                 <v-col>
-                    <router-link
-                        class="d-inline-flex align-center flex-column"
-                        :to="{ name: 'AllCategories' }"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="14.993"
-                            viewBox="0 0 15 14.993"
-                        >
-                            <g
-                                id="Group_8863"
-                                data-name="Group 8863"
-                                transform="translate(-106 -740)"
-                            >
+                    <router-link class="d-inline-flex align-center flex-column" :to="{ name: 'AllCategories' }">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14.993" viewBox="0 0 15 14.993">
+                            <g id="Group_8863" data-name="Group 8863" transform="translate(-106 -740)">
                                 <path
                                     id="Union_1"
                                     data-name="Union 1"
@@ -80,22 +58,12 @@
                                 </g>
                             </g>
                         </svg>
-                        <span class="d-block fs-10 mt-1 fw-600">{{
-                            $t("categories")
-                        }}</span>
+                        <span class="d-block fs-10 mt-1 fw-600">{{ $t("categories") }}</span>
                     </router-link>
                 </v-col>
                 <v-col>
-                    <div
-                        @click.stop="openChatWindow"
-                        class="c-pointer d-inline-flex align-center flex-column"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="14.094"
-                            viewBox="0 0 15 14.094"
-                        >
+                    <div @click.stop="openChatWindow" class="c-pointer d-inline-flex align-center flex-column">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14.094" viewBox="0 0 15 14.094">
                             <path
                                 id="Union_6"
                                 data-name="Union 6"
@@ -104,23 +72,13 @@
                                 fill="#999"
                             />
                         </svg>
-                        <span class="d-block fs-10 mt-1 fw-600">{{
-                            $t("messages")
-                        }}</span>
+                        <span class="d-block fs-10 mt-1 fw-600">{{ $t("messages") }}</span>
                     </div>
                 </v-col>
                 <v-col>
-                    <div
-                        @click.stop="openCartDrawer"
-                        class="c-pointer d-inline-flex align-center flex-column"
-                    >
+                    <div @click.stop="openCartDrawer" class="c-pointer d-inline-flex align-center flex-column">
                         <span class="position-relative d-flex">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12.978"
-                                height="15"
-                                viewBox="0 0 12.978 15"
-                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12.978" height="15" viewBox="0 0 12.978 15">
                                 <path
                                     id="Path_18931"
                                     data-name="Path 18931"
@@ -134,9 +92,7 @@
                                 >{{ getCartCount }}</span
                             >
                         </span>
-                        <span class="d-block fs-10 mt-1 fw-600">{{
-                            $t("cart")
-                        }}</span>
+                        <span class="d-block fs-10 mt-1 fw-600">{{ $t("cart") }}</span>
                     </div>
                 </v-col>
                 <v-col>
@@ -144,17 +100,9 @@
                         @click.stop="toggleMobileSideMenu(true)"
                         class="c-pointer d-inline-flex align-center flex-column"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="15"
-                            viewBox="0 0 15 15"
-                        >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
                             <g id="Page-1" transform="translate(0)">
-                                <g
-                                    id="Dribbble-Light-Preview"
-                                    transform="translate(0)"
-                                >
+                                <g id="Dribbble-Light-Preview" transform="translate(0)">
                                     <g id="icons">
                                         <path
                                             id="profile_round-_1342_"
@@ -168,9 +116,7 @@
                                 </g>
                             </g>
                         </svg>
-                        <span class="d-block fs-10 mt-1 fw-600">{{
-                            $t("account")
-                        }}</span>
+                        <span class="d-block fs-10 mt-1 fw-600">{{ $t("account") }}</span>
                     </div>
                 </v-col>
             </v-row>
@@ -188,22 +134,14 @@
             clipped
         >
             <div>
-                <button
-                    class=""
-                    @click.stop="toggleMobileSideMenu(false)"
-                    type="button"
-                >
+                <button class="" @click.stop="toggleMobileSideMenu(false)" type="button">
                     <i class="la la-close fs-24"></i>
                 </button>
             </div>
             <div class="align-center border-bottom d-flex py-5">
                 <template v-if="isAuthenticated">
                     <v-avatar size="48" class="">
-                        <img
-                            :src="currentUser.avatar"
-                            @error="imageFallback($event)"
-                            class=""
-                        />
+                        <img :src="currentUser.avatar" @error="imageFallback($event)" class="" />
                     </v-avatar>
                     <div class="ms-3">
                         <h4 class="fs-14 fw-700 mb-0 lh-1">
@@ -219,38 +157,22 @@
                         <i class="las la-user la-2x"></i>
                     </v-avatar>
                     <div class="ms-3">
-                        <router-link
-                            :to="{ name: 'Login' }"
-                            class="text-reset opacity-80 fw-500"
-                            >{{ $t("login") }}</router-link
-                        >
+                        <router-link :to="{ name: 'Login' }" class="text-reset opacity-80 fw-500">{{
+                            $t("login")
+                        }}</router-link>
                         <span class="mx-1 opacity-60">{{ $t("or") }}</span>
-                        <router-link
-                            :to="{ name: 'Registration' }"
-                            class="text-reset opacity-80 fw-500"
-                            >{{ $t("registration") }}</router-link
-                        >
+                        <router-link :to="{ name: 'Registration' }" class="text-reset opacity-80 fw-500">{{
+                            $t("registration")
+                        }}</router-link>
                     </div>
                 </template>
             </div>
             <div class="py-3 border-bottom">
                 <v-list class="py-0" dense>
-                    <v-list-item
-                        class="flex-grow-0 flex-fill"
-                        :to="{ name: 'AllCategories' }"
-                    >
+                    <v-list-item class="flex-grow-0 flex-fill" :to="{ name: 'AllCategories' }">
                         <v-list-item-icon class="me-4 d-flex align-center">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="15"
-                                height="14.993"
-                                viewBox="0 0 15 14.993"
-                            >
-                                <g
-                                    id="Group_8863"
-                                    data-name="Group 8863"
-                                    transform="translate(-106 -740)"
-                                >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14.993" viewBox="0 0 15 14.993">
+                                <g id="Group_8863" data-name="Group 8863" transform="translate(-106 -740)">
                                     <path
                                         id="Union_1"
                                         data-name="Union 1"
@@ -290,26 +212,12 @@
                                 </g>
                             </svg>
                         </v-list-item-icon>
-                        <v-list-item-title class="fs-13 opacity-90">{{
-                            $t("all_categories")
-                        }}</v-list-item-title>
+                        <v-list-item-title class="fs-13 opacity-90">{{ $t("all_categories") }}</v-list-item-title>
                     </v-list-item>
-                    <v-list-item
-                        class="flex-grow-0 flex-fill"
-                        :to="{ name: 'AllBrands' }"
-                    >
+                    <v-list-item class="flex-grow-0 flex-fill" :to="{ name: 'AllBrands' }">
                         <v-list-item-icon class="me-4 d-flex align-center">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="15"
-                                height="13"
-                                viewBox="0 0 15 13"
-                            >
-                                <g
-                                    id="Group_8883"
-                                    data-name="Group 8883"
-                                    transform="translate(-35 -10)"
-                                >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13">
+                                <g id="Group_8883" data-name="Group 8883" transform="translate(-35 -10)">
                                     <path
                                         id="Subtraction_3"
                                         data-name="Subtraction 3"
@@ -381,9 +289,7 @@
                                 </g>
                             </svg>
                         </v-list-item-icon>
-                        <v-list-item-title class="fs-13 opacity-90">{{
-                            $t("all_brands")
-                        }}</v-list-item-title>
+                        <v-list-item-title class="fs-13 opacity-90">{{ $t("all_brands") }}</v-list-item-title>
                     </v-list-item>
                     <v-list-item
                         class="flex-grow-0 flex-fill"
@@ -393,39 +299,20 @@
                         <v-list-item-icon class="me-4 d-flex align-center">
                             <i class="las la-store-alt"></i>
                         </v-list-item-icon>
-                        <v-list-item-title class="fs-13 opacity-90">{{
-                            $t("all_shops")
-                        }}</v-list-item-title>
+                        <v-list-item-title class="fs-13 opacity-90">{{ $t("all_shops") }}</v-list-item-title>
                     </v-list-item>
 
-                    <v-list-item
-                        class="flex-grow-0 flex-fill"
-                        :to="{ name: 'AllBlogs' }"
-                    >
+                    <v-list-item class="flex-grow-0 flex-fill" :to="{ name: 'AllBlogs' }">
                         <v-list-item-icon class="me-4 d-flex align-center">
                             <i class="las la-edit"></i>
                         </v-list-item-icon>
-                        <v-list-item-title class="fs-13 opacity-90">{{
-                            $t("all_blogs")
-                        }}</v-list-item-title>
+                        <v-list-item-title class="fs-13 opacity-90">{{ $t("all_blogs") }}</v-list-item-title>
                     </v-list-item>
 
-                    <v-list-item
-                        class="flex-grow-0 flex-fill"
-                        :to="{ name: 'AllOffers' }"
-                    >
+                    <v-list-item class="flex-grow-0 flex-fill" :to="{ name: 'AllOffers' }">
                         <v-list-item-icon class="me-4 d-flex align-center">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="15"
-                                height="15"
-                                viewBox="0 0 15 15"
-                            >
-                                <g
-                                    id="Layer_2"
-                                    data-name="Layer 2"
-                                    transform="translate(-1.995 -2.064)"
-                                >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
+                                <g id="Layer_2" data-name="Layer 2" transform="translate(-1.995 -2.064)">
                                     <path
                                         id="Path_18965"
                                         data-name="Path 18965"
@@ -461,20 +348,13 @@
                                 </g>
                             </svg>
                         </v-list-item-icon>
-                        <v-list-item-title class="fs-13 opacity-90">{{
-                            $t("offers")
-                        }}</v-list-item-title>
+                        <v-list-item-title class="fs-13 opacity-90">{{ $t("offers") }}</v-list-item-title>
                     </v-list-item>
-                    <v-list-item
-                        class="flex-grow-0 flex-fill"
-                        :to="{ name: 'TrackOrder' }"
-                    >
+                    <v-list-item class="flex-grow-0 flex-fill" :to="{ name: 'TrackOrder' }">
                         <v-list-item-icon class="me-4 d-flex align-center">
                             <i class="las la-map-marked fs-17"></i>
                         </v-list-item-icon>
-                        <v-list-item-title class="fs-13 opacity-90">{{
-                            $t("track_order")
-                        }}</v-list-item-title>
+                        <v-list-item-title class="fs-13 opacity-90">{{ $t("track_order") }}</v-list-item-title>
                     </v-list-item>
                 </v-list>
             </div>
@@ -491,17 +371,8 @@
                         v-if="allLanguages.length > 1"
                     >
                         <v-list-item-icon class="me-4 d-flex align-center">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="15"
-                                height="15"
-                                viewBox="0 0 15 15"
-                            >
-                                <g
-                                    id="Group_8874"
-                                    data-name="Group 8874"
-                                    transform="translate(-2 -2)"
-                                >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
+                                <g id="Group_8874" data-name="Group 8874" transform="translate(-2 -2)">
                                     <path
                                         id="Path_18953"
                                         data-name="Path 18953"
@@ -511,26 +382,15 @@
                                 </g>
                             </svg>
                         </v-list-item-icon>
-                        <v-list-item-title
-                            class="fs-13 opacity-90 d-flex align-center"
-                        >
+                        <v-list-item-title class="fs-13 opacity-90 d-flex align-center">
                             <span>{{ userLanguageObj.name }}</span>
                             <i class="las la-angle-right ms-auto"></i>
                         </v-list-item-title>
                         <LanguageSwitchDialog ref="langSwitch" />
                     </v-list-item>
-                    <v-list-item
-                        class="flex-grow-0 flex-fill"
-                        @click.stop="logout"
-                        v-if="isAuthenticated"
-                    >
+                    <v-list-item class="flex-grow-0 flex-fill" @click.stop="logout" v-if="isAuthenticated">
                         <v-list-item-icon class="me-4 d-flex align-center">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="15"
-                                viewBox="0 0 12 15"
-                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="15" viewBox="0 0 12 15">
                                 <path
                                     id="Path_18962"
                                     data-name="Path 18962"
@@ -540,9 +400,7 @@
                                 />
                             </svg>
                         </v-list-item-icon>
-                        <v-list-item-title class="fs-13 opacity-90">{{
-                            $t("logout")
-                        }}</v-list-item-title>
+                        <v-list-item-title class="fs-13 opacity-90">{{ $t("logout") }}</v-list-item-title>
                     </v-list-item>
                 </v-list>
             </div>
@@ -557,23 +415,15 @@ import LanguageSwitchDialog from "./LanguageSwitchDialog";
 export default {
     components: {
         LanguageSwitchDialog,
-        UserMenu,
+        UserMenu
     },
     computed: {
-        ...mapGetters("auth", [
-            "mobileSideMenuOpen",
-            "currentUser",
-            "isAuthenticated",
-        ]),
+        ...mapGetters("auth", ["mobileSideMenuOpen", "currentUser", "isAuthenticated"]),
         ...mapGetters("cart", ["getCartCount"]),
-        ...mapGetters("app", ["userLanguageObj", "allLanguages"]),
+        ...mapGetters("app", ["userLanguageObj", "allLanguages"])
     },
     methods: {
-        ...mapMutations("auth", [
-            "updateChatWindow",
-            "updateCartDrawer",
-            "updateMobileSideMenu",
-        ]),
+        ...mapMutations("auth", ["updateChatWindow", "updateCartDrawer", "updateMobileSideMenu"]),
         ...mapActions(["auth/logout"]),
         ...mapActions("cart", ["resetCart"]),
         ...mapActions("wishlist", ["resetWishlist"]),
@@ -595,8 +445,8 @@ export default {
             this.resetCart();
             this.resetWishlist();
             this.$router.push({ name: "Home" }).catch(() => {});
-        },
-    },
+        }
+    }
 };
 </script>
 <style scoped>

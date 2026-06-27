@@ -12,9 +12,11 @@ class ProductCollection extends ResourceCollection
             'data' => $this->collection->map(function ($data) {
                 return [
                     'id' => (int) $data->id,
-                    'name' => $data->getTranslation('name'),
+                    'name' => $data->name,
                     'slug' => $data->slug,
-                    'thumbnail_image' => api_asset($data->thumbnail_img),
+                    'lowest_price' => (int) $data->lowest_price,
+                    'highest_price' => (int) $data->highest_price,
+                    'thumbnail_image' => $this->productImage($data->thumbnail_img),
                     'base_price' => (float) product_base_price($data),
                     'base_discounted_price' => (float) product_discounted_base_price($data),
                     'stock' => $data->stock,
@@ -25,11 +27,8 @@ class ProductCollection extends ResourceCollection
                     'earn_point' => (float) $data->earn_point,
                     'is_variant' => (int) $data->is_variant,
                     'variations' => $data->variations,
-                    'description' => $data->description,
-                    'brandName' => optional($data->brand)->getTranslation('name'),
-                    'reference' => $data->reference,
-                    'currency' => $data->currency,
                     'is_digital' => $data->digital == 1 ? true : false,
+                    'tax' => $data->tax,
                 ];
             })
         ];
@@ -41,5 +40,14 @@ class ProductCollection extends ResourceCollection
             'success' => true,
             'status' => 200
         ];
+    }
+
+    private function productImage($image)
+    {
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $image;
+        }
+
+        return api_asset($image);
     }
 }

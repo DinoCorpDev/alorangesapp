@@ -2,7 +2,6 @@
     <div style="width: 100%">
         <div style="width: 100%" class="d-none d-lg-block">
             <div class="buttons">
-                <h6 class="black--text bold">Compras</h6>
                 <custom-button
                     block
                     class="mb-3 buttons-res mt-3"

@@ -47,7 +47,7 @@
                                 <div class=" v-text-field__details mt-2 pl-3 " v-if="$v.form.phone.$error" >
                                     <div class=" v-messages theme--light error--text " role="alert">
                                         <div class=" v-messages__wrapper " >
-                                            <div class=" v-messages__message " >{{ $t("this_field_is_required") }}</div>
+                                            <div class=" v-messages__message " >{{ $t("Este campo es requerido") }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -241,23 +241,23 @@ export default {
             const errors = [];
             if (!this.$v.form.name.$dirty) return errors;
             !this.$v.form.name.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         emailErrors() {
             const errors = [];
             if (!this.$v.form.email.$dirty) return errors;
             !this.$v.form.email.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.email.email &&
-                errors.push( this.$i18n.t("this_field_is_required_a_valid_email") );
+                errors.push( this.$i18n.t("Este campo es requerido_a_valid_email") );
             return errors;
         },
         passwordErrors() {
             const errors = [];
             if (!this.$v.form.password.$dirty) return errors;
             !this.$v.form.password.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.password.minLength &&
                 errors.push( this.$i18n.t("password_must_be_minimum_6_characters") );
             return errors;
@@ -266,7 +266,7 @@ export default {
             const errors = [];
             if (!this.$v.form.confirmPassword.$dirty) return errors;
             !this.$v.form.confirmPassword.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             !this.$v.form.confirmPassword.sameAsPassword &&
                 errors.push( this.$i18n.t("password_and_confirm_password_should_match") );
             return errors;
@@ -275,21 +275,21 @@ export default {
             const errors = [];
             if (!this.$v.form.shopName.$dirty) return errors;
             !this.$v.form.shopName.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         shopPhoneErrors() {
             const errors = [];
             if (!this.$v.form.shopPhone.$dirty) return errors;
             !this.$v.form.shopPhone.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         shopAddressErrors() {
             const errors = [];
             if (!this.$v.form.shopAddress.$dirty) return errors;
             !this.$v.form.shopAddress.required &&
-                errors.push(this.$i18n.t("this_field_is_required"));
+                errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
     },

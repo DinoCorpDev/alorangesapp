@@ -1,18 +1,8 @@
 <template>
-    <header :class="['header-sticky ', { 'sticky-top': generalSettings.sticky_header == 1 }] ">
-        <TopBar
-            :loading="loading"
-            :data="data"
-        />
-        <LogoBar
-            :loading="loading"
-            :data="data"
-        />
-        <HeaderMenu
-            :loading="loading"
-            :data="data"
-            class="d-none d-md-block"
-        />
+    <header :class="['header-sticky ', { 'sticky-top': generalSettings.sticky_header == 1 }]">
+        <TopBar :loading="loading" :data="data" />
+        <LogoBar :loading="loading" :data="data" />
+        <HeaderMenu :loading="loading" :data="data" class="d-none d-md-block" />
     </header>
 </template>
 
@@ -21,10 +11,11 @@ import TopBar from "./TopBar";
 import LogoBar from "./LogoBar";
 import HeaderMenu from "./HeaderMenu";
 import { mapGetters } from "vuex";
+
 export default {
     data: () => ({
         loading: true,
-        data: {},
+        data: {}
     }),
     components: {
         TopBar,
@@ -34,17 +25,17 @@ export default {
     computed: {
         ...mapGetters("app", ["generalSettings"])
     },
-    methods :{
-        async getDetails(){
+    methods: {
+        async getDetails() {
             const res = await this.call_api("get", `setting/header`);
-            if(res.status === 200){
-                this.data = res.data
-                this.loading = false
+            if (res.status === 200) {
+                this.data = res.data;
+                this.loading = false;
             }
-        },
+        }
     },
     created() {
-        this.getDetails()
+        this.getDetails();
     }
 };
 </script>

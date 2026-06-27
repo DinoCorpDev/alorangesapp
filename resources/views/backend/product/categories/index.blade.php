@@ -10,6 +10,11 @@
                 <h1 class="h3">{{ translate('All categories') }}</h1>
             </div>
             <div class="col-md-6 text-md-right">
+                @can('edit_categories')
+                    <a href="{{ route('categories.alegra') }}" class="btn btn-circle btn-primary mr-2">
+                        <span>{{ translate('Update All Categories From Alegra') }}</span>
+                    </a>
+                @endcan
                 @can('add_categories')
                     <a href="{{ route('categories.create') }}" class="btn btn-circle btn-primary">
                         <span>{{ translate('Add New category') }}</span>
@@ -72,7 +77,7 @@
                             </td>
                             {{-- <td>
                             <span class="avatar avatar-square avatar-xs">
-                                <img src="{{ uploaded_asset($category->icon) }}" alt="{{translate('icon')}}">
+                                <img src="{{ uploaded_asset($category->banner) }}" alt="{{translate('Image')}}">
                             </span>
                         </td> --}}
                             <td>
@@ -85,20 +90,32 @@
                                 </label>
                             </td>
                             <td class="text-right">
-                                @can('edit_categories')
-                                    <a class="btn btn-soft-primary btn-icon btn-circle btn-sm"
-                                        href="{{ route('categories.edit', ['id' => $category->id, 'lang' => env('DEFAULT_LANGUAGE')]) }}"
-                                        title="{{ translate('Edit') }}">
-                                        <i class="las la-edit"></i>
-                                    </a>
-                                @endcan
-                                @can('delete_categories')
-                                    <a href="#" class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete"
-                                        data-href="{{ route('categories.destroy', $category->id) }}"
-                                        title="{{ translate('Delete') }}">
-                                        <i class="las la-trash"></i>
-                                    </a>
-                                @endcan
+                                <div class="d-inline-flex align-items-center" style="gap: 4px; white-space: nowrap;">
+                                    @can('edit_categories')
+                                        <button type="button"
+                                            class="btn btn-icon btn-circle btn-sm category-status-toggle {{ $category->status == 1 ? 'btn-soft-success' : 'btn-soft-secondary' }}"
+                                            data-id="{{ $category->id }}"
+                                            data-status="{{ $category->status == 1 ? 1 : 0 }}"
+                                            onclick="update_status(this)"
+                                            title="{{ $category->status == 1 ? translate('Deactivate') : translate('Activate') }}">
+                                            <i class="las {{ $category->status == 1 ? 'la-toggle-on' : 'la-toggle-off' }}"></i>
+                                        </button>
+                                    @endcan
+                                    @can('edit_categories')
+                                        <a class="btn btn-soft-primary btn-icon btn-circle btn-sm"
+                                            href="{{ route('categories.edit', ['id' => $category->id, 'lang' => env('DEFAULT_LANGUAGE')]) }}"
+                                            title="{{ translate('Edit') }}">
+                                            <i class="las la-edit"></i>
+                                        </a>
+                                    @endcan
+                                    @can('delete_categories')
+                                        <a href="#" class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete"
+                                            data-href="{{ route('categories.destroy', $category->id) }}"
+                                            title="{{ translate('Delete') }}">
+                                            <i class="las la-trash"></i>
+                                        </a>
+                                    @endcan
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -132,6 +149,31 @@
             }, function(data) {
                 if (data == 1) {
                     AIZ.plugins.notify('success', '{{ translate('Featured categories updated successfully') }}');
+                } else {
+                    AIZ.plugins.notify('danger', '{{ translate('Something went wrong') }}');
+                }
+            });
+        }
+
+        function update_status(el) {
+            var nextStatus = $(el).data('status') == 1 ? 0 : 1;
+
+            $.post('{{ route('categories.status') }}', {
+                _token: '{{ csrf_token() }}',
+                id: $(el).data('id'),
+                status: nextStatus
+            }, function(data) {
+                if (data == 1) {
+                    $(el).data('status', nextStatus);
+                    $(el)
+                        .toggleClass('btn-soft-success', nextStatus == 1)
+                        .toggleClass('btn-soft-secondary', nextStatus == 0)
+                        .attr('title', nextStatus == 1 ? '{{ translate('Deactivate') }}' : '{{ translate('Activate') }}');
+                    $(el).find('i')
+                        .toggleClass('la-toggle-on', nextStatus == 1)
+                        .toggleClass('la-toggle-off', nextStatus == 0);
+
+                    AIZ.plugins.notify('success', '{{ translate('Category status updated successfully') }}');
                 } else {
                     AIZ.plugins.notify('danger', '{{ translate('Something went wrong') }}');
                 }

@@ -115,7 +115,6 @@ export default {
 
 
         async downloadProduct(product) {
-            console.log(product.file_path);
             const fileUrl = product.file_path; // Replace with the actual file URL
             const link = document.createElement("a");
             link.href = fileUrl;

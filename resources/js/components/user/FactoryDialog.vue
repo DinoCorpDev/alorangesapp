@@ -1,70 +1,13 @@
 <template>
     <v-dialog v-model="isVisible" max-width="960px" @click:outside="closeDialog">
         <div class="white pa-8 rounded">
-            <v-form class="inputs" ref="loginForm" lazy-validation @submit.prevent="register()">
+            <v-form class="modal-empresa-form" ref="empresaForm"  lazy-validation>
                 <v-row>
                     <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Primer Nombre</span>
+                        <span class="black--text body-2 text-uppercase">Razón social de la empresa</span>
                         <custom-input
-                            v-model="form.firstName"
-                            :error-messages="firstNameErrors"
-                            @blur="$v.form.firstName.$touch()"
-                            required
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase"> Segundo Nombre (Opcional) </span>
-                        <custom-input v-model="form.secondName" />
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Primer Apellido</span>
-                        <custom-input
-                            v-model="form.firstLastname"
-                            :error-messages="firstLastnameErrors"
-                            @blur="$v.form.firstLastname.$touch()"
-                            required
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Segundo Apellido</span>
-                        <custom-input
-                            v-model="form.secondLastname"
-                            :error-messages="secondLastnameErrors"
-                            @blur="$v.form.secondLastname.$touch()"
-                            required
-                        />
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Documento (Representante)</span>
-                        <select-custom
-                            :items="documentTypes"
-                            v-model="form.documentType"
-                            :error-messages="documentTypeErrors"
-                            @blur="$v.form.documentType.$touch()"
-                            required
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Numero de Documento</span>
-                        <custom-input
-                            v-model="form.documentNumber"
-                            :error-messages="documentNumberErrors"
-                            @blur="$v.form.documentNumber.$touch()"
-                            required
-                        />
-                    </v-col>
-                </v-row>
-                <v-row v-if="form.personType == 'Juridical'">
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Nombre de la Empresa</span>
-                        <custom-input
-                            v-model="form.companyName"
-                            :error-messages="companyNameErrors"
-                            @blur="$v.form.companyName.$touch()"
+                            v-model="form.companyRazon"
+                            @blur="$v.form.companyRazon.$touch()"
                             required
                         />
                     </v-col>
@@ -73,52 +16,7 @@
                         <select-custom
                             :items="companyTypes"
                             v-model="form.companyType"
-                            :error-messages="companyTypeErrors"
-                            @blur="$v.form.companyType.$touch()"
-                            required
-                        />
-                    </v-col>
-                </v-row>
-                <v-row v-if="form.personType == 'Juridical'">
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Documento</span>
-                        <select-custom
-                            :items="documentTypes"
-                            v-model="form.companyDocumentType"
-                            :error-messages="companyDocumentTypeErrors"
-                            @blur="$v.form.companyDocumentType.$touch()"
-                            required
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">
-                            Numero de
-                            {{ form.companyDocumentType ? form.companyDocumentType : "Documento" }}
-                        </span>
-                        <custom-input
-                            v-model="form.companyDocumentNumber"
-                            :error-messages="companyDocumentNumberErrors"
-                            @blur="$v.form.companyDocumentNumber.$touch()"
-                            required
-                        />
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Nombre de la Empresa</span>
-                        <custom-input
-                            v-model="form.companyName"
-                            :error-messages="companyNameErrors"
-                            @blur="$v.form.companyName.$touch()"
-                            required
-                        />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Entidad Comercial</span>
-                        <select-custom
-                            :items="companyTypes"
-                            v-model="form.companyType"
-                            :error-messages="companyTypeErrors"
+                         
                             @blur="$v.form.companyType.$touch()"
                             required
                         />
@@ -130,7 +28,7 @@
                         <select-custom
                             :items="documentTypes"
                             v-model="form.companyDocumentType"
-                            :error-messages="companyDocumentTypeErrors"
+                       
                             @blur="$v.form.companyDocumentType.$touch()"
                             required
                         />
@@ -142,20 +40,10 @@
                         </span>
                         <custom-input
                             v-model="form.companyDocumentNumber"
-                            :error-messages="companyDocumentNumberErrors"
+                       
                             @blur="$v.form.companyDocumentNumber.$touch()"
                             required
                         />
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">Documento (Representante)</span>
-                        <custom-button block class="mt-3" color="nero" text="Añadir documento" />
-                    </v-col>
-                    <v-col cols="12" md="6">
-                        <span class="black--text body-2 text-uppercase">RUT</span>
-                        <custom-button block class="mt-3" color="nero" text="Añadir documento" />
                     </v-col>
                 </v-row>
                 <v-row>
@@ -179,8 +67,8 @@
 </template>
 
 <script>
-import { required, requiredIf, email, minLength, sameAs } from "vuelidate/lib/validators";
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import { required, requiredIf, email, minLength, sameAs } from "vuelidate/lib/validators";
 import { VueTelInput } from "vue-tel-input";
 
 import CustomButton from "../global/CustomButton.vue";
@@ -230,7 +118,7 @@ export default {
             secondLastname: "",
             documentType: "",
             documentNumber: "",
-            companyName: "",
+            companyRazon: "",
             companyType: "",
             companyDocumentType: "",
             companyDocumentNumber: "",
@@ -243,23 +131,20 @@ export default {
     }),
     validations: {
         form: {
-            personType: { required },
-            firstName: { required },
-            secondName: { required },
-            firstLastname: { required },
-            secondLastname: { required },
-            documentType: { required },
-            documentNumber: { required },
-            companyName: { requiredIf: requiredIf(item => item.personType === "Juridical") },
-            companyType: { requiredIf: requiredIf(item => item.personType === "Juridical") },
-            companyDocumentType: { requiredIf: requiredIf(item => item.personType === "Juridical") },
-            companyDocumentNumber: { requiredIf: requiredIf(item => item.personType === "Juridical") },
-            phone: { required },
-            oldPassword: { required }
+            companyRazon: { required },
+            companyType: { required },
+            companyDocumentType: { required },
+            companyDocumentNumber: { required },
         }
     },
+    async created() {
+        this.form.companyRazon = this.currentUser.company_razon;
+        this.form.companyType = this.currentUser.company_type;
+        this.form.companyDocumentType = this.currentUser.company_document_type;
+        this.form.companyDocumentNumber = this.currentUser.company_document_number;
+    },
     watch: {
-        oldProfile(newVal, oldVal) {
+        oldFactory(newVal, oldVal) {
             if (newVal && !this.is_empty_obj(newVal)) {
                 this.processOldProfile(newVal);
             } else {
@@ -268,7 +153,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters("auth", ["currentUser"]),
+        ...mapGetters("auth", ["currentUser", "getUser"]),
         ...mapGetters("app", ["generalSettings", "availableCountries"]),
         isVisible: {
             get: function () {
@@ -279,73 +164,73 @@ export default {
         personTypeErrors() {
             const errors = [];
             if (!this.$v.form.personType.$dirty) return errors;
-            !this.$v.form.personType.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.personType.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         firstNameErrors() {
             const errors = [];
             if (!this.$v.form.firstName.$dirty) return errors;
-            !this.$v.form.firstName.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.firstName.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         secondNameErrors() {
             const errors = [];
             if (!this.$v.form.secondName.$dirty) return errors;
-            !this.$v.form.secondName.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.secondName.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         firstLastnameErrors() {
             const errors = [];
             if (!this.$v.form.firstLastname.$dirty) return errors;
-            !this.$v.form.firstLastname.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.firstLastname.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         secondLastnameErrors() {
             const errors = [];
             if (!this.$v.form.secondLastname.$dirty) return errors;
-            !this.$v.form.secondLastname.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.secondLastname.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         documentTypeErrors() {
             const errors = [];
             if (!this.$v.form.documentType.$dirty) return errors;
-            !this.$v.form.documentType.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.documentType.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         documentNumberErrors() {
             const errors = [];
             if (!this.$v.form.documentNumber.$dirty) return errors;
-            !this.$v.form.documentNumber.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.documentNumber.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
-        companyNameErrors() {
+        companyRazonErrors() {
             const errors = [];
-            if (!this.$v.form.companyName.$dirty) return errors;
-            !this.$v.form.companyName.requiredIf && errors.push(this.$i18n.t("this_field_is_required"));
+            if (!this.$v.form.companyRazon.$dirty) return errors;
+            !this.$v.form.companyRazon.requiredIf && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyTypeErrors() {
             const errors = [];
             if (!this.$v.form.companyType.$dirty) return errors;
-            !this.$v.form.companyType.requiredIf && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.companyType.requiredIf && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyDocumentTypeErrors() {
             const errors = [];
             if (!this.$v.form.companyDocumentType.$dirty) return errors;
-            !this.$v.form.companyDocumentType.requiredIf && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.companyDocumentType.requiredIf && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         companyDocumentNumberErrors() {
             const errors = [];
             if (!this.$v.form.companyDocumentNumber.$dirty) return errors;
-            !this.$v.form.companyDocumentNumber.requiredIf && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.companyDocumentNumber.requiredIf && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         },
         oldPasswordErrors() {
             const errors = [];
             if (!this.$v.form.oldPassword.$dirty) return errors;
-            !this.$v.form.oldPassword.required && errors.push(this.$i18n.t("this_field_is_required"));
+            !this.$v.form.oldPassword.required && errors.push(this.$i18n.t("Este campo es requerido"));
             return errors;
         }
     },
@@ -359,20 +244,13 @@ export default {
         async register() {
             this.$v.form.$touch();
 
-            if (this.form.invalidPhone) {
-                this.form.showInvalidPhone = true;
-                return;
-            }
-
             if (this.$v.form.$anyError) {
                 return;
             }
 
-            this.form.phone = this.form.phone.replace(/\s/g, "");
-
             this.infoUpdateLoading = true;
 
-            const res = await this.call_api("post", "user/info/update", this.form);
+            const res = await this.call_api("post", "user/info/updateEmpresa", this.form);
 
             if (res.data.success) {
                 this.setUser(res.data.user);
@@ -382,17 +260,10 @@ export default {
             }
 
             this.infoUpdateLoading = false;
+            this.closeDialog();
         },
         async processOldProfile(oldVal) {
-            let oldProfile = { ...oldVal };
-
-            this.form.firstName = oldProfile.firstName;
-            this.form.secondName = oldProfile.secondName;
-            this.form.firstLastname = oldProfile.firstLastname;
-            this.form.secondLastname = oldProfile.secondLastname;
-            this.form.documentType = oldProfile.documentType;
-            this.form.documentNumber = oldProfile.documentNumber;
-            this.form.phone = oldProfile.phone;
+            let oldProfile = { ...oldVal };            
         },
         closeDialog() {
             this.isVisible = false;

@@ -2,7 +2,12 @@
     <v-container fluid class="product-details pa-4">
         <v-row tag="section" class="flex-column-reverse flex-lg-row mb-6">
             <v-col cols="12">
-                <AddToCart :is-loading="detailsLoading" :product-details="productDetails" :products="products" />
+                <AddToCart
+                    :is-loading="detailsLoading"
+                    :product-details="collectionDetails"
+                    :products="products"
+                    type-detail="collection"
+                />
             </v-col>
         </v-row>
 
@@ -25,7 +30,7 @@ export default {
     data: () => ({
         metaTitle: "",
         detailsLoading: true,
-        productDetails: {},
+        collectionDetails: {},
         moreProducts: [],
         footerProducts: [],
         relatedProducts: [{}, {}, {}, {}, {}],
@@ -40,30 +45,10 @@ export default {
             const res = await this.call_api("get", `collection/details/${this.$route.params.slug}`);
 
             if (res.data.success) {
-                let collection = res.data.data.collection;
-                this.productDetails = {
-                    photos: res.data.data.images,
-                    videos: res.data.data.videos,
-                    data_sheet: res.data.data.diagrama,
-                    reference: collection.referencia,
-                    id: collection.id,
-                    name: collection.coleccion,
-                    brand: {
-                        name: res.data.data.marca
-                    },
-                    base_price: collection.precio,
-                    base_discounted_price: collection.precio,
-                    stock: collection.stock,
-                    warranty_text: collection.descuento,
-                    shipping: collection.envio,
-                    isCollection: true
-                };
-
-                this.products = res.data.data.products;
-
-                this.getMoreProducts(this.products[0]?.id);
-                this.getMoreProducts2(this.products[0]?.id);
-                this.getRelatedProducts(this.products[0]?.id);
+                this.collectionDetails = res.data.data;
+                this.getMoreProducts(this.collectionDetails?.id);
+                this.getMoreProducts2(this.collectionDetails?.id);
+                this.getRelatedProducts(this.collectionDetails.id);
             } else {
                 this.snack({
                     message: res.data.message,

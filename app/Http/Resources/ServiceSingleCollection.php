@@ -180,7 +180,7 @@ class ServiceSingleCollection extends JsonResource
     {
         $result = array();
         foreach (explode(',', $this->photos) as $item) {
-            array_push($result, api_asset_new($item));
+            array_push($result, api_asset($item));
         }
         return $result;
     }

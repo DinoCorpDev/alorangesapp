@@ -56,23 +56,25 @@ if (!function_exists('convert_to_usd')) {
 if (!function_exists('format_price')) {
     function format_price($price, $show_tag = false)
     {
+        // Force no decimals (remove cents)
+        $decimals = 0;
 
         if (get_setting('decimal_separator') == 1) {
-            $fomated_price = number_format($price, get_setting('no_of_decimals'));
+            $fomated_price = number_format($price, $decimals);
         } else {
-            $fomated_price = number_format($price, get_setting('no_of_decimals'), ',', ' ');
+            $fomated_price = number_format($price, $decimals, ',', ' ');
         }
 
         if ($show_tag) {
             if ($price < 1000000) {
                 // Anything less than a million
-                $fomated_price = number_format($price, get_setting('no_of_decimals'));
+                $fomated_price = number_format($price, $decimals);
             } else if ($price < 1000000000) {
                 // Anything less than a billion
-                $fomated_price = number_format($price / 1000000, get_setting('no_of_decimals')) . 'M';
+                $fomated_price = number_format($price / 1000000, $decimals) . 'M';
             } else {
                 // At least a billion
-                $fomated_price = number_format($price / 1000000000, get_setting('no_of_decimals')) . 'B';
+                $fomated_price = number_format($price / 1000000000, $decimals) . 'B';
             }
         }
 
@@ -123,13 +125,16 @@ if (!function_exists('product_base_price')) {
         $price = $product->lowest_price;
         $tax = 0;
 
-        foreach ($product->taxes as $product_tax) {
-            if ($product_tax->tax_type == 'percent') {
-                $tax += ($price * $product_tax->tax) / 100;
-            } elseif ($product_tax->tax_type == 'flat') {
-                $tax += $product_tax->tax;
+        if ($with_tax) {
+            foreach ($product->taxes as $product_tax) {
+                if ($product_tax->tax_type == 'percent') {
+                    $tax += ($price * $product_tax->tax) / 100;
+                } elseif ($product_tax->tax_type == 'flat') {
+                    $tax += $product_tax->tax;
+                }
             }
         }
+
         $price += $with_tax ? $tax : 0;
 
         return $price;
@@ -142,13 +147,16 @@ if (!function_exists('product_highest_price')) {
         $price = $product->highest_price;
         $tax = 0;
 
-        foreach ($product->taxes as $product_tax) {
-            if ($product_tax->tax_type == 'percent') {
-                $tax += ($price * $product_tax->tax) / 100;
-            } elseif ($product_tax->tax_type == 'flat') {
-                $tax += $product_tax->tax;
+        if ($with_tax) {
+            foreach ($product->taxes as $product_tax) {
+                if ($product_tax->tax_type == 'percent') {
+                    $tax += ($price * $product_tax->tax) / 100;
+                } elseif ($product_tax->tax_type == 'flat') {
+                    $tax += $product_tax->tax;
+                }
             }
         }
+
         $price += $with_tax ? $tax : 0;
 
         return $price;
@@ -180,13 +188,16 @@ if (!function_exists('product_discounted_base_price')) {
             }
         }
 
-        foreach ($product->taxes as $product_tax) {
-            if ($product_tax->tax_type == 'percent') {
-                $tax += ($price * $product_tax->tax) / 100;
-            } elseif ($product_tax->tax_type == 'flat') {
-                $tax += $product_tax->tax;
+        if ($with_tax) {
+            foreach ($product->taxes as $product_tax) {
+                if ($product_tax->tax_type == 'percent') {
+                    $tax += ($price * $product_tax->tax) / 100;
+                } elseif ($product_tax->tax_type == 'flat') {
+                    $tax += $product_tax->tax;
+                }
             }
         }
+
         $price += $with_tax ? $tax : 0;
         return $price;
     }
@@ -223,11 +234,13 @@ if (!function_exists('product_discounted_highest_price')) {
             }
         }
 
-        foreach ($product->taxes as $product_tax) {
-            if ($product_tax->tax_type == 'percent') {
-                $tax += ($price * $product_tax->tax) / 100;
-            } elseif ($product_tax->tax_type == 'flat') {
-                $tax += $product_tax->tax;
+        if ($with_tax) {
+            foreach ($product->taxes as $product_tax) {
+                if ($product_tax->tax_type == 'percent') {
+                    $tax += ($price * $product_tax->tax) / 100;
+                } elseif ($product_tax->tax_type == 'flat') {
+                    $tax += $product_tax->tax;
+                }
             }
         }
 
@@ -239,7 +252,7 @@ if (!function_exists('product_discounted_highest_price')) {
 if (!function_exists('product_tax')) {
     function product_variation_tax($product, $variation)
     {
-        $price = $variation->price;
+        $price = $product->price;
         $tax = 0;
 
         $discount_applicable = false;
@@ -276,7 +289,7 @@ if (!function_exists('product_tax')) {
 if (!function_exists('variation_price')) {
     function variation_price($product, $variation, $with_tax = true)
     {
-        $price = $variation->price;
+        $price = $product['highest_price'];
         $tax = 0;
 
         foreach ($product->taxes as $product_tax) {
@@ -302,7 +315,7 @@ if (!function_exists('variation_discounted_price')) {
      */
     function variation_discounted_price($product, $variation, $with_tax = true)
     {
-        $price = $variation->price;
+        $price = $product->highest_price;
         $tax = 0;
 
         $discount_applicable = false;
@@ -324,11 +337,13 @@ if (!function_exists('variation_discounted_price')) {
             }
         }
 
-        foreach ($product->taxes as $product_tax) {
-            if ($product_tax->tax_type == 'percent') {
-                $tax += ($price * $product_tax->tax) / 100;
-            } elseif ($product_tax->tax_type == 'flat') {
-                $tax += $product_tax->tax;
+        if ($with_tax) {
+            foreach ($product->taxes as $product_tax) {
+                if ($product_tax->tax_type == 'percent') {
+                    $tax += ($price * $product_tax->tax) / 100;
+                } elseif ($product_tax->tax_type == 'flat') {
+                    $tax += $product_tax->tax;
+                }
             }
         }
 
@@ -387,7 +402,7 @@ if (!function_exists('filter_product_variations')) {
             $data['id'] = $variation->id;
             $data['code'] = ($variation->code == null) ? $variation->code : array_filter(explode("/", $variation->code));
             $data['img'] = $variation->img;
-            $data['price'] = variation_discounted_price($product, $variation);
+            $data['price'] = variation_discounted_price($product, $variation, false);
             $data['stock'] = $variation->stock;
 
             array_push($new_variations, $data);
@@ -642,9 +657,45 @@ function hex2rgba($color, $opacity = false)
 if (!function_exists('api_asset')) {
     function api_asset($id)
     {
+        if (filter_var($id, FILTER_VALIDATE_URL)) {
+            return $id;
+        }
+
+        if (is_string($id) && (strpos($id, 'uploads/') === 0 || strpos($id, 'assets/') === 0)) {
+            return static_asset($id);
+        }
+
         if (($asset = \App\Models\Upload::find($id)) != null) {
             return my_asset($asset->file_name);
         }
+        return "";
+    }
+}
+
+if (!function_exists('api_asset_new')) {
+    function api_asset_new($id)
+    {
+        if (filter_var($id, FILTER_VALIDATE_URL)) {
+            return (object) [
+                'src' => $id,
+                'type' => 'image'
+            ];
+        }
+
+        if (is_string($id) && (strpos($id, 'uploads/') === 0 || strpos($id, 'assets/') === 0)) {
+            return (object) [
+                'src' => static_asset($id),
+                'type' => 'image'
+            ];
+        }
+
+        if (($asset = \App\Models\Upload::find($id)) != null) {
+            return (object) [
+                'src' => my_asset($asset->file_name),
+                'type' => $asset->type
+            ];
+        }
+
         return "";
     }
 }
@@ -653,6 +704,14 @@ if (!function_exists('api_asset')) {
 if (!function_exists('uploaded_asset')) {
     function uploaded_asset($id)
     {
+        if (filter_var($id, FILTER_VALIDATE_URL)) {
+            return $id;
+        }
+
+        if (is_string($id) && (strpos($id, 'uploads/') === 0 || strpos($id, 'assets/') === 0)) {
+            return static_asset($id);
+        }
+
         if (($asset = \App\Models\Upload::find($id)) != null) {
             return my_asset($asset->file_name);
         }

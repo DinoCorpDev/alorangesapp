@@ -1,29 +1,10 @@
 <template>
     <div class="product-gallery" v-show="!isLoading">
-        <v-tabs :hide-slider="true" background-color="transparent" grow height="38px" v-model="currentTab">
-            <v-tab :ripple="false">Imagenes</v-tab>
-            <v-tab :ripple="false">Videos</v-tab>
-            <v-tab :ripple="false">Ficha Técnica</v-tab>
-        </v-tabs>
-        <v-tabs-items v-model="currentTab">
-            <v-tab-item>
                 <Carousel
                     :slides="galleryImages"
                     :showArrows="galleryImages.length > 1"
                     :hideDelimiters="galleryImages.length <= 1"
                 />
-            </v-tab-item>
-            <v-tab-item>
-                <Carousel
-                    :slides="galleryVideos"
-                    :showArrows="galleryVideos.length > 1"
-                    :hideDelimiters="galleryVideos.length <= 1"
-                />
-            </v-tab-item>
-            <v-tab-item>
-                <img :src="dataSheet" />
-            </v-tab-item>
-        </v-tabs-items>
     </div>
 </template>
 

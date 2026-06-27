@@ -1,14 +1,14 @@
 <template>
     <v-row>
-        <v-col cols="12" md="7">
+        <v-col cols="12" md="5">
             <ProductGallery
                 :is-loading="isLoading"
-                :galleryImages="productDetails.photos"
+                :galleryImages="productDetails.images"
                 :galleryVideos="productDetails.videos"
                 :dataSheet="productDetails.data_sheet"
             />
         </v-col>
-        <v-col cols="12" md="5">
+        <v-col cols="12" md="7">
             <div v-if="!isLoading" class="add-to-cart-list-box pa-4 mb-3">
                 <div class="d-flex justify-space-between">
                     <h5 class="subt2 font-weight-bold text-uppercase mb-2">
@@ -20,12 +20,12 @@
                             @click="removeFromWishlist(productDetails.id)"
                             class="icon"
                         >
-                            <FavoriteIcon />
+                            <WishIcon />
                         </button>
                     </template>
                     <template v-else>
                         <button :title="$t('add_to_wishlist')" @click="addNewWishlist(productDetails.id)" class="icon">
-                            <FavoriteIcon />
+                            <WishIcon />
                         </button>
                     </template>
                 </div>
@@ -44,8 +44,10 @@
                         {{ format_price(productDetails.base_discounted_price) }}
                     </h5>
                 </div>
-                <div class="d-flex justify-space-between align-center mb-3">
-                    <span class="tx-caption">* Iva Incluido</span>
+                <div class="d-flex justify-start align-center mb-3">
+                    <span class="tx-caption">* Iva Incluido ({{ productDetails.tax ? parseInt(productDetails.tax) : 0 }} %)</span>
+                </div>
+                <div class="d-flex justify-start align-center mb-3 mt-3">
                     <vue-numeric-input
                         v-model="cartQuantity"
                         :min="1"
@@ -55,56 +57,53 @@
                         size="132px"
                     />
                 </div>
-                <div class="add-to-cart-actions">
+                <div class="add-to-cart-actions d-sm-flex justify-start align-center">
                     <Custom-Button
-                        :disabled="actionLoading"
-                        :loading="actionLoading"
-                        @click="addCart()"
-                        color="nero"
+                        v-if="Number.isInteger(cartQuantity)"
+                        @click.prevent="addCart()"
+                        color="orange"
                         text="Agregar a Compras"
                     />
-                    <CustomButton text="Consultar a un Asesor" color="grey" />
+                    <a href="https://wa.me/573174420109" target="_blank"
+                        ><CustomButton text="Consultar a un Asesor" color="grey" />
+                    </a>
                 </div>
             </div>
 
-            <div class="add-to-cart-list-box pa-4 mb-3">
-                <div class="add-to-cart-list-box-item">
-                    <h5 class="subt2 fw-600 text-uppercase">Variación</h5>
-                    <v-btn-toggle multiple borderless>
-                        <v-btn class="blue" depressed :ripple="false" />
-                        <v-btn class="grey" depressed :ripple="false" />
-                        <v-btn class="black" depressed :ripple="false" />
-                        <v-btn class="red" depressed :ripple="false" />
-                    </v-btn-toggle>
-                </div>
-            </div>
+            <!-- <div class="add-to-cart-list-box pa-4 mb-3">
+                <h5>Detalle</h5>
+                <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+                    Ut enim ad minim veniam.
+                </p>
+            </div> -->
 
             <ul class="add-to-cart-list-box pa-4 mb-3">
-                <li class="add-to-cart-list-box-item mb-2">
+                <!-- <li class="add-to-cart-list-box-item mb-2">
                     <h5 class="subt2 text-uppercase">Disponibilidad</h5>
                     <span class="subt2">{{ productDetails?.stock ?? "000" }} en stock</span>
                 </li>
                 <li class="add-to-cart-list-box-item mb-2">
                     <h5 class="subt2 text-uppercase">Garantía</h5>
                     <span class="subt2">{{ productDetails?.warranty_text ?? "--" }}</span>
-                </li>
+                </li> -->
                 <li class="add-to-cart-list-box-item mb-2">
                     <h5 class="subt2 text-uppercase">Pago</h5>
                     <img src="/public/assets/img/product/icons-payments.png" alt="" />
                 </li>
-                <li class="add-to-cart-list-box-item">
+                <!-- <li class="add-to-cart-list-box-item">
                     <h5 class="subt2 text-uppercase">Envío</h5>
                     <span class="subt2">{{ productDetails?.shipping ?? "--" }}</span>
-                </li>
+                </li> -->
             </ul>
 
-            <div v-if="products.length > 0">
+            <!-- <div v-if="products.length > 0">
                 <h5 class="subt2 fw-600 text-uppercase mb-2">Se incluye con la compra</h5>
                 <v-divider class="mb-3" />
                 <div class="add-to-cart-related-products overflow-y-auto overflow-uw">
                     <ProductBoxShort v-for="product in products" :key="product.id" :productDetails="product" />
                 </div>
-            </div>
+            </div> -->
 
             <v-divider class="d-sm-none mt-3" />
         </v-col>
@@ -116,14 +115,13 @@ import { mapGetters, mapActions, mapMutations } from "vuex";
 import ProductGallery from "../product/ProductGallery.vue";
 import ProductBoxShort from "../product/ProductBoxShort.vue";
 import CustomButton from "../../components/global/CustomButton.vue";
-
 import FavoriteIcon from "../../components/icons/Favorite.vue";
+import WishIcon from "../../components/icons/WishIcon.vue";
 
 export default {
     props: {
         isLoading: { type: Boolean, required: true, default: true },
-        productDetails: { type: Object, required: true, default: {} },
-        products: { type: Array, required: false, default: [] }
+        productDetails: { type: Object, required: true, default: {} }
     },
     data: () => ({
         cartQuantity: 1,
@@ -152,18 +150,21 @@ export default {
         ProductGallery,
         ProductBoxShort,
         FavoriteIcon,
+        WishIcon,
         CustomButton
     },
     computed: {
         ...mapGetters("wishlist", ["isThisWishlisted"]),
-        ...mapGetters("cart", ["isThisInCart", "findCartItemByVariationId"])
+        ...mapGetters("cart", ["isThisInCart", "findCartItemByVariationId"]),
+        discount() {
+            return this.discount_percent(this.productDetails.base_price, this.productDetails.base_discounted_price);
+        }
     },
     methods: {
         ...mapActions("wishlist", ["addNewWishlist", "removeFromWishlist"]),
-        ...mapActions("cart", ["addToCart", "updateQuantity", "addToCartCollection"]),
+        ...mapActions("cart", ["addToCart", "updateQuantity"]),
         ...mapActions("auth", ["showConversationDialog"]),
         ...mapMutations("auth", ["updateChatWindow"]),
-
         addCart() {
             if (this.productDetails.is_variant == 1) {
                 // for variant product
@@ -189,36 +190,10 @@ export default {
                 });
                 return;
             }
-
-            let minMaxCheck = this.checkMinMaxLimit(this.selectedVariation?.id);
-            if (!minMaxCheck.success) {
-                // selected variation min max limit check
-
-                let message =
-                    minMaxCheck.type == "min_limit"
-                        ? `${this.$i18n.t("you_need_to_purchase_minimum_quantity")} ${this.minCartLimit}.`
-                        : `${this.$i18n.t("you_can_purchase_maximum_quantity")} ${this.maxCartLimit}.`;
-
-                this.snack({
-                    message: message,
-                    color: "red"
-                });
-                return;
-            }
-
-            if (this.productDetails?.isCollection) {
-                this.addToCartCollection({
-                    // variation_id: this.selectedVariation?.id,
-                    variation_id: this.productDetails?.id,
-                    qty: this.cartQuantity
-                });
-            } else {
-                this.addToCart({
-                    // variation_id: this.selectedVariation?.id,
-                    variation_id: this.productDetails?.id,
-                    qty: this.cartQuantity
-                });
-            }
+            this.addToCart({
+                product_id: this.productDetails,
+                qty: this.cartQuantity
+            });
 
             this.snack({
                 message: this.$i18n.t("product_added_to_cart"),

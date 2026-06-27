@@ -1,0 +1,12 @@
+<template>
+    <svg xmlns="http://www.w3.org/2000/svg" width="12.5" height="12.5" viewBox="0 0 23.296 23.678">
+        <g id="Componente_418" data-name="Componente 418" transform="translate(0.5 0.719)">
+            <g id="Grupo_10803" data-name="Grupo 10803" transform="translate(-173.338 -89.711)" style="isolation: isolate">
+            <g id="Grupo_13239" data-name="Grupo 13239">
+                <path id="Trazado_10019" data-name="Trazado 10019" d="M187.341,107.71l1.577-1.577,7.883-7.883-1.577-1.577-6.766,6.766,0-13.567h-2.228v13.571l-6.77-6.77-1.577,1.577,7.883,7.883Z" transform="matrix(-1, -0.017, 0.017, -1, 370.074, 200.84)" stroke="#000" stroke-width="1"/>
+                <path id="Trazado_10020" data-name="Trazado 10020" d="M193.4,134.873v3.344H175.567v-3.344h-2.23v5.574h22.3v-5.574Z" transform="translate(0 -28.277)" stroke="#000" stroke-width="1"/>
+            </g>
+            </g>
+        </g>
+    </svg>
+</template>

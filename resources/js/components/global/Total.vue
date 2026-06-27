@@ -1,31 +1,34 @@
 <template>
-    <div class="d-flex justify-center">
+    <div class="inicio d-flex justify-center">
         <div class="div_total">
-            <div>
-                <span class="text-uppercase bold title">Total </span>
-                <span class="text-uppercase price"> {{ format_price(total) }} COP</span>
+            <div class="cuerpo" style="display: flex; align-items: end">
+                <span class="text-uppercase bold title pr-1 pr-sm-5">SUBTOTAL</span>
+                <span class="text-uppercase price"> {{ formatearMoneda(getCartPrice) }} COP</span>
             </div>
-            <span class="iva">* Iva incluido</span>
         </div>
     </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+import CustomFavorite from "../../components/icons/CustomFavorite.vue";
+
 export default {
     name: "Total",
-    props: {
-        total: {
-            type: String | Number,
-            default: "000.000.000"
-        },
-        text1: {
-            type: String
-        },
-        text2: {
-            type: String
-        },
-        btn2: {
-            type: String
+    components: {
+        CustomFavorite
+    },
+    computed: {
+        ...mapGetters("cart", ["getCartPrice", "getCartCount"])
+    },
+    methods:{
+        formatearMoneda(valor) {
+            return valor.toLocaleString('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
         }
     }
 };
@@ -37,11 +40,8 @@ export default {
 }
 
 .price {
-    font: normal normal normal 24px/24px Roboto;
-}
-
-.iva {
-    font: normal normal 600 12px/16px Overpass;
+    // font: normal normal normal 24px/24px Roboto;
+    font-size: calc(12px + 6 * var(--screen-size));
 }
 
 @media (max-width: 600px) {
@@ -49,7 +49,7 @@ export default {
         text-align: center;
     }
     .title {
-        font: normal normal 600 16px/23px Overpass;
+        font: normal normal 600 10px/23px Overpass;
     }
 
     .price {
@@ -61,5 +61,13 @@ export default {
     .iva {
         font: normal normal 600 10px/13px Overpass;
     }
+}
+
+.icono-cantidad{
+    background: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    
 }
 </style>

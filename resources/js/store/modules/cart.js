@@ -53,7 +53,7 @@ export default {
         getCartPrice(state) {
             let total = 0;
             state.cartProducts.forEach(item => {
-                if (item.selected) total += item.dicounted_price * item.qty;
+                if (item.selected) total += item.regular_price * item.qty;
             });
             return (state.cartPrice = total);
         },
@@ -83,7 +83,7 @@ export default {
         getShopCartTotalPrice: state => shop_id => {
             let total = 0;
             state.cartProducts.forEach(item => {
-                if (item.shop_id == shop_id && item.selected) total += item.dicounted_price * item.qty;
+                if (item.shop_id == shop_id && item.selected) total += item.discounted_price * item.qty;
             });
             return total;
         },
@@ -91,7 +91,7 @@ export default {
             let total = 0;
             let shop = state.cartShops.find(shop => shop.id == shop_id);
             state.cartProducts.forEach(item => {
-                if (item.shop_id == shop_id && item.selected) total += item.dicounted_price * item.qty;
+                if (item.shop_id == shop_id && item.selected) total += item.discounted_price * item.qty;
             });
             return total - shop.couponDiscount;
         },
@@ -136,7 +136,7 @@ export default {
                 if (shop.selected && shop.min_order > 0) {
                     let total = 0;
                     state.cartProducts.forEach(item => {
-                        if (item.shop_id == shop.id && item.selected) total += item.dicounted_price * item.qty;
+                        if (item.shop_id == shop.id && item.selected) total += item.discounted_price * item.qty;
                     });
                     let shopCartPrice = total - shop.couponDiscount;
 
@@ -205,23 +205,27 @@ export default {
             }
         },
         addToCart(state, product) {
-            let isAlreadyAdded = state.cartProducts.some(
-                cartProduct => cartProduct.variation_id === product.variation_id
-            );
-            if (isAlreadyAdded) {
-                state.cartProducts.map(cartProduct => {
-                    if (cartProduct.variation_id === product.variation_id)
-                        return (cartProduct.qty = cartProduct.qty + product.qty);
-                });
-            } else {
-                product.selected = true;
-                product.max_qty = product.max_qty > 0 ? product.max_qty : Infinity;
-                state.cartProducts.push(product);
-            }
+            // let isAlreadyAdded = state.cartProducts.some(
+            //     cartProduct => cartProduct.variation_id === product.variation_id
+            // );
+            // if (isAlreadyAdded) {
+            //     state.cartProducts.map(cartProduct => {
+            //         if (cartProduct.variation_id === product.variation_id)
+            //             return (cartProduct.qty = cartProduct.qty + product.qty);
+            //     });
+            // } else {
+            product.selected = true;
+            product.max_qty = product.max_qty > 0 ? product.max_qty : Infinity;
+            state.cartProducts.push(product);
+            // }
         },
-        updateQuantity(state, { type, cart_id, isCollection }) {
+        updateQuantity(state, { type, cart_id, qty }) {
             let item = state.cartProducts.find(cartProduct => cartProduct.cart_id === cart_id);
-            if (type == "plus") {
+            if (type === "set") {
+                state.cartProducts.map(cartProduct => {
+                    if (cartProduct.cart_id === cart_id) return (cartProduct.qty = qty);
+                });
+            } else if (type == "plus") {
                 state.cartProducts.map(cartProduct => {
                     if (cartProduct.cart_id === cart_id) return (cartProduct.qty = cartProduct.qty + 1);
                 });
@@ -333,14 +337,14 @@ export default {
                 }
             }
         },
-        async addToCart({ commit, getters, dispatch }, { variation_id, qty }) {
+        async addToCart({ commit, getters, dispatch }, { product_id, qty }) {
             let temp_user_id = getters.getTempUserId;
             if (!this.getters["auth/isAuthenticated"] && !temp_user_id) {
                 temp_user_id = Math.floor(Math.random() * 10000) + new Date().getTime();
                 commit("setTempUserId", temp_user_id);
             }
             const res = await Mixin.methods.call_api("post", `carts/add`, {
-                variation_id: variation_id,
+                product_id: product_id,
                 qty: qty,
                 temp_user_id: temp_user_id
             });
@@ -352,25 +356,9 @@ export default {
                 dispatch("proccessCoupon");
             }
         },
-        async addToCartCollection({ commit, getters, dispatch }, { variation_id, qty }) {
-            let temp_user_id = getters.getTempUserId;
-            if (!this.getters["auth/isAuthenticated"] && !temp_user_id) {
-                temp_user_id = Math.floor(Math.random() * 10000) + new Date().getTime();
-                commit("setTempUserId", temp_user_id);
-            }
-            const res = await Mixin.methods.call_api("post", `carts/addCollection`, {
-                variation_id: variation_id,
-                qty: qty,
-                temp_user_id: temp_user_id
-            });
-
-            if (res.data.success) {
-                commit("addToCart", res.data.data);
-                commit("updateCartShops", res.data.shop);
-            }
-        },
-        async updateQuantity({ commit, getters, dispatch }, { type, cart_id, isCollection = false }) {
+        async updateQuantity({ commit, getters, dispatch }, { type, cart_id, qty }) {
             let cartItem = getters.findCartItemByCartId(cart_id);
+
             if (type == "plus" && cartItem.qty + 1 > cartItem.max_qty) {
                 Mixin.methods.snack({
                     message: `${i18n.t("you_can_purchase_maximum_quantity")} ${cartItem.max_qty}.`,
@@ -378,21 +366,31 @@ export default {
                 });
                 return;
             }
+
+            if (type === "set" && qty > cartItem.max_qty) {
+                Mixin.methods.snack({
+                    message: `${i18n.t("you_can_purchase_maximum_quantity")} ${cartItem.max_qty}.`,
+                    color: "red"
+                });
+                return;
+            }
+
             const res = await Mixin.methods.call_api("post", `carts/change-quantity`, {
                 type: type,
                 cart_id: cart_id,
-                temp_user_id: getters.getTempUserId,
-                isCollection: isCollection
+                qty: qty,
+                temp_user_id: getters.getTempUserId
             });
+
             if (res.data.success) {
-                commit("updateQuantity", { type, cart_id, isCollection });
+                commit("updateQuantity", { type, cart_id, qty });
                 commit("updateCartShops");
                 dispatch("proccessCoupon");
             } else {
-                Mixin.methods.snack({
-                    message: res.data.message,
-                    color: "red"
-                });
+                // Mixin.methods.snack({
+                //     message: res.data.message,
+                //     color: "red"
+                // });
             }
         },
         async removeFromCart({ commit, getters, dispatch }, cart_id) {
@@ -449,7 +447,7 @@ export default {
                                 willGetDiscount = true;
                                 if (shop.couponDetails.discount_type == "percent") {
                                     couponDiscount +=
-                                        ((item.dicounted_price * parseFloat(shop.couponDetails.discount)) / 100) *
+                                        ((item.discounted_price * parseFloat(shop.couponDetails.discount)) / 100) *
                                         item.qty;
                                 } else if (shop.couponDetails.discount_type == "amount") {
                                     couponDiscount += item.qty * parseFloat(shop.couponDetails.discount);

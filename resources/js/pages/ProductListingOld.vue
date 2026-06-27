@@ -371,7 +371,7 @@
             this.queryParam.minPrice = this.$route.query.minPrice || this.queryParam.minPrice;
             this.queryParam.maxPrice = this.$route.query.maxPrice || this.queryParam.maxPrice;
             this.queryParam.attributeValues = this.$route.query.attributeValues || this.queryParam.attributeValues;
-            console.log(this.queryParam);
+            
             if(this.queryParam.sortBy !== 'popular'){
                 let selectedSort = this.sortingOptions.find(sort =>  sort.value === this.queryParam.sortBy)
                 this.sortingDefault = selectedSort

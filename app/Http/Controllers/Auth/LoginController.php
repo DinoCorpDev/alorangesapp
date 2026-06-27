@@ -8,7 +8,6 @@ use Socialite;
 use App\Models\User;
 use App\Customer;
 use Illuminate\Http\Request;
-use CoreComponentRepository;
 use Illuminate\Support\Str;
 
 class LoginController extends Controller
@@ -101,7 +100,6 @@ class LoginController extends Controller
     public function authenticated()
     {
         if (auth()->user()->user_type == 'admin' || auth()->user()->user_type == 'staff') {
-            CoreComponentRepository::instantiateShopRepository();
             return redirect()->route('admin.dashboard');
         } elseif (auth()->user()->user_type == 'seller') {
             return redirect()->route('seller.dashboard');

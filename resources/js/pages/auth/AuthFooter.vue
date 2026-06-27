@@ -1,11 +1,11 @@
 <template>
     <v-footer class="auth-footer">
-        <span class="auth-footer-copyright">© Idovela 2022</span>
-        <ul class="auth-footer-links">
+        <span class="auth-footer-copyright mb-6">© Aloranges 2024</span>
+        <!-- <ul class="auth-footer-links">
             <li class="auth-footer-link" v-for="link in authFooterLinks" :key="`link-${link.label}`">
                 <router-link :to="link.link"> {{ link.label }} </router-link>
             </li>
-        </ul>
+        </ul> -->
     </v-footer>
 </template>
 
@@ -23,7 +23,9 @@ export default {
 .auth-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    text-align: center;
+    justify-content: center;
+    background: #fafcfc;
     padding: 0;
 
     &-copyright,
