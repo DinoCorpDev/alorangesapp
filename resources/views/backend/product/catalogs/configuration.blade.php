@@ -2,34 +2,39 @@
 
 @section('content')
     @php
-        $infoRows = old('info_table_labels')
-            ? collect(old('info_table_labels'))->map(function ($label, $index) {
+        $coverImageRows = old('cover_category_ids')
+            ? collect(old('cover_category_ids'))->map(function ($categoryId, $index) {
                 return [
-                    'label' => $label,
-                    'value' => old('info_table_values.' . $index),
+                    'category_id' => $categoryId,
+                    'image' => old('cover_category_images.' . $index),
                 ];
             })->values()->all()
-            : ($settings['info_table_rows'] ?? []);
+            : ($settings['cover_category_images'] ?? []);
 
-        if (empty($infoRows) && ! empty($settings['info_page_content'])) {
-            $infoRows = collect(preg_split('/\r\n|\r|\n/', $settings['info_page_content']))
-                ->filter()
-                ->map(function ($line) {
-                    $parts = explode(':', $line, 2);
-                    return [
-                        'label' => trim($parts[0] ?? ''),
-                        'value' => trim($parts[1] ?? $line),
-                    ];
-                })->values()->all();
+        if (empty($coverImageRows) && ! empty($settings['cover_image'])) {
+            $coverImageRows = [[
+                'category_id' => '',
+                'image' => $settings['cover_image'],
+            ]];
         }
 
-        if (empty($infoRows)) {
-            $infoRows = [
-                ['label' => '', 'value' => ''],
-                ['label' => '', 'value' => ''],
-                ['label' => '', 'value' => ''],
-            ];
+        if (empty($coverImageRows)) {
+            $coverImageRows = [['category_id' => '', 'image' => '']];
         }
+
+        $extraPageImages = old('extra_page_images')
+            ? collect(old('extra_page_images'))->filter()->values()->all()
+            : ($settings['extra_page_images'] ?? []);
+
+        if (empty($extraPageImages) && ! empty($settings['page_four_image'])) {
+            $extraPageImages = [$settings['page_four_image']];
+        }
+
+        if (empty($extraPageImages)) {
+            $extraPageImages = [''];
+        }
+
+        $fullPageImageHint = translate('Recommended size') . ': 2550 x 3300 px - ' . translate('Letter size, vertical');
 
         $fontFamilies = ['DejaVu Sans', 'Arial', 'Georgia', 'Times New Roman', 'Verdana', 'Tahoma', 'Courier New'];
         $typographyFields = [
@@ -141,13 +146,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#config-payment" role="tab">
-                                <i class="las la-credit-card"></i> {{ translate('Payment') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#config-information" role="tab">
-                                <i class="las la-table"></i> {{ translate('Information') }}
+                            <a class="nav-link" data-toggle="tab" href="#config-cover-images" role="tab">
+                                <i class="las la-image"></i> {{ translate('Catalog Covers') }}
                             </a>
                         </li>
                         <li class="nav-item">
@@ -170,10 +170,10 @@
                                         <div class="config-toggle-row">
                                             <div>
                                                 <h6>{{ translate('Payment page') }}</h6>
-                                                <p>{{ translate('Payment image and payment blocks') }}</p>
+                                                <p>{{ translate('Only one full-page image will be rendered') }}</p>
                                             </div>
                                             <label class="aiz-checkbox mb-0">
-                                                <input type="checkbox" name="show_payment_page" value="1" data-config-toggle="#payment-fields" @if (old('show_payment_page', $settings['show_payment_page'] ?? true)) checked @endif>
+                                                <input type="checkbox" name="show_payment_page" value="1" @if (old('show_payment_page', $settings['show_payment_page'] ?? true)) checked @endif>
                                                 <span class="aiz-square-check"></span>
                                                 <span>{{ translate('Show') }}</span>
                                             </label>
@@ -187,6 +187,7 @@
                                                 <div class="form-control file-amount">{{ translate('Choose File') }}</div>
                                                 <input type="hidden" name="payment_page_image" class="selected-files" value="{{ old('payment_page_image', $settings['payment_page_image'] ?? '') }}">
                                             </div>
+                                            <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                             <div class="file-preview box sm"></div>
                                         </div>
                                     </div>
@@ -197,10 +198,10 @@
                                         <div class="config-toggle-row">
                                             <div>
                                                 <h6>{{ translate('Information page') }}</h6>
-                                                <p>{{ translate('Information image and editable table') }}</p>
+                                                <p>{{ translate('Only one full-page image will be rendered') }}</p>
                                             </div>
                                             <label class="aiz-checkbox mb-0">
-                                                <input type="checkbox" name="show_info_page" value="1" data-config-toggle="#information-fields" @if (old('show_info_page', $settings['show_info_page'] ?? true)) checked @endif>
+                                                <input type="checkbox" name="show_info_page" value="1" @if (old('show_info_page', $settings['show_info_page'] ?? true)) checked @endif>
                                                 <span class="aiz-square-check"></span>
                                                 <span>{{ translate('Show') }}</span>
                                             </label>
@@ -214,33 +215,73 @@
                                                 <div class="form-control file-amount">{{ translate('Choose File') }}</div>
                                                 <input type="hidden" name="info_page_image" class="selected-files" value="{{ old('info_page_image', $settings['info_page_image'] ?? '') }}">
                                             </div>
+                                            <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                             <div class="file-preview box sm"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12">
+                                    <div class="config-panel">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <div>
+                                                <h6 class="mb-1">{{ translate('Extra full-page images') }}</h6>
+                                                <p class="mb-0 text-muted">{{ translate('Add as many full-page image pages as the catalog needs') }}</p>
+                                            </div>
+                                            <button type="button" class="btn btn-soft-primary btn-sm" id="add-extra-page-row">
+                                                <i class="las la-plus"></i>
+                                                {{ translate('Add Page') }}
+                                            </button>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered mb-0" id="extra-pages-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>{{ translate('Full-page image') }}</th>
+                                                        <th width="80" class="text-center">{{ translate('Options') }}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($extraPageImages as $extraPageImage)
+                                                        <tr class="extra-page-row">
+                                                            <td>
+                                                                <div class="input-group" data-toggle="aizuploader" data-type="image">
+                                                                    <div class="input-group-prepend">
+                                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                                    </div>
+                                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                                    <input type="hidden" name="extra_page_images[]" class="selected-files" value="{{ $extraPageImage }}">
+                                                                </div>
+                                                                <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
+                                                                <div class="file-preview box sm"></div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-extra-page-row" title="{{ translate('Delete') }}">
+                                                                    <i class="las la-trash"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-6">
                                     <div class="config-panel mb-lg-0">
-                                        <div class="config-toggle-row">
-                                            <div>
-                                                <h6>{{ translate('Fourth page') }}</h6>
-                                                <p>{{ translate('Optional full page image') }}</p>
-                                            </div>
-                                            <label class="aiz-checkbox mb-0">
-                                                <input type="checkbox" name="show_page_four" value="1" data-config-toggle="#page-four-fields" @if (old('show_page_four', $settings['show_page_four'] ?? false)) checked @endif>
-                                                <span class="aiz-square-check"></span>
-                                                <span>{{ translate('Show') }}</span>
-                                            </label>
-                                        </div>
-                                        <div id="page-four-fields" class="form-group mb-0 compact-uploader">
-                                            <label>{{ translate('Page 4 image') }}</label>
+                                        <h6>{{ translate('Last catalog page') }}</h6>
+                                        <p>{{ translate('Optional full-page image rendered at the end of the catalog') }}</p>
+                                        <div class="form-group mb-0 compact-uploader">
+                                            <label>{{ translate('Last page image') }}</label>
                                             <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                 <div class="input-group-prepend">
                                                     <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
                                                 </div>
                                                 <div class="form-control file-amount">{{ translate('Choose File') }}</div>
-                                                <input type="hidden" name="page_four_image" class="selected-files" value="{{ old('page_four_image', $settings['page_four_image'] ?? '') }}">
+                                                <input type="hidden" name="final_page_image" class="selected-files" value="{{ old('final_page_image', $settings['final_page_image'] ?? '') }}">
                                             </div>
+                                            <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                             <div class="file-preview box sm"></div>
                                         </div>
                                     </div>
@@ -264,173 +305,58 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="config-payment" role="tabpanel">
-                            <div id="payment-fields">
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="config-panel-white">
-                                            <h5 class="config-section-title">{{ translate('Header') }}</h5>
-                                            <p class="config-section-subtitle">{{ translate('Main payment titles') }}</p>
-                                            <div class="form-group mt-3">
-                                                <label>{{ translate('Payment page title') }}</label>
-                                                <input type="text" class="form-control" name="payment_title" value="{{ old('payment_title', $settings['payment_title'] ?? '') }}">
-                                            </div>
-                                            <div class="form-group mb-0">
-                                                <label>{{ translate('Main payment banner') }}</label>
-                                                <input type="text" class="form-control" name="payment_delivery_title" value="{{ old('payment_delivery_title', $settings['payment_delivery_title'] ?? '') }}">
-                                            </div>
-                                        </div>
+                        <div class="tab-pane fade" id="config-cover-images" role="tabpanel">
+                            <div class="config-panel-white mb-0">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="config-section-title">{{ translate('First catalog image by category') }}</h5>
+                                        <p class="config-section-subtitle">{{ translate('These images will be available when creating or editing a PDF catalog') }}</p>
                                     </div>
-
-                                    <div class="col-lg-6">
-                                        <div class="config-panel-white">
-                                            <h5 class="config-section-title">{{ translate('Bank transfer') }}</h5>
-                                            <p class="config-section-subtitle">{{ translate('Bank or transfer details') }}</p>
-                                            <div class="form-group mt-3">
-                                                <label>{{ translate('Bank account / transfer information') }}</label>
-                                                <textarea class="form-control" name="payment_bank_info" rows="4">{{ old('payment_bank_info', $settings['payment_bank_info'] ?? '') }}</textarea>
-                                            </div>
-                                            <div class="form-group mb-0 compact-uploader">
-                                                <label>{{ translate('Bank / transfer icon') }}</label>
-                                                <div class="input-group" data-toggle="aizuploader" data-type="image">
-                                                    <div class="input-group-prepend">
-                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
-                                                    </div>
-                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
-                                                    <input type="hidden" name="payment_bank_icon" class="selected-files" value="{{ old('payment_bank_icon', $settings['payment_bank_icon'] ?? '') }}">
-                                                </div>
-                                                <div class="file-preview box sm"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-lg-6">
-                                        <div class="config-panel-white">
-                                            <h5 class="config-section-title">{{ translate('Debit cards') }}</h5>
-                                            <div class="form-group mt-3">
-                                                <label>{{ translate('Debit cards title') }}</label>
-                                                <input type="text" class="form-control" name="payment_debit_title" value="{{ old('payment_debit_title', $settings['payment_debit_title'] ?? '') }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>{{ translate('Debit cards information') }}</label>
-                                                <textarea class="form-control" name="payment_debit_info" rows="3">{{ old('payment_debit_info', $settings['payment_debit_info'] ?? '') }}</textarea>
-                                            </div>
-                                            <div class="form-group mb-0 compact-uploader">
-                                                <label>{{ translate('Debit cards icon') }}</label>
-                                                <div class="input-group" data-toggle="aizuploader" data-type="image">
-                                                    <div class="input-group-prepend">
-                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
-                                                    </div>
-                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
-                                                    <input type="hidden" name="payment_debit_icon" class="selected-files" value="{{ old('payment_debit_icon', $settings['payment_debit_icon'] ?? '') }}">
-                                                </div>
-                                                <div class="file-preview box sm"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-lg-6">
-                                        <div class="config-panel-white">
-                                            <h5 class="config-section-title">{{ translate('Credit cards') }}</h5>
-                                            <div class="form-group mt-3">
-                                                <label>{{ translate('Credit cards title') }}</label>
-                                                <input type="text" class="form-control" name="payment_credit_title" value="{{ old('payment_credit_title', $settings['payment_credit_title'] ?? '') }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>{{ translate('Credit cards information') }}</label>
-                                                <textarea class="form-control" name="payment_credit_info" rows="3">{{ old('payment_credit_info', $settings['payment_credit_info'] ?? '') }}</textarea>
-                                            </div>
-                                            <div class="form-group mb-0 compact-uploader">
-                                                <label>{{ translate('Credit cards icon') }}</label>
-                                                <div class="input-group" data-toggle="aizuploader" data-type="image">
-                                                    <div class="input-group-prepend">
-                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
-                                                    </div>
-                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
-                                                    <input type="hidden" name="payment_credit_icon" class="selected-files" value="{{ old('payment_credit_icon', $settings['payment_credit_icon'] ?? '') }}">
-                                                </div>
-                                                <div class="file-preview box sm"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-lg-12">
-                                        <div class="config-panel-white mb-0">
-                                            <h5 class="config-section-title">{{ translate('Cash payments') }}</h5>
-                                            <div class="row gutters-10 mt-3">
-                                                <div class="col-lg-6">
-                                                    <div class="form-group">
-                                                        <label>{{ translate('Cash payment title') }}</label>
-                                                        <input type="text" class="form-control" name="payment_cash_title" value="{{ old('payment_cash_title', $settings['payment_cash_title'] ?? '') }}">
-                                                    </div>
-                                                    <div class="form-group mb-lg-0">
-                                                        <label>{{ translate('Cash payment information') }}</label>
-                                                        <textarea class="form-control" name="payment_cash_info" rows="3">{{ old('payment_cash_info', $settings['payment_cash_info'] ?? '') }}</textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-6">
-                                                    <div class="form-group mb-0 compact-uploader">
-                                                        <label>{{ translate('Cash payment icon') }}</label>
+                                    <button type="button" class="btn btn-soft-primary btn-sm" id="add-cover-image-row">
+                                        <i class="las la-plus"></i>
+                                        {{ translate('Add Cover') }}
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered mb-0" id="cover-images-table">
+                                        <thead>
+                                            <tr>
+                                                <th width="35%">{{ translate('Category') }}</th>
+                                                <th>{{ translate('First Catalog Image') }}</th>
+                                                <th width="80" class="text-center">{{ translate('Options') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($coverImageRows as $coverImageRow)
+                                                <tr class="cover-image-row">
+                                                    <td>
+                                                        <select class="form-control aiz-selectpicker" name="cover_category_ids[]" data-live-search="true">
+                                                            <option value="">{{ translate('Choose Category') }}</option>
+                                                            @foreach ($categories as $category)
+                                                                <option value="{{ $category->id }}" @if ((string) ($coverImageRow['category_id'] ?? '') === (string) $category->id) selected @endif>{{ $category->getTranslation('name') }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td>
                                                         <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                             <div class="input-group-prepend">
                                                                 <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
                                                             </div>
                                                             <div class="form-control file-amount">{{ translate('Choose File') }}</div>
-                                                            <input type="hidden" name="payment_cash_icon" class="selected-files" value="{{ old('payment_cash_icon', $settings['payment_cash_icon'] ?? '') }}">
+                                                            <input type="hidden" name="cover_category_images[]" class="selected-files" value="{{ $coverImageRow['image'] ?? '' }}">
                                                         </div>
+                                                        <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                                         <div class="file-preview box sm"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tab-pane fade" id="config-information" role="tabpanel">
-                            <div id="information-fields">
-                                <div class="config-panel-white">
-                                    <h5 class="config-section-title">{{ translate('Information table') }}</h5>
-                                    <div class="form-group mt-3">
-                                        <label>{{ translate('Information table title') }}</label>
-                                        <input type="text" class="form-control" name="info_page_title" value="{{ old('info_page_title', $settings['info_page_title'] ?? '') }}">
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <label class="mb-0">{{ translate('Information table rows') }}</label>
-                                        <button type="button" class="btn btn-soft-primary btn-sm" id="add-info-row">
-                                            <i class="las la-plus"></i>
-                                            {{ translate('Add Row') }}
-                                        </button>
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered mb-0" id="info-table-editor">
-                                            <thead>
-                                                <tr>
-                                                    <th width="35%">{{ translate('Label') }}</th>
-                                                    <th>{{ translate('Value') }}</th>
-                                                    <th width="60" class="text-center">{{ translate('Action') }}</th>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-cover-image-row" title="{{ translate('Delete') }}">
+                                                            <i class="las la-trash"></i>
+                                                        </button>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($infoRows as $row)
-                                                    <tr>
-                                                        <td>
-                                                            <input type="text" class="form-control" name="info_table_labels[]" value="{{ $row['label'] ?? '' }}">
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" class="form-control" name="info_table_values[]" value="{{ $row['value'] ?? '' }}">
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-info-row">
-                                                                <i class="las la-trash"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -515,6 +441,17 @@
 
 @section('script')
     <script type="text/javascript">
+        var coverCategoryOptions = @json($categories->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'name' => $category->getTranslation('name'),
+            ];
+        })->values());
+
+        function escapeHtml(value) {
+            return $('<div>').text(value || '').html();
+        }
+
         function syncConfigToggles() {
             $('[data-config-toggle]').each(function() {
                 var target = $($(this).data('config-toggle'));
@@ -525,22 +462,58 @@
         $('[data-config-toggle]').on('change', syncConfigToggles);
         syncConfigToggles();
 
-        $('#add-info-row').on('click', function() {
-            $('#info-table-editor tbody').append(
-                '<tr>' +
-                    '<td><input type="text" class="form-control" name="info_table_labels[]" value=""></td>' +
-                    '<td><input type="text" class="form-control" name="info_table_values[]" value=""></td>' +
-                    '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-info-row"><i class="las la-trash"></i></button></td>' +
-                '</tr>'
-            );
+        function coverImageRowTemplate() {
+            var options = '<option value="">{{ translate('Choose Category') }}</option>' + coverCategoryOptions.map(function(category) {
+                return '<option value="' + escapeHtml(category.id) + '">' + escapeHtml(category.name) + '</option>';
+            }).join('');
+
+            return '<tr class="cover-image-row">' +
+                '<td><select class="form-control aiz-selectpicker" name="cover_category_ids[]" data-live-search="true">' + options + '</select></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="cover_category_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-cover-image-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
+            '</tr>';
+        }
+
+        $('#add-cover-image-row').on('click', function() {
+            $('#cover-images-table tbody').append(coverImageRowTemplate());
+            if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
         });
 
-        $(document).on('click', '.remove-info-row', function() {
-            if ($('#info-table-editor tbody tr').length > 1) {
-                $(this).closest('tr').remove();
-            } else {
-                $(this).closest('tr').find('input').val('');
+        $(document).on('click', '.remove-cover-image-row', function() {
+            if ($('.cover-image-row').length === 1) {
+                var row = $(this).closest('.cover-image-row');
+                row.find('select').val('');
+                row.find('.selected-files').val('');
+                row.find('.file-amount').text('{{ translate('Choose File') }}');
+                row.find('.file-preview').empty();
+                if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
+                return;
             }
+
+            $(this).closest('.cover-image-row').remove();
+        });
+
+        function extraPageRowTemplate() {
+            return '<tr class="extra-page-row">' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="extra_page_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-extra-page-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
+            '</tr>';
+        }
+
+        $('#add-extra-page-row').on('click', function() {
+            $('#extra-pages-table tbody').append(extraPageRowTemplate());
+        });
+
+        $(document).on('click', '.remove-extra-page-row', function() {
+            if ($('.extra-page-row').length === 1) {
+                var row = $(this).closest('.extra-page-row');
+                row.find('.selected-files').val('');
+                row.find('.file-amount').text('{{ translate('Choose File') }}');
+                row.find('.file-preview').empty();
+                return;
+            }
+
+            $(this).closest('.extra-page-row').remove();
         });
 
         $('.config-tabs a[data-toggle="tab"]').on('shown.bs.tab', function(e) {

@@ -40,12 +40,13 @@ class ProductCatalogController extends Controller
         $catalog = null;
         $settings = $this->catalogDefaultsConfig();
         $sharedBlocks = $this->sharedBlocksConfig();
+        $categories = Category::orderBy('order_level')->orderBy('name')->get();
         $letters = array_merge(range('A', 'Z'), ['#']);
         $letterPalette = $this->letterPalette();
         $action = route('product_catalogs.configuration.defaults.update');
         $method = 'POST';
 
-        return view('backend.product.catalogs.configuration', compact('catalog', 'settings', 'sharedBlocks', 'letters', 'letterPalette', 'action', 'method'));
+        return view('backend.product.catalogs.configuration', compact('catalog', 'settings', 'sharedBlocks', 'categories', 'letters', 'letterPalette', 'action', 'method'));
     }
 
     public function updateConfigurationDefaults(Request $request)
@@ -69,12 +70,13 @@ class ProductCatalogController extends Controller
 
         $settings = array_merge($this->catalogDefaultsConfig(), $catalog['settings'] ?? []);
         $sharedBlocks = $this->sharedBlocksConfig();
+        $categories = Category::orderBy('order_level')->orderBy('name')->get();
         $letters = array_merge(range('A', 'Z'), ['#']);
         $letterPalette = $this->letterPalette();
         $action = route('product_catalogs.configuration.update', $catalog['id']);
         $method = 'PUT';
 
-        return view('backend.product.catalogs.configuration', compact('catalog', 'settings', 'sharedBlocks', 'letters', 'letterPalette', 'action', 'method'));
+        return view('backend.product.catalogs.configuration', compact('catalog', 'settings', 'sharedBlocks', 'categories', 'letters', 'letterPalette', 'action', 'method'));
     }
 
     public function updateConfiguration(Request $request, $catalog)
@@ -95,6 +97,7 @@ class ProductCatalogController extends Controller
         $settings['advisor_email_1'] = $existing['settings']['advisor_email_1'] ?? '';
         $settings['advisor_email_2'] = $existing['settings']['advisor_email_2'] ?? '';
         $settings['advertising_items'] = $this->catalogAdvertisingItems($existing['settings'] ?? []);
+        $settings['letter_intro_ads'] = $this->catalogLetterIntroAds($existing['settings'] ?? []);
         $settings['products_per_page'] = (int) ($existing['settings']['products_per_page'] ?? 12) === 20 ? 20 : 12;
 
         $categories = Category::whereIn('id', $existing['category_ids'] ?? [])
@@ -271,6 +274,12 @@ class ProductCatalogController extends Controller
             'advertising_images.*' => 'nullable|string|max:255',
             'advertising_letters' => 'nullable|array',
             'advertising_letters.*' => 'nullable|string|max:1',
+            'letter_intro_ad_images' => 'nullable|array',
+            'letter_intro_ad_images.*' => 'nullable|string|max:255',
+            'letter_intro_ad_category_ids' => 'nullable|array',
+            'letter_intro_ad_category_ids.*' => 'nullable|integer|exists:categories,id',
+            'letter_intro_ad_letters' => 'nullable|array',
+            'letter_intro_ad_letters.*' => 'nullable|string|max:1',
             'products_per_page' => 'required|integer|in:12,20',
         ]);
 
@@ -300,6 +309,7 @@ class ProductCatalogController extends Controller
             'advisor_email_1' => $request->advisor_email_1,
             'advisor_email_2' => $request->advisor_email_2,
             'advertising_items' => $this->sanitizeAdvertisingItems($request),
+            'letter_intro_ads' => $this->sanitizeLetterIntroAds($request),
             'products_per_page' => (int) $request->products_per_page,
         ]);
 
@@ -585,6 +595,13 @@ class ProductCatalogController extends Controller
             'payment_cash_icon' => 'nullable|string|max:255',
             'info_page_image' => 'nullable|string|max:255',
             'page_four_image' => 'nullable|string|max:255',
+            'cover_category_ids' => 'nullable|array',
+            'cover_category_ids.*' => 'nullable|integer|exists:categories,id',
+            'cover_category_images' => 'nullable|array',
+            'cover_category_images.*' => 'nullable|string|max:255',
+            'extra_page_images' => 'nullable|array',
+            'extra_page_images.*' => 'nullable|string|max:255',
+            'final_page_image' => 'nullable|string|max:255',
             'payment_title' => 'nullable|string|max:120',
             'payment_delivery_title' => 'nullable|string|max:160',
             'payment_bank_info' => 'nullable|string|max:1000',
@@ -636,6 +653,9 @@ class ProductCatalogController extends Controller
             'payment_cash_info' => $request->payment_cash_info,
             'info_page_title' => $request->info_page_title,
             'info_table_rows' => $this->sanitizeInfoTableRows($request),
+            'cover_category_images' => $this->sanitizeCoverCategoryImages($request),
+            'extra_page_images' => $this->sanitizeImageList($request->extra_page_images ?: []),
+            'final_page_image' => $request->final_page_image,
             'product_title_font_family' => $this->sanitizeFontFamily($request->product_title_font_family),
             'product_title_font_size' => (int) ($request->product_title_font_size ?: 12),
             'product_description_font_family' => $this->sanitizeFontFamily($request->product_description_font_family),
@@ -747,6 +767,61 @@ class ProductCatalogController extends Controller
         return $items;
     }
 
+    protected function sanitizeImageList(array $images)
+    {
+        return collect($images)->map(function ($image) {
+            return trim((string) $image);
+        })->filter()->values()->all();
+    }
+
+    protected function sanitizeCoverCategoryImages(Request $request)
+    {
+        $categoryIds = $request->cover_category_ids ?: [];
+        $images = $request->cover_category_images ?: [];
+        $items = [];
+
+        foreach ($categoryIds as $index => $categoryId) {
+            $categoryId = (int) $categoryId;
+            $image = trim((string) ($images[$index] ?? ''));
+
+            if ($categoryId > 0 && $image !== '') {
+                $items[] = [
+                    'category_id' => $categoryId,
+                    'image' => $image,
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    protected function sanitizeLetterIntroAds(Request $request)
+    {
+        $images = $request->letter_intro_ad_images ?: [];
+        $categoryIds = $request->letter_intro_ad_category_ids ?: [];
+        $letters = $request->letter_intro_ad_letters ?: [];
+        $allowedLetters = array_merge(range('A', 'Z'), ['#']);
+        $items = [];
+
+        foreach ($images as $index => $image) {
+            $image = trim((string) $image);
+            $categoryId = (int) ($categoryIds[$index] ?? 0);
+            $letter = Str::upper(trim((string) ($letters[$index] ?? '')));
+
+            if ($image === '' || $categoryId <= 0 || ! in_array($letter, $allowedLetters, true)) {
+                continue;
+            }
+
+            $items[] = [
+                'image' => $image,
+                'category_id' => $categoryId,
+                'letter' => $letter,
+            ];
+        }
+
+        return $items;
+    }
+
     protected function catalogAdvertisingItems(array $settings)
     {
         if (! empty($settings['advertising_items']) && is_array($settings['advertising_items'])) {
@@ -763,6 +838,13 @@ class ProductCatalogController extends Controller
         return [];
     }
 
+    protected function catalogLetterIntroAds(array $settings)
+    {
+        return ! empty($settings['letter_intro_ads']) && is_array($settings['letter_intro_ads'])
+            ? $settings['letter_intro_ads']
+            : [];
+    }
+
     protected function defaultSettings()
     {
         return [
@@ -773,6 +855,7 @@ class ProductCatalogController extends Controller
             'description_limit' => 90,
             'products_per_page' => 12,
             'cover_image' => null,
+            'cover_category_images' => [],
             'cover_title_position' => 'middle',
             'advisor_name' => '',
             'advisor_phone' => '',
@@ -781,6 +864,7 @@ class ProductCatalogController extends Controller
             'advertising_image' => null,
             'advertising_position' => 'before_products',
             'advertising_items' => [],
+            'letter_intro_ads' => [],
             'payment_page_image' => null,
             'payment_bank_icon' => null,
             'payment_debit_icon' => null,
@@ -788,6 +872,8 @@ class ProductCatalogController extends Controller
             'payment_cash_icon' => null,
             'info_page_image' => null,
             'page_four_image' => null,
+            'extra_page_images' => [],
+            'final_page_image' => null,
             'payment_title' => 'MEDIOS DE PAGO',
             'payment_delivery_title' => 'EFECTIVO CONTRA ENTREGA, DEPOSITO O TRANSFERENCIA DIRECTA',
             'payment_bank_info' => '',

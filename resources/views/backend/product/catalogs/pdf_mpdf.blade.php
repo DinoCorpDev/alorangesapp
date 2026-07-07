@@ -109,6 +109,12 @@
     $paymentCashIcon  = $pageImage($settings['payment_cash_icon']);
     $infoImage        = $pageImage($settings['info_page_image']);
     $pageFourImage    = $pageImage($settings['page_four_image']);
+    $extraPageImages  = collect($settings['extra_page_images'] ?? [])->map($pageImage)->filter()->values();
+    $finalPageImage   = $pageImage($settings['final_page_image'] ?? null);
+
+    if ($extraPageImages->isEmpty() && $pageFourImage) {
+        $extraPageImages = collect([$pageFourImage]);
+    }
 
     $fallbackImage = $localPublicAsset('assets/img/item-placeholder.png') ?: ($fallbackImage ?? null);
 
@@ -122,6 +128,15 @@
             'image'  => $pageImage($item['image'] ?? null),
         ];
     })->filter(fn($i) => $i['letter'] && $i['image'])->groupBy('letter');
+    $letterIntroAdsByKey = collect($settings['letter_intro_ads'] ?? [])->map(function ($item) use ($pageImage) {
+        $categoryId = (int) ($item['category_id'] ?? 0);
+        $letter = \Illuminate\Support\Str::upper($item['letter'] ?? '');
+
+        return [
+            'key' => $categoryId . '|' . $letter,
+            'image' => $pageImage($item['image'] ?? null),
+        ];
+    })->filter(fn($i) => $i['key'] !== '0|' && $i['image'])->groupBy('key')->map(fn($items) => $items->first());
 
     $descriptionLimit = (int) ($settings['description_limit'] ?: 90);
 
@@ -373,150 +388,43 @@
 {{-- ═══════════════════════════════════════════════════════ --}}
 {{-- PÁGINA DE MEDIOS DE PAGO                                --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
-@if ($settings['show_payment_page'])
-    {!! $pageBreak() !!}
-    <div class="report-page">
-        @if ($paymentImage)
-            <img class="full-page-bg" src="{{ $paymentImage }}" alt="">
-        @endif
-        <div class="report-overlay" style="@if ($paymentImage) margin-top:-218mm; @else margin-top:58mm; @endif">
-            <div class="report-title">{{ $settings['payment_title'] ?: 'MEDIOS DE PAGO' }}</div>
-            <div class="report-accent"></div>
-
-            <div class="report-card">
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr>
-                        <td style="vertical-align:top;">
-                            <div class="report-card-title">{{ $settings['payment_delivery_title'] }}</div>
-                            <div class="report-card-body">{!! nl2br(e($settings['payment_bank_info'])) !!}</div>
-                        </td>
-                        @if ($paymentBankIcon)
-                            <td style="width:28mm; text-align:center; vertical-align:middle;">
-                                <img class="payment-icon" src="{{ $paymentBankIcon }}" alt="">
-                            </td>
-                        @endif
-                    </tr>
-                </table>
-            </div>
-
-            <table class="payment-method-table">
-                <tr>
-                    <td class="payment-method-card" style="width:50%;">
-                        <div class="payment-method-title">{{ $settings['payment_debit_title'] }}</div>
-                        @if ($paymentDebitIcon)
-                            <div style="text-align:center; margin-bottom:2mm;"><img class="payment-icon" src="{{ $paymentDebitIcon }}" alt=""></div>
-                        @endif
-                        <div class="report-card-body">{!! nl2br(e($settings['payment_debit_info'])) !!}</div>
-                    </td>
-                    <td class="payment-method-card" style="width:50%;">
-                        <div class="payment-method-title">{{ $settings['payment_credit_title'] }}</div>
-                        @if ($paymentCreditIcon)
-                            <div style="text-align:center; margin-bottom:2mm;"><img class="payment-icon" src="{{ $paymentCreditIcon }}" alt=""></div>
-                        @endif
-                        <div class="report-card-body">{!! nl2br(e($settings['payment_credit_info'])) !!}</div>
-                    </td>
-                </tr>
-            </table>
-
-            <div class="payment-cash-card">
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr>
-                        <td style="vertical-align:top;">
-                            <div class="payment-method-title">{{ $settings['payment_cash_title'] }}</div>
-                            <div class="report-card-body">{!! nl2br(e($settings['payment_cash_info'])) !!}</div>
-                        </td>
-                        @if ($paymentCashIcon)
-                            <td style="width:28mm; text-align:center; vertical-align:middle;">
-                                <img class="payment-icon" src="{{ $paymentCashIcon }}" alt="">
-                            </td>
-                        @endif
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-@endif
-
-{{-- ═══════════════════════════════════════════════════════ --}}
-{{-- PÁGINA DE INFORMACIÓN                                    --}}
-{{-- ═══════════════════════════════════════════════════════ --}}
-@if ($settings['show_info_page'])
-    {!! $pageBreak() !!}
-    <div class="report-page">
-        @if ($infoImage)
-            <img class="full-page-bg" src="{{ $infoImage }}" alt="">
-        @endif
-        <div class="report-overlay" style="@if ($infoImage) margin-top:-218mm; @else margin-top:58mm; @endif">
-            <div class="report-title">{{ $settings['info_page_title'] ?: 'INFORMACION' }}</div>
-            <div class="report-accent"></div>
-
-            @if (! empty($infoRows))
-                <table class="info-table">
-                    @foreach ($infoRows as $row)
-                        <tr>
-                            <td class="info-table-label">{{ $row['label'] ?? '' }}</td>
-                            <td>{{ $row['value'] ?? '' }}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            @else
-                <div class="report-card">
-                    <div class="report-card-body">&nbsp;</div>
-                </div>
-            @endif
-        </div>
-    </div>
-@endif
-
-@if (false && $settings['show_info_page'])
-    {!! $pageBreak() !!}
-    <div class="pdf-page" style="width:216mm; height:276mm; overflow:hidden;">
-        @if ($infoImage)
-            <img src="{{ $infoImage }}" style="display:block; width:216mm; height:276mm;" alt="">
-        @endif
-        <div style="@if ($infoImage) margin-top:-226mm; @else margin-top:50mm; @endif margin-left:20mm; width:176mm;">
-        <div class="info-title">{{ $settings['info_page_title'] ?: 'INFORMACIÓN' }}</div>
-
-        @if (! empty($infoRows))
-            <table class="info-table">
-                @foreach ($infoRows as $row)
-                    <tr>
-                        <td class="info-table-label">{{ $row['label'] ?? '' }}</td>
-                        <td>{{ $row['value'] ?? '' }}</td>
-                    </tr>
-                @endforeach
-            </table>
-        @else
-            <div style="border:1.2mm solid #008847; padding:6mm; min-height:20mm;"></div>
-        @endif
-        </div>
-    </div>
-@endif
-
-{{-- ═══════════════════════════════════════════════════════ --}}
-{{-- PÁGINA 4 (imagen opcional)                              --}}
-{{-- ═══════════════════════════════════════════════════════ --}}
-@if ($settings['show_page_four'] && $pageFourImage)
+@if ($settings['show_payment_page'] && $paymentImage)
     {!! $pageBreak() !!}
     <div class="pdf-page">
-        <img src="{{ $pageFourImage }}" style="display:block; width:216mm; height:276mm;" alt="">
+        <img class="full-page-bg" src="{{ $paymentImage }}" alt="">
     </div>
 @endif
 
-{{-- ═══════════════════════════════════════════════════════ --}}
-{{-- PÁGINAS DE PRODUCTOS                                     --}}
-{{-- ═══════════════════════════════════════════════════════ --}}
+@if ($settings['show_info_page'] && $infoImage)
+    {!! $pageBreak() !!}
+    <div class="pdf-page">
+        <img class="full-page-bg" src="{{ $infoImage }}" alt="">
+    </div>
+@endif
+
+@foreach ($extraPageImages as $extraPageImage)
+    {!! $pageBreak() !!}
+    <div class="pdf-page">
+        <img class="full-page-bg" src="{{ $extraPageImage }}" alt="">
+    </div>
+@endforeach
+
+{{-- Product pages --}}
 @foreach ($productsByCategory as $executiveCategoryGroup)
     @php
         $executiveCategoryName = $executiveCategoryGroup['category']
             ? $executiveCategoryGroup['category']->getTranslation('name')
             : '';
+        $executiveCategoryId = $executiveCategoryGroup['category']
+            ? $executiveCategoryGroup['category']->id
+            : null;
     @endphp
 
     @foreach ($executiveCategoryGroup['letter_groups'] as $letter => $letterProducts)
         @php
             $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
             $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
+            $letterIntroAd = $letterIntroAdsByKey->get($executiveCategoryId . '|' . $letter);
             $remainingLetterProducts = $letterProducts->values();
             $letterAdvertising = $advertisingByLetter->get($letter, collect())->values();
             $letterPages = collect();
@@ -538,6 +446,13 @@
                 }
             }
         @endphp
+
+        @if ($letterIntroAd)
+            {!! $pageBreak() !!}
+            <div class="pdf-page">
+                <img class="full-page-bg" src="{{ $letterIntroAd['image'] }}" alt="">
+            </div>
+        @endif
 
         @foreach ($letterPages as $letterPage)
             @php
@@ -626,6 +541,13 @@
         @endforeach
     @endforeach
 @endforeach
+
+@if ($finalPageImage)
+    {!! $pageBreak() !!}
+    <div class="pdf-page">
+        <img class="full-page-bg" src="{{ $finalPageImage }}" alt="">
+    </div>
+@endif
 
 @foreach ([] as $categoryGroup)
     @foreach ($categoryGroup['letter_groups'] as $letter => $letterProducts)

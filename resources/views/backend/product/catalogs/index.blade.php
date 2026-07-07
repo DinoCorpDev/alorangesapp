@@ -20,8 +20,45 @@
             $advertisingRows = [['image' => '', 'letter' => 'A']];
         }
 
+        $letterIntroAdRows = old('letter_intro_ad_images')
+            ? collect(old('letter_intro_ad_images'))->map(function ($image, $index) {
+                return [
+                    'image' => $image,
+                    'category_id' => old('letter_intro_ad_category_ids.' . $index),
+                    'letter' => old('letter_intro_ad_letters.' . $index),
+                ];
+            })->values()->all()
+            : ($settings['letter_intro_ads'] ?? []);
+
+        if (empty($letterIntroAdRows)) {
+            $letterIntroAdRows = [['image' => '', 'category_id' => '', 'letter' => 'A']];
+        }
+
         $coverTitlePosition = old('cover_title_position', $settings['cover_title_position'] ?? 'middle');
         $productsPerPage = (int) old('products_per_page', $settings['products_per_page'] ?? 12) === 20 ? 20 : 12;
+        $fullPageImageHint = translate('Recommended size') . ': 2550 x 3300 px - ' . translate('Letter size, vertical');
+        $advertisingImageHint = translate('Recommended size') . ': 1600 x 900 px - ' . translate('Horizontal image');
+        $selectedCoverImage = old('cover_image', $settings['cover_image'] ?? '');
+        $coverImageOptions = collect($settings['cover_category_images'] ?? [])->map(function ($item) use ($categories) {
+            $category = $categories->firstWhere('id', (int) ($item['category_id'] ?? 0));
+
+            return [
+                'category_id' => $item['category_id'] ?? '',
+                'category_name' => $category ? $category->getTranslation('name') : translate('Category'),
+                'image' => $item['image'] ?? '',
+            ];
+        })->filter(function ($item) {
+            return ! empty($item['image']);
+        })->values();
+
+        if ($selectedCoverImage && $coverImageOptions->where('image', $selectedCoverImage)->isEmpty()) {
+            $coverImageOptions->prepend([
+                'category_id' => '',
+                'category_name' => translate('Current catalog image'),
+                'image' => $selectedCoverImage,
+            ]);
+        }
+
         $catalogMessages = [
             'categoriesSelected' => translate('categories selected'),
             'productsSelected' => translate('products selected'),
@@ -398,14 +435,22 @@
                             <div class="col-lg-4">
                                 <div class="form-group mb-lg-0">
                                     <label>{{ translate('First Catalog Image') }}</label>
-                                    <div class="input-group" data-toggle="aizuploader" data-type="image">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                    @if ($coverImageOptions->isNotEmpty())
+                                        <select class="form-control aiz-selectpicker" name="cover_image" id="catalog-cover-image" data-live-search="true">
+                                            <option value="">{{ translate('Choose Cover Image') }}</option>
+                                            @foreach ($coverImageOptions as $coverImageOption)
+                                                <option value="{{ $coverImageOption['image'] }}" data-category-id="{{ $coverImageOption['category_id'] }}" @if ($selectedCoverImage === $coverImageOption['image']) selected @endif>
+                                                    {{ $coverImageOption['category_name'] }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted d-block mt-1">{{ translate('Manage cover images from Catalog Configuration') }}</small>
+                                    @else
+                                        <input type="hidden" name="cover_image" value="">
+                                        <div class="alert alert-soft-warning mb-0">
+                                            {{ translate('Configure cover images by category before choosing the first catalog image') }}
                                         </div>
-                                        <div class="form-control file-amount">{{ translate('Choose File') }}</div>
-                                        <input type="hidden" name="cover_image" class="selected-files" value="{{ old('cover_image', $settings['cover_image'] ?? '') }}">
-                                    </div>
-                                    <div class="file-preview box sm"></div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-lg-8">
@@ -518,6 +563,7 @@
                                                     <div class="form-control file-amount">{{ translate('Choose File') }}</div>
                                                     <input type="hidden" name="advertising_images[]" class="selected-files" value="{{ $advertisingRow['image'] ?? '' }}">
                                                 </div>
+                                                <small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small>
                                                 <div class="file-preview box sm"></div>
                                             </td>
                                             <td>
@@ -529,6 +575,68 @@
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-advertising-row" title="{{ translate('Delete') }}">
+                                                    <i class="las la-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="catalog-section catalog-section-soft">
+                        <div class="catalog-section-title">
+                            <div>
+                                <h6>{{ translate('Letter intro advertising') }}</h6>
+                                <p>{{ translate('Full-page image shown once before the selected category letter starts') }}</p>
+                            </div>
+                            <button type="button" class="btn btn-soft-primary btn-sm" id="add-letter-intro-ad-row">
+                                <i class="las la-plus"></i>
+                                {{ translate('Add Page') }}
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0" id="letter-intro-ad-table">
+                                <thead>
+                                    <tr>
+                                        <th>{{ translate('Full-page image') }}</th>
+                                        <th width="260">{{ translate('Category') }}</th>
+                                        <th width="150">{{ translate('Letter') }}</th>
+                                        <th width="80" class="text-center">{{ translate('Options') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($letterIntroAdRows as $letterIntroAdRow)
+                                        <tr class="letter-intro-ad-row">
+                                            <td>
+                                                <div class="input-group" data-toggle="aizuploader" data-type="image">
+                                                    <div class="input-group-prepend">
+                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                    </div>
+                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                    <input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value="{{ $letterIntroAdRow['image'] ?? '' }}">
+                                                </div>
+                                                <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
+                                                <div class="file-preview box sm"></div>
+                                            </td>
+                                            <td>
+                                                <select class="form-control aiz-selectpicker letter-intro-ad-category" name="letter_intro_ad_category_ids[]" data-live-search="true">
+                                                    <option value="">{{ translate('Choose Category') }}</option>
+                                                    @foreach ($categories as $category)
+                                                        <option value="{{ $category->id }}" @if ((string) ($letterIntroAdRow['category_id'] ?? '') === (string) $category->id) selected @endif>{{ $category->getTranslation('name') }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-control aiz-selectpicker" name="letter_intro_ad_letters[]">
+                                                    @foreach ($advertisingLetters as $advertisingLetter)
+                                                        <option value="{{ $advertisingLetter }}" @if (($letterIntroAdRow['letter'] ?? 'A') === $advertisingLetter) selected @endif>{{ $advertisingLetter }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="{{ translate('Delete') }}">
                                                     <i class="las la-trash"></i>
                                                 </button>
                                             </td>
@@ -713,6 +821,12 @@
     <script type="text/javascript">
         var selectedProductIds = @json($selectedProductIds);
         var advertisingLetterOptions = @json($advertisingLetters);
+        var catalogCategoryOptions = @json($categories->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'name' => $category->getTranslation('name'),
+            ];
+        })->values());
         var generateCatalogText = @json($isEdit ? translate('Update PDF Catalog') : translate('Generate PDF Catalog'));
         var catalogMessages = @json($catalogMessages);
 
@@ -730,15 +844,71 @@
             }).join('');
 
             return '<tr class="advertising-row">' +
-                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="advertising_images[]" class="selected-files" value=""></div><div class="file-preview box sm"></div></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="advertising_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small><div class="file-preview box sm"></div></td>' +
                 '<td><select class="form-control aiz-selectpicker" name="advertising_letters[]">' + options + '</select></td>' +
                 '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-advertising-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
+            '</tr>';
+        }
+
+        function categoryOptionsTemplate() {
+            return '<option value="">{{ translate('Choose Category') }}</option>' + catalogCategoryOptions.map(function(category) {
+                return '<option value="' + escapeHtml(category.id) + '">' + escapeHtml(category.name) + '</option>';
+            }).join('');
+        }
+
+        function letterIntroAdRowTemplate() {
+            var letterOptions = advertisingLetterOptions.map(function(letter) {
+                return '<option value="' + escapeHtml(letter) + '">' + escapeHtml(letter) + '</option>';
+            }).join('');
+
+            return '<tr class="letter-intro-ad-row">' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td><select class="form-control aiz-selectpicker letter-intro-ad-category" name="letter_intro_ad_category_ids[]" data-live-search="true">' + categoryOptionsTemplate() + '</select></td>' +
+                '<td><select class="form-control aiz-selectpicker" name="letter_intro_ad_letters[]">' + letterOptions + '</select></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
             '</tr>';
         }
 
         function refreshCategorySummary() {
             var count = ($('#catalog-category').val() || []).length;
             $('#selected-categories-count').text(count + ' ' + catalogMessages.categoriesSelected);
+        }
+
+        function refreshCoverImageOptions() {
+            var categoryIds = ($('#catalog-category').val() || []).map(String);
+            var coverSelect = $('#catalog-cover-image');
+
+            if (!coverSelect.length) { return; }
+
+            coverSelect.find('option').each(function() {
+                var categoryId = ($(this).data('category-id') || '').toString();
+                var isPlaceholder = $(this).val() === '';
+                var isSelected = $(this).is(':selected');
+                var shouldShow = isPlaceholder || categoryIds.length === 0 || categoryIds.indexOf(categoryId) !== -1 || isSelected;
+
+                $(this).prop('hidden', !shouldShow);
+            });
+
+            if ($.fn.selectpicker) { coverSelect.selectpicker('refresh'); }
+        }
+
+        function refreshLetterIntroCategoryOptions() {
+            var categoryIds = ($('#catalog-category').val() || []).map(String);
+
+            $('.letter-intro-ad-category').each(function() {
+                var categorySelect = $(this);
+
+                categorySelect.find('option').each(function() {
+                    var optionValue = ($(this).val() || '').toString();
+                    var isPlaceholder = optionValue === '';
+                    var isSelected = $(this).is(':selected');
+                    var shouldShow = isPlaceholder || categoryIds.length === 0 || categoryIds.indexOf(optionValue) !== -1 || isSelected;
+
+                    $(this).prop('hidden', !shouldShow);
+                });
+            });
+
+            if ($.fn.selectpicker) { $('.letter-intro-ad-category').selectpicker('refresh'); }
         }
 
         function refreshGenerateButton() {
@@ -834,6 +1004,8 @@
         function loadCatalogProducts() {
             var categoryIds = $('#catalog-category').val() || [];
             refreshCategorySummary();
+            refreshCoverImageOptions();
+            refreshLetterIntroCategoryOptions();
             $('#catalog-products').html(productEmptyState('las la-spinner la-spin', catalogMessages.loadingProductsTitle, catalogMessages.loadingProductsBody));
             $('#select-all-products').prop('checked', false).prop('disabled', true);
             $('#generate-catalog, #generate-catalog-bottom').prop('disabled', true);
@@ -873,6 +1045,28 @@
             $('#advertising-table tbody').append(advertisingRowTemplate());
             if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
         });
+
+        $('#add-letter-intro-ad-row').on('click', function() {
+            $('#letter-intro-ad-table tbody').append(letterIntroAdRowTemplate());
+            refreshLetterIntroCategoryOptions();
+            if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
+        });
+
+        $(document).on('click', '.remove-letter-intro-ad-row', function() {
+            if ($('.letter-intro-ad-row').length === 1) {
+                var row = $(this).closest('.letter-intro-ad-row');
+                row.find('.selected-files').val('');
+                row.find('.file-amount').text('{{ translate('Choose File') }}');
+                row.find('.file-preview').empty();
+                row.find('select').val('');
+                row.find('select[name="letter_intro_ad_letters[]"]').val('A');
+                if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
+                return;
+            }
+
+            $(this).closest('.letter-intro-ad-row').remove();
+        });
+
         $(document).on('click', '.remove-advertising-row', function() {
             if ($('.advertising-row').length === 1) {
                 var row = $(this).closest('.advertising-row');
@@ -895,6 +1089,8 @@
         });
 
         refreshCategorySummary();
+        refreshCoverImageOptions();
+        refreshLetterIntroCategoryOptions();
         refreshGenerateButton();
         if (($('#catalog-category').val() || []).length > 0) { loadCatalogProducts(); }
     </script>
