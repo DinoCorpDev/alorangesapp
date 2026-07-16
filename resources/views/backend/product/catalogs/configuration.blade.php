@@ -34,14 +34,14 @@
             $extraPageImages = [''];
         }
 
-        $fullPageImageHint = translate('Recommended size') . ': 2550 x 3300 px - ' . translate('Letter size, vertical');
+        $fullPageImageHint = 'Tamano recomendado: 2550 x 3300 px - carta vertical';
 
         $fontFamilies = ['DejaVu Sans', 'Arial', 'Georgia', 'Times New Roman', 'Verdana', 'Tahoma', 'Courier New'];
         $typographyFields = [
-            ['label' => translate('Product title'), 'family' => 'product_title_font_family', 'size' => 'product_title_font_size', 'default_size' => 12],
-            ['label' => translate('Description'), 'family' => 'product_description_font_family', 'size' => 'product_description_font_size', 'default_size' => 10],
-            ['label' => translate('Price'), 'family' => 'product_price_font_family', 'size' => 'product_price_font_size', 'default_size' => 16],
-            ['label' => translate('Reference'), 'family' => 'product_reference_font_family', 'size' => 'product_reference_font_size', 'default_size' => 12],
+            ['label' => 'Titulo del producto', 'family' => 'product_title_font_family', 'size' => 'product_title_font_size', 'default_size' => 12],
+            ['label' => 'Descripcion', 'family' => 'product_description_font_family', 'size' => 'product_description_font_size', 'default_size' => 10],
+            ['label' => 'Precio', 'family' => 'product_price_font_family', 'size' => 'product_price_font_size', 'default_size' => 16],
+            ['label' => 'Referencia', 'family' => 'product_reference_font_family', 'size' => 'product_reference_font_size', 'default_size' => 12],
         ];
     @endphp
 
@@ -117,15 +117,15 @@
         <div class="aiz-titlebar text-left mt-2 mb-3">
             <div class="row align-items-center">
                 <div class="col-md-7">
-                    <h1 class="h3">{{ translate('Catalog Configuration') }}</h1>
+                    <h1 class="h3">Configuracion del catalogo</h1>
                     <p class="mb-0 text-muted">
-                        {{ $catalog ? $catalog['name'] : translate('Default configuration for new catalogs') }}
+                        {{ $catalog ? $catalog['name'] : 'Configuracion base para nuevos catalogos' }}
                     </p>
                 </div>
                 <div class="col-md-5 text-md-right mt-3 mt-md-0">
                     <a href="{{ route('product_catalogs.index') }}" class="btn btn-soft-secondary">
                         <i class="las la-arrow-left"></i>
-                        {{ translate('Back to PDF Catalogs') }}
+                        Volver a catalogos PDF
                     </a>
                 </div>
             </div>
@@ -142,22 +142,22 @@
                     <ul class="nav nav-tabs config-tabs mb-4" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" data-toggle="tab" href="#config-pages" role="tab">
-                                <i class="las la-file-alt"></i> {{ translate('Pages') }}
+                                <i class="las la-file-alt"></i> Paginas
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-toggle="tab" href="#config-cover-images" role="tab">
-                                <i class="las la-image"></i> {{ translate('Catalog Covers') }}
+                                <i class="las la-image"></i> Portadas
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-toggle="tab" href="#config-products" role="tab">
-                                <i class="las la-box"></i> {{ translate('Products') }}
+                                <i class="las la-box"></i> Productos
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-toggle="tab" href="#config-style" role="tab">
-                                <i class="las la-palette"></i> {{ translate('Style') }}
+                                <i class="las la-palette"></i> Estilo
                             </a>
                         </li>
                     </ul>
@@ -169,22 +169,22 @@
                                     <div class="config-panel">
                                         <div class="config-toggle-row">
                                             <div>
-                                                <h6>{{ translate('Payment page') }}</h6>
-                                                <p>{{ translate('Only one full-page image will be rendered') }}</p>
+                                                <h6>Pagina de medios de pago</h6>
+                                                <p>Se mostrara una sola imagen a pagina completa.</p>
                                             </div>
                                             <label class="aiz-checkbox mb-0">
                                                 <input type="checkbox" name="show_payment_page" value="1" @if (old('show_payment_page', $settings['show_payment_page'] ?? true)) checked @endif>
                                                 <span class="aiz-square-check"></span>
-                                                <span>{{ translate('Show') }}</span>
+                                                <span>Mostrar</span>
                                             </label>
                                         </div>
                                         <div class="form-group mb-0 compact-uploader">
-                                            <label>{{ translate('Payment section image') }}</label>
+                                            <label>Imagen de medios de pago</label>
                                             <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                 <div class="input-group-prepend">
-                                                    <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                    <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                                 </div>
-                                                <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                <div class="form-control file-amount">Elegir archivo</div>
                                                 <input type="hidden" name="payment_page_image" class="selected-files" value="{{ old('payment_page_image', $settings['payment_page_image'] ?? '') }}">
                                             </div>
                                             <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
@@ -197,22 +197,22 @@
                                     <div class="config-panel">
                                         <div class="config-toggle-row">
                                             <div>
-                                                <h6>{{ translate('Information page') }}</h6>
-                                                <p>{{ translate('Only one full-page image will be rendered') }}</p>
+                                                <h6>Pagina de informacion</h6>
+                                                <p>Se mostrara una sola imagen a pagina completa.</p>
                                             </div>
                                             <label class="aiz-checkbox mb-0">
                                                 <input type="checkbox" name="show_info_page" value="1" @if (old('show_info_page', $settings['show_info_page'] ?? true)) checked @endif>
                                                 <span class="aiz-square-check"></span>
-                                                <span>{{ translate('Show') }}</span>
+                                                <span>Mostrar</span>
                                             </label>
                                         </div>
                                         <div class="form-group mb-0 compact-uploader">
-                                            <label>{{ translate('Information table image') }}</label>
+                                            <label>Imagen de informacion</label>
                                             <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                 <div class="input-group-prepend">
-                                                    <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                    <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                                 </div>
-                                                <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                <div class="form-control file-amount">Elegir archivo</div>
                                                 <input type="hidden" name="info_page_image" class="selected-files" value="{{ old('info_page_image', $settings['info_page_image'] ?? '') }}">
                                             </div>
                                             <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
@@ -225,20 +225,20 @@
                                     <div class="config-panel">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
                                             <div>
-                                                <h6 class="mb-1">{{ translate('Extra full-page images') }}</h6>
-                                                <p class="mb-0 text-muted">{{ translate('Add as many full-page image pages as the catalog needs') }}</p>
+                                                <h6 class="mb-1">Paginas extra</h6>
+                                                <p class="mb-0 text-muted">Agrega todas las paginas de imagen completa que necesite el catalogo.</p>
                                             </div>
                                             <button type="button" class="btn btn-soft-primary btn-sm" id="add-extra-page-row">
                                                 <i class="las la-plus"></i>
-                                                {{ translate('Add Page') }}
+                                                Agregar pagina
                                             </button>
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table table-bordered mb-0" id="extra-pages-table">
                                                 <thead>
                                                     <tr>
-                                                        <th>{{ translate('Full-page image') }}</th>
-                                                        <th width="80" class="text-center">{{ translate('Options') }}</th>
+                                                        <th>Imagen a pagina completa</th>
+                                                        <th width="80" class="text-center">Opciones</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -247,16 +247,16 @@
                                                             <td>
                                                                 <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                                     <div class="input-group-prepend">
-                                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                                                     </div>
-                                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                                    <div class="form-control file-amount">Elegir archivo</div>
                                                                     <input type="hidden" name="extra_page_images[]" class="selected-files" value="{{ $extraPageImage }}">
                                                                 </div>
                                                                 <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                                                 <div class="file-preview box sm"></div>
                                                             </td>
                                                             <td class="text-center">
-                                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-extra-page-row" title="{{ translate('Delete') }}">
+                                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-extra-page-row" title="Eliminar">
                                                                     <i class="las la-trash"></i>
                                                                 </button>
                                                             </td>
@@ -270,15 +270,15 @@
 
                                 <div class="col-lg-6">
                                     <div class="config-panel mb-lg-0">
-                                        <h6>{{ translate('Last catalog page') }}</h6>
-                                        <p>{{ translate('Optional full-page image rendered at the end of the catalog') }}</p>
+                                        <h6>Ultima pagina del catalogo</h6>
+                                        <p>Imagen opcional a pagina completa al final del PDF.</p>
                                         <div class="form-group mb-0 compact-uploader">
-                                            <label>{{ translate('Last page image') }}</label>
+                                            <label>Imagen final</label>
                                             <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                 <div class="input-group-prepend">
-                                                    <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                    <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                                 </div>
-                                                <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                <div class="form-control file-amount">Elegir archivo</div>
                                                 <input type="hidden" name="final_page_image" class="selected-files" value="{{ old('final_page_image', $settings['final_page_image'] ?? '') }}">
                                             </div>
                                             <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
@@ -291,13 +291,13 @@
                                     <div class="config-panel mb-0">
                                         <div class="config-toggle-row mb-0">
                                             <div>
-                                                <h6>{{ translate('Product prices') }}</h6>
-                                                <p>{{ translate('Show or hide product prices') }}</p>
+                                                <h6>Precios de productos</h6>
+                                                <p>Activa o desactiva los precios en las tarjetas.</p>
                                             </div>
                                             <label class="aiz-checkbox mb-0">
                                                 <input type="checkbox" name="show_prices" value="1" @if (old('show_prices', $settings['show_prices'] ?? true)) checked @endif>
                                                 <span class="aiz-square-check"></span>
-                                                <span>{{ translate('Show') }}</span>
+                                                <span>Mostrar</span>
                                             </label>
                                         </div>
                                     </div>
@@ -309,21 +309,21 @@
                             <div class="config-panel-white mb-0">
                                 <div class="d-flex align-items-center justify-content-between mb-3">
                                     <div>
-                                        <h5 class="config-section-title">{{ translate('First catalog image by category') }}</h5>
-                                        <p class="config-section-subtitle">{{ translate('These images will be available when creating or editing a PDF catalog') }}</p>
+                                        <h5 class="config-section-title">Portadas por categoria</h5>
+                                        <p class="config-section-subtitle">Estas imagenes estaran disponibles al crear o editar un catalogo PDF.</p>
                                     </div>
                                     <button type="button" class="btn btn-soft-primary btn-sm" id="add-cover-image-row">
                                         <i class="las la-plus"></i>
-                                        {{ translate('Add Cover') }}
+                                        Agregar portada
                                     </button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-bordered mb-0" id="cover-images-table">
                                         <thead>
                                             <tr>
-                                                <th width="35%">{{ translate('Category') }}</th>
-                                                <th>{{ translate('First Catalog Image') }}</th>
-                                                <th width="80" class="text-center">{{ translate('Options') }}</th>
+                                                <th width="35%">Categoria</th>
+                                                <th>Primera imagen del catalogo</th>
+                                                <th width="80" class="text-center">Opciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -331,7 +331,7 @@
                                                 <tr class="cover-image-row">
                                                     <td>
                                                         <select class="form-control aiz-selectpicker" name="cover_category_ids[]" data-live-search="true">
-                                                            <option value="">{{ translate('Choose Category') }}</option>
+                                                            <option value="">Selecciona una categoria</option>
                                                             @foreach ($categories as $category)
                                                                 <option value="{{ $category->id }}" @if ((string) ($coverImageRow['category_id'] ?? '') === (string) $category->id) selected @endif>{{ $category->getTranslation('name') }}</option>
                                                             @endforeach
@@ -340,16 +340,16 @@
                                                     <td>
                                                         <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                             <div class="input-group-prepend">
-                                                                <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                                <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                                             </div>
-                                                            <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                            <div class="form-control file-amount">Elegir archivo</div>
                                                             <input type="hidden" name="cover_category_images[]" class="selected-files" value="{{ $coverImageRow['image'] ?? '' }}">
                                                         </div>
                                                         <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                                         <div class="file-preview box sm"></div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-cover-image-row" title="{{ translate('Delete') }}">
+                                                        <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-cover-image-row" title="Eliminar">
                                                             <i class="las la-trash"></i>
                                                         </button>
                                                     </td>
@@ -363,11 +363,11 @@
 
                         <div class="tab-pane fade" id="config-products" role="tabpanel">
                             <div class="config-panel-white">
-                                <h5 class="config-section-title">{{ translate('Product layout') }}</h5>
+                                <h5 class="config-section-title">Distribucion de productos</h5>
                                 <div class="row gutters-10 mt-3">
                                     <div class="col-lg-4">
                                         <div class="form-group mb-lg-0">
-                                            <label>{{ translate('Description character limit') }}</label>
+                                            <label>Limite de caracteres de descripcion</label>
                                             <input type="number" class="form-control" name="description_limit" min="40" max="220" value="{{ old('description_limit', $settings['description_limit'] ?? 90) }}">
                                         </div>
                                     </div>
@@ -375,14 +375,14 @@
                             </div>
 
                             <div class="config-panel-white mb-0">
-                                <h5 class="config-section-title">{{ translate('Product typography') }}</h5>
+                                <h5 class="config-section-title">Tipografia de productos</h5>
                                 <div class="table-responsive mt-3">
                                     <table class="table table-bordered typography-table mb-0">
                                         <thead>
                                             <tr>
-                                                <th>{{ translate('Element') }}</th>
-                                                <th width="260">{{ translate('Font family') }}</th>
-                                                <th width="160">{{ translate('Font size') }}</th>
+                                                <th>Elemento</th>
+                                                <th width="260">Tipo de letra</th>
+                                                <th width="160">Tamano</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -409,15 +409,15 @@
 
                         <div class="tab-pane fade" id="config-style" role="tabpanel">
                             <div class="config-panel-white mb-0">
-                                <h5 class="config-section-title">{{ translate('Letter colors') }}</h5>
+                                <h5 class="config-section-title">Colores por letra</h5>
                                 <div class="row gutters-10 mt-3">
                                     @foreach ($letters as $letter)
                                         <div class="col-xl-2 col-md-3 col-6">
                                             <div class="letter-color-cell">
                                                 <label class="mb-2">{{ $letter }}</label>
                                                 <div class="d-flex">
-                                                    <input type="color" class="form-control mr-1" name="product_box_colors[{{ $letter }}]" value="{{ old('product_box_colors.' . $letter, $settings['product_box_colors'][$letter] ?? $letterPalette[$letter] ?? '#f36f21') }}" title="{{ translate('Box color') }}">
-                                                    <input type="color" class="form-control" name="product_text_colors[{{ $letter }}]" value="{{ old('product_text_colors.' . $letter, $settings['product_text_colors'][$letter] ?? '#ffffff') }}" title="{{ translate('Text color') }}">
+                                                    <input type="color" class="form-control mr-1" name="product_box_colors[{{ $letter }}]" value="{{ old('product_box_colors.' . $letter, $settings['product_box_colors'][$letter] ?? $letterPalette[$letter] ?? '#f36f21') }}" title="Color del recuadro">
+                                                    <input type="color" class="form-control" name="product_text_colors[{{ $letter }}]" value="{{ old('product_text_colors.' . $letter, $settings['product_text_colors'][$letter] ?? '#ffffff') }}" title="Color del texto">
                                                 </div>
                                             </div>
                                         </div>
@@ -432,7 +432,7 @@
             <div class="config-sticky-actions text-right">
                 <button type="submit" class="btn btn-primary">
                     <i class="las la-save"></i>
-                    {{ translate('Save Configuration') }}
+                    Guardar configuracion
                 </button>
             </div>
         </form>
@@ -463,14 +463,14 @@
         syncConfigToggles();
 
         function coverImageRowTemplate() {
-            var options = '<option value="">{{ translate('Choose Category') }}</option>' + coverCategoryOptions.map(function(category) {
+            var options = '<option value="">Selecciona una categoria</option>' + coverCategoryOptions.map(function(category) {
                 return '<option value="' + escapeHtml(category.id) + '">' + escapeHtml(category.name) + '</option>';
             }).join('');
 
             return '<tr class="cover-image-row">' +
                 '<td><select class="form-control aiz-selectpicker" name="cover_category_ids[]" data-live-search="true">' + options + '</select></td>' +
-                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="cover_category_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
-                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-cover-image-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="cover_category_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-cover-image-row" title="Eliminar"><i class="las la-trash"></i></button></td>' +
             '</tr>';
         }
 
@@ -484,7 +484,7 @@
                 var row = $(this).closest('.cover-image-row');
                 row.find('select').val('');
                 row.find('.selected-files').val('');
-                row.find('.file-amount').text('{{ translate('Choose File') }}');
+                row.find('.file-amount').text('Elegir archivo');
                 row.find('.file-preview').empty();
                 if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
                 return;
@@ -495,8 +495,8 @@
 
         function extraPageRowTemplate() {
             return '<tr class="extra-page-row">' +
-                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="extra_page_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
-                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-extra-page-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="extra_page_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-extra-page-row" title="Eliminar"><i class="las la-trash"></i></button></td>' +
             '</tr>';
         }
 
@@ -508,7 +508,7 @@
             if ($('.extra-page-row').length === 1) {
                 var row = $(this).closest('.extra-page-row');
                 row.find('.selected-files').val('');
-                row.find('.file-amount').text('{{ translate('Choose File') }}');
+                row.find('.file-amount').text('Elegir archivo');
                 row.find('.file-preview').empty();
                 return;
             }

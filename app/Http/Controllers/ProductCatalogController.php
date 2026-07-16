@@ -250,7 +250,12 @@ class ProductCatalogController extends Controller
         $categories = Category::orderBy('order_level')->orderBy('name')->get();
         $catalogs = collect($this->catalogs())->sortByDesc('created_at')->values();
         $sharedBlocks = $this->sharedBlocksConfig();
-        $settings = array_merge($this->defaultSettings(), $catalog['settings'] ?? []);
+        $defaultSettings = $this->catalogDefaultsConfig();
+        $settings = array_merge($defaultSettings, $catalog['settings'] ?? []);
+
+        if (empty($settings['cover_category_images']) && ! empty($defaultSettings['cover_category_images'])) {
+            $settings['cover_category_images'] = $defaultSettings['cover_category_images'];
+        }
         $mode = $catalog ? 'edit' : 'create';
 
         return view('backend.product.catalogs.index', compact('categories', 'catalogs', 'catalog', 'sharedBlocks', 'settings', 'mode'));

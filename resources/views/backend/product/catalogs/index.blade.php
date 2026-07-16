@@ -36,15 +36,15 @@
 
         $coverTitlePosition = old('cover_title_position', $settings['cover_title_position'] ?? 'middle');
         $productsPerPage = (int) old('products_per_page', $settings['products_per_page'] ?? 12) === 20 ? 20 : 12;
-        $fullPageImageHint = translate('Recommended size') . ': 2550 x 3300 px - ' . translate('Letter size, vertical');
-        $advertisingImageHint = translate('Recommended size') . ': 1600 x 900 px - ' . translate('Horizontal image');
+        $fullPageImageHint = 'Tamano recomendado: 2550 x 3300 px - carta vertical';
+        $advertisingImageHint = 'Tamano recomendado: 1600 x 900 px - imagen horizontal';
         $selectedCoverImage = old('cover_image', $settings['cover_image'] ?? '');
         $coverImageOptions = collect($settings['cover_category_images'] ?? [])->map(function ($item) use ($categories) {
             $category = $categories->firstWhere('id', (int) ($item['category_id'] ?? 0));
 
             return [
                 'category_id' => $item['category_id'] ?? '',
-                'category_name' => $category ? $category->getTranslation('name') : translate('Category'),
+                'category_name' => $category ? $category->getTranslation('name') : 'Categoria',
                 'image' => $item['image'] ?? '',
             ];
         })->filter(function ($item) {
@@ -54,23 +54,23 @@
         if ($selectedCoverImage && $coverImageOptions->where('image', $selectedCoverImage)->isEmpty()) {
             $coverImageOptions->prepend([
                 'category_id' => '',
-                'category_name' => translate('Current catalog image'),
+                'category_name' => 'Imagen actual del catalogo',
                 'image' => $selectedCoverImage,
             ]);
         }
 
         $catalogMessages = [
-            'categoriesSelected' => translate('categories selected'),
-            'productsSelected' => translate('products selected'),
-            'selectProductsHint' => translate('Select products to enable this button'),
-            'selectCategoriesTitle' => translate('Select categories to load products'),
-            'selectCategoriesBody' => translate('The product list will appear here grouped by category and letter'),
-            'loadingProductsTitle' => translate('Loading products'),
-            'loadingProductsBody' => translate('Please wait while the category products are loaded'),
-            'noProductsTitle' => translate('No products found for the selected categories'),
-            'noProductsBody' => translate('Try selecting a different category'),
-            'loadErrorTitle' => translate('Products could not be loaded'),
-            'loadErrorBody' => translate('Please try again or review the selected categories'),
+            'categoriesSelected' => 'categorias seleccionadas',
+            'productsSelected' => 'productos seleccionados',
+            'selectProductsHint' => 'Selecciona productos para habilitar este boton',
+            'selectCategoriesTitle' => 'Selecciona categorias para cargar productos',
+            'selectCategoriesBody' => 'La lista aparecera agrupada por categoria y letra',
+            'loadingProductsTitle' => 'Cargando productos',
+            'loadingProductsBody' => 'Espera un momento mientras se cargan los productos',
+            'noProductsTitle' => 'No se encontraron productos en las categorias seleccionadas',
+            'noProductsBody' => 'Intenta seleccionar otra categoria',
+            'loadErrorTitle' => 'No se pudieron cargar los productos',
+            'loadErrorBody' => 'Intenta nuevamente o revisa las categorias seleccionadas',
         ];
     @endphp
 
@@ -136,6 +136,31 @@
         .catalog-index-shell .catalog-section-soft {
             background: #f8fafc;
         }
+        .catalog-index-shell .catalog-section-focus {
+            border-color: #fed7aa;
+            background: #fffaf5;
+        }
+        .catalog-index-shell .section-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #f36f21;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .catalog-index-shell .section-kicker span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            color: #fff;
+            background: #f36f21;
+            font-size: 12px;
+        }
         .catalog-index-shell .catalog-section-title {
             display: flex;
             align-items: flex-start;
@@ -190,6 +215,15 @@
             font-size: 32px;
             margin-bottom: 8px;
         }
+        .catalog-index-shell .catalog-tip {
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            background: #fffbeb;
+            color: #92400e;
+            padding: 10px 12px;
+            margin-top: 10px;
+        }
+        .catalog-index-shell .catalog-tip i { margin-right: 6px; }
         .catalog-index-shell .catalog-product-toolbar {
             display: flex;
             align-items: center;
@@ -350,21 +384,21 @@
         <div class="aiz-titlebar text-left mt-2 mb-3">
             <div class="row align-items-center">
                 <div class="col-lg-7">
-                    <h1 class="h3">{{ translate('PDF Catalogs') }}</h1>
+                    <h1 class="h3">Catalogos PDF</h1>
                     <p class="mb-0 text-muted">
-                        {{ translate('Create, edit and download product catalogs from one place') }}
+                        Crea, edita y descarga catalogos de productos desde un solo lugar.
                     </p>
                 </div>
                 <div class="col-lg-5 text-lg-right mt-3 mt-lg-0">
                     @if ($isEdit)
                         <a href="{{ route('product_catalogs.index') }}" class="btn btn-soft-secondary mr-2">
                             <i class="las la-plus"></i>
-                            {{ translate('Create New Catalog') }}
+                            Crear nuevo catalogo
                         </a>
                     @endif
                     <a class="btn btn-soft-primary" href="{{ $isEdit ? route('product_catalogs.configuration', $catalog['id']) : route('product_catalogs.configuration.defaults') }}">
                         <i class="las la-cog"></i>
-                        {{ translate('Catalog Configuration') }}
+                        Configuracion del catalogo
                     </a>
                 </div>
             </div>
@@ -375,46 +409,46 @@
                 <div class="catalog-flow-step">
                     <span>1</span>
                     <div>
-                        <strong>{{ translate('Cover') }}</strong>
-                        <small>{{ translate('Image, title and advisor') }}</small>
+                        <strong>Portada</strong>
+                        <small>Imagen, titulo y asesor</small>
                     </div>
                 </div>
                 <div class="catalog-flow-step">
                     <span>2</span>
                     <div>
-                        <strong>{{ translate('Categories') }}</strong>
-                        <small>{{ translate('Choose the product groups') }}</small>
+                        <strong>Categorias</strong>
+                        <small>Grupos de productos</small>
                     </div>
                 </div>
                 <div class="catalog-flow-step">
                     <span>3</span>
                     <div>
-                        <strong>{{ translate('Products') }}</strong>
-                        <small>{{ translate('Search and select items') }}</small>
+                        <strong>Productos</strong>
+                        <small>Buscar y seleccionar</small>
                     </div>
                 </div>
                 <div class="catalog-flow-step">
                     <span>4</span>
                     <div>
-                        <strong>{{ translate('PDF') }}</strong>
-                        <small>{{ translate('Generate or update the file') }}</small>
+                        <strong>PDF</strong>
+                        <small>Generar archivo</small>
                     </div>
                 </div>
             </div>
             <p class="catalog-helper mb-0">
-                {{ translate('Start by choosing categories. Products load automatically and you can select them one by one or all visible results at once.') }}
+                Selecciona las categorias, elige la portada y marca los productos que iran en el catalogo.
             </p>
         </div>
 
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <div>
-                    <h5 class="mb-0 h6">{{ $isEdit ? translate('Edit Catalog') : translate('Create Catalog') }}</h5>
+                    <h5 class="mb-0 h6">{{ $isEdit ? 'Editar catalogo' : 'Crear catalogo' }}</h5>
                     <small class="text-muted">
-                        {{ $isEdit ? translate('Adjust the catalog details and regenerate the PDF') : translate('Complete the sections below to generate a new PDF') }}
+                        {{ $isEdit ? 'Ajusta la informacion y vuelve a generar el PDF' : 'Completa las secciones para generar un nuevo PDF' }}
                     </small>
                 </div>
-                <span class="catalog-badge">{{ $isEdit ? translate('Editing') : translate('New') }}</span>
+                <span class="catalog-badge">{{ $isEdit ? 'Editando' : 'Nuevo' }}</span>
             </div>
             <div class="card-body">
                 <form action="{{ $isEdit ? route('product_catalogs.update', $catalog['id']) : route('product_catalogs.store') }}" method="POST" id="catalog-form">
@@ -423,32 +457,37 @@
                         @method('PUT')
                     @endif
 
-                    <div class="catalog-section catalog-section-soft">
+                    <div class="catalog-section catalog-section-focus">
                         <div class="catalog-section-title">
                             <div>
-                                <h6>{{ translate('Catalog Cover') }}</h6>
-                                <p>{{ translate('This information appears on the first page of the catalog') }}</p>
+                                <div class="section-kicker"><span>1</span> Portada</div>
+                                <h6>Datos de la primera pagina</h6>
+                                <p>Elige una portada configurada por categoria y completa la informacion del asesor.</p>
                             </div>
                         </div>
 
                         <div class="row gutters-10">
                             <div class="col-lg-4">
                                 <div class="form-group mb-lg-0">
-                                    <label>{{ translate('First Catalog Image') }}</label>
+                                    <label>Primera imagen del catalogo</label>
                                     @if ($coverImageOptions->isNotEmpty())
                                         <select class="form-control aiz-selectpicker" name="cover_image" id="catalog-cover-image" data-live-search="true">
-                                            <option value="">{{ translate('Choose Cover Image') }}</option>
+                                            <option value="">Selecciona una portada</option>
                                             @foreach ($coverImageOptions as $coverImageOption)
                                                 <option value="{{ $coverImageOption['image'] }}" data-category-id="{{ $coverImageOption['category_id'] }}" @if ($selectedCoverImage === $coverImageOption['image']) selected @endif>
                                                     {{ $coverImageOption['category_name'] }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <small class="text-muted d-block mt-1">{{ translate('Manage cover images from Catalog Configuration') }}</small>
+                                        <small class="text-muted d-block mt-1">Estas imagenes se administran desde Configuracion del catalogo.</small>
+                                        <div class="catalog-tip d-none" id="catalog-cover-empty-tip">
+                                            <i class="las la-info-circle"></i>
+                                            No hay portadas configuradas para las categorias seleccionadas. Puedes elegir otra categoria o agregar la portada en Configuracion del catalogo.
+                                        </div>
                                     @else
                                         <input type="hidden" name="cover_image" value="">
                                         <div class="alert alert-soft-warning mb-0">
-                                            {{ translate('Configure cover images by category before choosing the first catalog image') }}
+                                            Primero configura portadas por categoria en Configuracion del catalogo.
                                         </div>
                                     @endif
                                 </div>
@@ -457,35 +496,35 @@
                                 <div class="row gutters-10">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{ translate('Title Position') }}</label>
+                                            <label>Posicion del titulo</label>
                                             <select class="form-control aiz-selectpicker" name="cover_title_position">
-                                                <option value="top" @if ($coverTitlePosition === 'top') selected @endif>{{ translate('Top') }}</option>
-                                                <option value="middle" @if ($coverTitlePosition === 'middle') selected @endif>{{ translate('Middle') }}</option>
-                                                <option value="bottom" @if ($coverTitlePosition === 'bottom') selected @endif>{{ translate('Bottom') }}</option>
+                                                <option value="top" @if ($coverTitlePosition === 'top') selected @endif>Arriba</option>
+                                                <option value="middle" @if ($coverTitlePosition === 'middle') selected @endif>Centro</option>
+                                                <option value="bottom" @if ($coverTitlePosition === 'bottom') selected @endif>Abajo</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{ translate('Advisor Name') }}</label>
-                                            <input type="text" class="form-control" name="advisor_name" value="{{ old('advisor_name', $settings['advisor_name'] ?? '') }}" placeholder="{{ translate('Advisor Name') }}">
+                                            <label>Nombre del asesor</label>
+                                            <input type="text" class="form-control" name="advisor_name" value="{{ old('advisor_name', $settings['advisor_name'] ?? '') }}" placeholder="Nombre del asesor">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{ translate('Advisor Phone') }}</label>
-                                            <input type="text" class="form-control" name="advisor_phone" value="{{ old('advisor_phone', $settings['advisor_phone'] ?? '') }}" placeholder="{{ translate('Advisor Phone') }}">
+                                            <label>Telefono del asesor</label>
+                                            <input type="text" class="form-control" name="advisor_phone" value="{{ old('advisor_phone', $settings['advisor_phone'] ?? '') }}" placeholder="Telefono del asesor">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-md-0">
-                                            <label>{{ translate('Advisor Email') }} 1</label>
+                                            <label>Correo del asesor 1</label>
                                             <input type="email" class="form-control" name="advisor_email_1" value="{{ old('advisor_email_1', $settings['advisor_email_1'] ?? '') }}" placeholder="correo@ejemplo.com">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-0">
-                                            <label>{{ translate('Advisor Email') }} 2</label>
+                                            <label>Correo del asesor 2</label>
                                             <input type="email" class="form-control" name="advisor_email_2" value="{{ old('advisor_email_2', $settings['advisor_email_2'] ?? '') }}" placeholder="correo@ejemplo.com">
                                         </div>
                                     </div>
@@ -497,16 +536,17 @@
                     <div class="catalog-section">
                         <div class="catalog-section-title">
                             <div>
-                                <h6>{{ translate('Catalog Details') }}</h6>
-                                <p>{{ translate('Choose one or more categories and name the catalog') }}</p>
+                                <div class="section-kicker"><span>2</span> Datos</div>
+                                <h6>Categorias y nombre del catalogo</h6>
+                                <p>Selecciona una o varias categorias para cargar los productos disponibles.</p>
                             </div>
-                            <small class="text-muted" id="selected-categories-count">0 {{ translate('categories selected') }}</small>
+                            <small class="text-muted" id="selected-categories-count">0 categorias seleccionadas</small>
                         </div>
 
                         <div class="row gutters-10 align-items-end">
                             <div class="col-lg-5">
                                 <div class="form-group mb-lg-0">
-                                    <label>{{ translate('Categories') }}</label>
+                                    <label>Categorias</label>
                                     <select class="form-control aiz-selectpicker" name="category_ids[]" id="catalog-category" data-live-search="true" data-actions-box="true" multiple required>
                                         @foreach ($categories as $category)
                                             <option value="{{ $category->id }}" @if (in_array((string) $category->id, $selectedCategoryIds)) selected @endif>{{ $category->getTranslation('name') }}</option>
@@ -516,17 +556,17 @@
                             </div>
                             <div class="col-lg-4">
                                 <div class="form-group mb-lg-0">
-                                    <label>{{ translate('Catalog Name') }}</label>
-                                    <input type="text" class="form-control" name="name" value="{{ old('name', $catalog['name'] ?? '') }}" placeholder="{{ translate('Catalog Name') }}">
+                                    <label>Nombre del catalogo</label>
+                                    <input type="text" class="form-control" name="name" value="{{ old('name', $catalog['name'] ?? '') }}" placeholder="Nombre del catalogo">
                                 </div>
                             </div>
                             <div class="col-lg-3">
                                 <div class="form-group mb-0">
                                     <button type="submit" class="btn btn-primary btn-block" id="generate-catalog" disabled>
                                         <i class="las la-file-pdf"></i>
-                                        <span class="submit-label">{{ $isEdit ? translate('Update PDF Catalog') : translate('Generate PDF Catalog') }}</span>
+                                        <span class="submit-label">{{ $isEdit ? 'Actualizar catalogo PDF' : 'Generar catalogo PDF' }}</span>
                                     </button>
-                                    <small class="text-muted d-block mt-2" id="catalog-submit-hint">{{ translate('Select products to enable this button') }}</small>
+                                    <small class="text-muted d-block mt-2" id="catalog-submit-hint">Selecciona productos para habilitar este boton</small>
                                 </div>
                             </div>
                         </div>
@@ -535,21 +575,22 @@
                     <div class="catalog-section catalog-section-soft">
                         <div class="catalog-section-title">
                             <div>
-                                <h6>{{ translate('Advertising') }}</h6>
-                                <p>Imagen destacada junto a los productos de la letra seleccionada</p>
+                                <div class="section-kicker"><span>3</span> Publicidad</div>
+                                <h6>Publicidad dentro de productos</h6>
+                                <p>Imagen horizontal que aparece al lado derecho de los productos de una letra.</p>
                             </div>
                             <button type="button" class="btn btn-soft-primary btn-sm" id="add-advertising-row">
                                 <i class="las la-plus"></i>
-                                {{ translate('Add Advertising') }}
+                                Agregar publicidad
                             </button>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered mb-0" id="advertising-table">
                                 <thead>
                                     <tr>
-                                        <th>{{ translate('Advertising Image') }}</th>
+                                        <th>Imagen de publicidad</th>
                                         <th width="190">Mostrar con la letra</th>
-                                        <th width="80" class="text-center">{{ translate('Options') }}</th>
+                                        <th width="80" class="text-center">Opciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -558,9 +599,9 @@
                                             <td>
                                                 <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                     <div class="input-group-prepend">
-                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                                     </div>
-                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                    <div class="form-control file-amount">Elegir archivo</div>
                                                     <input type="hidden" name="advertising_images[]" class="selected-files" value="{{ $advertisingRow['image'] ?? '' }}">
                                                 </div>
                                                 <small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small>
@@ -574,7 +615,7 @@
                                                 </select>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-advertising-row" title="{{ translate('Delete') }}">
+                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-advertising-row" title="Eliminar">
                                                     <i class="las la-trash"></i>
                                                 </button>
                                             </td>
@@ -588,22 +629,23 @@
                     <div class="catalog-section catalog-section-soft">
                         <div class="catalog-section-title">
                             <div>
-                                <h6>{{ translate('Letter intro advertising') }}</h6>
-                                <p>{{ translate('Full-page image shown once before the selected category letter starts') }}</p>
+                                <div class="section-kicker"><span>4</span> Separadores</div>
+                                <h6>Publicidad al iniciar una letra</h6>
+                                <p>Imagen a pagina completa que se muestra una sola vez antes de iniciar la letra elegida.</p>
                             </div>
                             <button type="button" class="btn btn-soft-primary btn-sm" id="add-letter-intro-ad-row">
                                 <i class="las la-plus"></i>
-                                {{ translate('Add Page') }}
+                                Agregar pagina
                             </button>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered mb-0" id="letter-intro-ad-table">
                                 <thead>
                                     <tr>
-                                        <th>{{ translate('Full-page image') }}</th>
-                                        <th width="260">{{ translate('Category') }}</th>
-                                        <th width="150">{{ translate('Letter') }}</th>
-                                        <th width="80" class="text-center">{{ translate('Options') }}</th>
+                                        <th>Imagen a pagina completa</th>
+                                        <th width="260">Categoria</th>
+                                        <th width="150">Letra</th>
+                                        <th width="80" class="text-center">Opciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -612,9 +654,9 @@
                                             <td>
                                                 <div class="input-group" data-toggle="aizuploader" data-type="image">
                                                     <div class="input-group-prepend">
-                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div>
+                                                        <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                                     </div>
-                                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                                    <div class="form-control file-amount">Elegir archivo</div>
                                                     <input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value="{{ $letterIntroAdRow['image'] ?? '' }}">
                                                 </div>
                                                 <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
@@ -622,7 +664,7 @@
                                             </td>
                                             <td>
                                                 <select class="form-control aiz-selectpicker letter-intro-ad-category" name="letter_intro_ad_category_ids[]" data-live-search="true">
-                                                    <option value="">{{ translate('Choose Category') }}</option>
+                                                    <option value="">Selecciona una categoria</option>
                                                     @foreach ($categories as $category)
                                                         <option value="{{ $category->id }}" @if ((string) ($letterIntroAdRow['category_id'] ?? '') === (string) $category->id) selected @endif>{{ $category->getTranslation('name') }}</option>
                                                     @endforeach
@@ -636,7 +678,7 @@
                                                 </select>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="{{ translate('Delete') }}">
+                                                <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="Eliminar">
                                                     <i class="las la-trash"></i>
                                                 </button>
                                             </td>
@@ -650,13 +692,14 @@
                     <div class="catalog-section">
                         <div class="catalog-section-title">
                             <div>
-                                <h6>{{ translate('Products') }}</h6>
-                                <p>{{ translate('Only products with price greater than zero can be selected') }}</p>
+                                <div class="section-kicker"><span>5</span> Productos</div>
+                                <h6>Seleccion de productos</h6>
+                                <p>Solo se pueden seleccionar productos con precio mayor a cero.</p>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="font-weight-bold mb-2">Productos por página</label>
+                            <label class="font-weight-bold mb-2">Productos por pagina</label>
                             <div class="catalog-density-options">
                                 <label class="catalog-density-option">
                                     <input type="radio" name="products_per_page" value="12" @checked($productsPerPage === 12)>
@@ -666,7 +709,7 @@
                                         </span>
                                         <span class="catalog-density-copy">
                                             <strong>12 productos</strong>
-                                            <small>Tarjetas amplias e imágenes más grandes</small>
+                                            <small>Tarjetas amplias e imagenes mas grandes</small>
                                         </span>
                                     </span>
                                 </label>
@@ -678,7 +721,7 @@
                                         </span>
                                         <span class="catalog-density-copy">
                                             <strong>20 productos</strong>
-                                            <small>Formato compacto para catálogos extensos</small>
+                                            <small>Formato compacto para catalogos extensos</small>
                                         </span>
                                     </span>
                                 </label>
@@ -688,31 +731,31 @@
                         <div class="catalog-stat-grid">
                             <div class="catalog-stat">
                                 <strong id="selected-products-count">0</strong>
-                                <span>{{ translate('Selected products') }}</span>
+                                <span>Productos seleccionados</span>
                             </div>
                             <div class="catalog-stat">
                                 <strong id="loaded-products-count">0</strong>
-                                <span>{{ translate('Loaded products') }}</span>
+                                <span>Productos cargados</span>
                             </div>
                             <div class="catalog-stat">
                                 <strong id="unavailable-products-count">0</strong>
-                                <span>{{ translate('Unavailable products') }}</span>
+                                <span>No disponibles</span>
                             </div>
                         </div>
 
                         <div class="catalog-product-toolbar">
-                            <input type="text" class="form-control form-control-sm d-none" id="catalog-product-search" placeholder="{{ translate('Search products by name, ID or category') }}">
+                            <input type="text" class="form-control form-control-sm d-none" id="catalog-product-search" placeholder="Buscar productos por nombre, ID o categoria">
                             <label class="aiz-checkbox mb-0 fw-600">
                                 <input type="checkbox" id="select-all-products" disabled>
                                 <span class="aiz-square-check"></span>
-                                <span>{{ translate('Select All Visible') }}</span>
+                                <span>Seleccionar visibles</span>
                             </label>
                         </div>
 
                         <div id="catalog-products" class="catalog-empty-state">
                             <i class="las la-box-open"></i>
-                            <strong>{{ translate('Select categories to load products') }}</strong>
-                            <div>{{ translate('The product list will appear here grouped by category and letter') }}</div>
+                            <strong>Selecciona categorias para cargar productos</strong>
+                            <div>La lista aparecera agrupada por categoria y letra</div>
                         </div>
                     </div>
 
@@ -720,13 +763,13 @@
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <small class="text-muted">
-                                    {{ translate('Review the selected products before generating the PDF') }}
+                                    Revisa los productos seleccionados antes de generar el PDF.
                                 </small>
                             </div>
                             <div class="col-md-4 text-md-right mt-2 mt-md-0">
                                 <button type="submit" class="btn btn-primary" id="generate-catalog-bottom" disabled>
                                     <i class="las la-file-pdf"></i>
-                                    <span class="submit-label">{{ $isEdit ? translate('Update PDF Catalog') : translate('Generate PDF Catalog') }}</span>
+                                    <span class="submit-label">{{ $isEdit ? 'Actualizar catalogo PDF' : 'Generar catalogo PDF' }}</span>
                                 </button>
                             </div>
                         </div>
@@ -739,11 +782,11 @@
             <div class="card-header">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <h5 class="mb-0 h6">{{ translate('Generated Catalogs') }}</h5>
-                        <small class="text-muted">{{ translate('Download, edit or delete existing catalog files') }}</small>
+                        <h5 class="mb-0 h6">Catalogos generados</h5>
+                        <small class="text-muted">Descarga, edita o elimina los archivos existentes.</small>
                     </div>
                     <div class="col-md-6 mt-3 mt-md-0">
-                        <input type="text" class="form-control form-control-sm" id="catalog-list-search" placeholder="{{ translate('Search generated catalogs') }}">
+                        <input type="text" class="form-control form-control-sm" id="catalog-list-search" placeholder="Buscar catalogos generados">
                     </div>
                 </div>
             </div>
@@ -752,11 +795,11 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>{{ translate('Name') }}</th>
-                            <th data-breakpoints="lg">{{ translate('Categories') }}</th>
-                            <th data-breakpoints="lg">{{ translate('Products') }}</th>
-                            <th data-breakpoints="lg">{{ translate('Created At') }}</th>
-                            <th class="text-right">{{ translate('Options') }}</th>
+                            <th>Nombre</th>
+                            <th data-breakpoints="lg">Categorias</th>
+                            <th data-breakpoints="lg">Productos</th>
+                            <th data-breakpoints="lg">Creado</th>
+                            <th class="text-right">Opciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -769,27 +812,27 @@
                                 <td>
                                     <span class="fw-700 text-dark">{{ $catalogItem['name'] }}</span>
                                     @if (! empty($catalogItem['updated_at']))
-                                        <small class="d-block text-muted">{{ translate('Updated') }}: {{ $catalogItem['updated_at'] }}</small>
+                                        <small class="d-block text-muted">Actualizado: {{ $catalogItem['updated_at'] }}</small>
                                     @endif
                                 </td>
                                 <td>{{ $catalogItem['category_name'] }}</td>
                                 <td><span class="badge badge-inline badge-soft-info">{{ $catalogItem['products_count'] }}</span></td>
                                 <td>{{ $catalogItem['created_at'] }}</td>
                                 <td class="text-right catalog-actions">
-                                    <a class="btn btn-soft-info btn-sm" href="{{ route('product_catalogs.edit', $catalogItem['id']) }}" title="{{ translate('Edit') }}">
+                                    <a class="btn btn-soft-info btn-sm" href="{{ route('product_catalogs.edit', $catalogItem['id']) }}" title="Editar">
                                         <i class="las la-edit"></i>
-                                        {{ translate('Edit') }}
+                                        Editar
                                     </a>
-                                    <a class="btn btn-soft-primary btn-sm" href="{{ route('product_catalogs.download', $catalogItem['id']) }}" title="{{ translate('Download') }}">
+                                    <a class="btn btn-soft-primary btn-sm" href="{{ route('product_catalogs.download', $catalogItem['id']) }}" title="Descargar">
                                         <i class="las la-download"></i>
-                                        {{ translate('Download') }}
+                                        Descargar
                                     </a>
-                                    <form action="{{ route('product_catalogs.destroy', $catalogItem['id']) }}" method="POST" class="d-inline-block" onsubmit="return confirm('{{ translate('Are you sure you want to delete this catalog?') }}');">
+                                    <form action="{{ route('product_catalogs.destroy', $catalogItem['id']) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Seguro que deseas eliminar este catalogo?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-soft-danger btn-sm" title="{{ translate('Delete') }}">
+                                        <button type="submit" class="btn btn-soft-danger btn-sm" title="Eliminar">
                                             <i class="las la-trash"></i>
-                                            {{ translate('Delete') }}
+                                            Eliminar
                                         </button>
                                     </form>
                                 </td>
@@ -800,14 +843,14 @@
                                 <td colspan="6" class="text-center py-4">
                                     <div class="catalog-empty-state">
                                         <i class="las la-file-pdf"></i>
-                                        <strong>{{ translate('No catalogs found') }}</strong>
-                                        <div>{{ translate('Generated catalogs will appear here') }}</div>
+                                        <strong>No hay catalogos generados</strong>
+                                        <div>Los catalogos creados apareceran aqui.</div>
                                     </div>
                                 </td>
                             </tr>
                         @else
                             <tr id="catalogs-no-results" class="d-none">
-                                <td colspan="6" class="text-center text-muted py-4">{{ translate('No catalogs match your search') }}</td>
+                                <td colspan="6" class="text-center text-muted py-4">No hay catalogos que coincidan con la busqueda</td>
                             </tr>
                         @endif
                     </tbody>
@@ -827,7 +870,7 @@
                 'name' => $category->getTranslation('name'),
             ];
         })->values());
-        var generateCatalogText = @json($isEdit ? translate('Update PDF Catalog') : translate('Generate PDF Catalog'));
+        var generateCatalogText = @json($isEdit ? 'Actualizar catalogo PDF' : 'Generar catalogo PDF');
         var catalogMessages = @json($catalogMessages);
 
         function escapeHtml(value) {
@@ -844,14 +887,14 @@
             }).join('');
 
             return '<tr class="advertising-row">' +
-                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="advertising_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="advertising_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small><div class="file-preview box sm"></div></td>' +
                 '<td><select class="form-control aiz-selectpicker" name="advertising_letters[]">' + options + '</select></td>' +
-                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-advertising-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-advertising-row" title="Eliminar"><i class="las la-trash"></i></button></td>' +
             '</tr>';
         }
 
         function categoryOptionsTemplate() {
-            return '<option value="">{{ translate('Choose Category') }}</option>' + catalogCategoryOptions.map(function(category) {
+            return '<option value="">Selecciona una categoria</option>' + catalogCategoryOptions.map(function(category) {
                 return '<option value="' + escapeHtml(category.id) + '">' + escapeHtml(category.name) + '</option>';
             }).join('');
         }
@@ -862,10 +905,10 @@
             }).join('');
 
             return '<tr class="letter-intro-ad-row">' +
-                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse') }}</div></div><div class="form-control file-amount">{{ translate('Choose File') }}</div><input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
                 '<td><select class="form-control aiz-selectpicker letter-intro-ad-category" name="letter_intro_ad_category_ids[]" data-live-search="true">' + categoryOptionsTemplate() + '</select></td>' +
                 '<td><select class="form-control aiz-selectpicker" name="letter_intro_ad_letters[]">' + letterOptions + '</select></td>' +
-                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="Eliminar"><i class="las la-trash"></i></button></td>' +
             '</tr>';
         }
 
@@ -880,15 +923,22 @@
 
             if (!coverSelect.length) { return; }
 
+            var availableOptions = 0;
+
             coverSelect.find('option').each(function() {
                 var categoryId = ($(this).data('category-id') || '').toString();
                 var isPlaceholder = $(this).val() === '';
                 var isSelected = $(this).is(':selected');
-                var shouldShow = isPlaceholder || categoryIds.length === 0 || categoryIds.indexOf(categoryId) !== -1 || isSelected;
+                var isAvailable = isPlaceholder || categoryIds.length === 0 || categoryIds.indexOf(categoryId) !== -1 || isSelected;
 
-                $(this).prop('hidden', !shouldShow);
+                $(this).prop('disabled', !isAvailable);
+
+                if (!isPlaceholder && isAvailable) {
+                    availableOptions++;
+                }
             });
 
+            $('#catalog-cover-empty-tip').toggleClass('d-none', categoryIds.length > 0 && availableOptions === 0);
             if ($.fn.selectpicker) { coverSelect.selectpicker('refresh'); }
         }
 
@@ -904,7 +954,7 @@
                     var isSelected = $(this).is(':selected');
                     var shouldShow = isPlaceholder || categoryIds.length === 0 || categoryIds.indexOf(optionValue) !== -1 || isSelected;
 
-                    $(this).prop('hidden', !shouldShow);
+                    $(this).prop('disabled', !shouldShow);
                 });
             });
 
@@ -960,7 +1010,7 @@
                 return;
             }
 
-            var html = '<div class="table-responsive"><table class="table table-hover mb-0 catalog-product-table"><thead><tr><th width="58">{{ translate('Select') }}</th><th>{{ translate('Product Name') }}</th><th width="180" class="text-right">{{ translate('Price') }}</th></tr></thead><tbody>';
+            var html = '<div class="table-responsive"><table class="table table-hover mb-0 catalog-product-table"><thead><tr><th width="58">Sel.</th><th>Producto</th><th width="180" class="text-right">Precio</th></tr></thead><tbody>';
 
             categoryGroups.forEach(function(categoryGroup) {
                 var groups = {};
@@ -988,13 +1038,13 @@
                         html += '<tr class="' + rowClass + disabledClass + '" data-search="' + escapeHtml(searchText) + '">';
                         html += '<td class="align-middle"><label class="aiz-checkbox mb-0' + (product.is_disabled ? ' aiz-checkbox-disabled' : '') + '"><input type="checkbox" id="' + checkboxId + '" class="catalog-product-checkbox" name="product_ids[]" value="' + product.id + '"' + disabled + checked + '><span class="aiz-square-check"></span></label></td>';
                         html += '<td class="align-middle"><label class="mb-0 d-block' + (product.is_disabled ? '' : ' c-pointer') + '" for="' + checkboxId + '"><span class="d-block fw-600 text-dark" style="white-space: normal; word-break: break-word;">' + escapeHtml(product.name) + '</span><small class="text-muted">ID: ' + product.id + '</small>';
-                        if (product.is_disabled) { html += '<span class="badge badge-inline badge-soft-danger ml-2">{{ translate('Price is zero') }}</span>'; }
+                        if (product.is_disabled) { html += '<span class="badge badge-inline badge-soft-danger ml-2">Precio en cero</span>'; }
                         html += '</label></td><td class="align-middle text-right fw-600">' + escapeHtml(product.price) + '</td></tr>';
                     });
                 });
             });
 
-            html += '<tr id="catalog-no-search-results" class="d-none"><td colspan="3" class="text-center text-muted py-4">{{ translate('No products match your search') }}</td></tr></tbody></table></div>';
+            html += '<tr id="catalog-no-search-results" class="d-none"><td colspan="3" class="text-center text-muted py-4">No hay productos que coincidan con la busqueda</td></tr></tbody></table></div>';
             $('#catalog-products').html(html);
             $('#catalog-product-search').removeClass('d-none').val('');
             refreshSelectAllState();
@@ -1056,7 +1106,7 @@
             if ($('.letter-intro-ad-row').length === 1) {
                 var row = $(this).closest('.letter-intro-ad-row');
                 row.find('.selected-files').val('');
-                row.find('.file-amount').text('{{ translate('Choose File') }}');
+                row.find('.file-amount').text('Elegir archivo');
                 row.find('.file-preview').empty();
                 row.find('select').val('');
                 row.find('select[name="letter_intro_ad_letters[]"]').val('A');
@@ -1071,7 +1121,7 @@
             if ($('.advertising-row').length === 1) {
                 var row = $(this).closest('.advertising-row');
                 row.find('.selected-files').val('');
-                row.find('.file-amount').text('{{ translate('Choose File') }}');
+                row.find('.file-amount').text('Elegir archivo');
                 row.find('.file-preview').empty();
                 row.find('select').val('A');
                 if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
