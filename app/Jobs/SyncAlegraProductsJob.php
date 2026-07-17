@@ -53,19 +53,32 @@ class SyncAlegraProductsJob
             // process and dies with it. "start /B" fully detaches it.
             $cmd = 'start "" /B '.escapeshellarg($phpBinary).' '.escapeshellarg($artisan).' alegra:sync-products';
             $process = Process::fromShellCommandline($cmd);
+            $process->setTimeout(null);
+            $process->setIdleTimeout(null);
+            $process->disableOutput();
+            $process->start();
         } else {
-            // Under PHP-FPM, a plain proc_open child stays in the worker's
-            // process/session group and can be killed when that worker is
-            // recycled. setsid + nohup fully detaches it from that group.
+            // Under PHP-FPM/LiteSpeed, a plain proc_open child stays in the
+            // worker's process/session group and can be killed when that
+            // worker is recycled, so it needs setsid + nohup to detach.
+            //
+            // Symfony's Process wraps the command with its own exit-code/PID
+            // tracking, which is incompatible with a command that
+            // backgrounds itself via a trailing "&" (the wrapped command
+            // silently never runs). A raw proc_open() call avoids that.
             $cmd = 'setsid nohup '.escapeshellarg($phpBinary).' '.escapeshellarg($artisan)
                 .' alegra:sync-products > /dev/null 2>&1 &';
-            $process = Process::fromShellCommandline($cmd);
-        }
 
-        $process->setTimeout(null);
-        $process->setIdleTimeout(null);
-        $process->disableOutput();
-        $process->start();
+            $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+            $proc = @proc_open($cmd, $descriptors, $pipes, base_path());
+
+            if (is_resource($proc)) {
+                foreach ($pipes as $pipe) {
+                    fclose($pipe);
+                }
+                proc_close($proc);
+            }
+        }
 
         $status = ['status' => 'starting'];
         Cache::put(self::CACHE_KEY, $status, now()->addHours(6));
