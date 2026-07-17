@@ -18,6 +18,7 @@ use App\Models\OrderDetail;
 use App\Models\Shop;
 use App\Models\ProductCategory;
 use App\Models\Upload;
+use App\Jobs\SyncAlegraProductsJob;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use App\Utility\CategoryUtility;
 
-use App\Http\Services\AlegraServices;
 use App\Http\Services\WompiServices;
 use Illuminate\Support\Str;
 
@@ -552,27 +552,10 @@ class ProductController extends Controller
     }
 
     public function alegra(){
-        @set_time_limit(0);
+        SyncAlegraProductsJob::trigger();
 
-        $counter = 0;
-
-        try {
-            (new AlegraServices)->eachProduct(function ($product) use (&$counter) {
-                try {
-                    if ($this->syncAlegraProduct($product)) {
-                        $counter++;
-                    }
-                } catch (Exception $e) {
-                    report($e);
-                }
-            });
-
-            $url = config('app.url').'/admin/product';
-            return redirect($url)->with('Actualizado', $counter.' productos han sido actualizados correctamente');
-        } catch (Exception $e) {
-            report($e);
-            return back()->withErrors('There was a problem uploading the data!');
-        }
+        $url = config('app.url').'/admin/product';
+        return redirect($url)->with('Actualizado', 'La importación de productos desde Alegra se está ejecutando en segundo plano.');
     }
 
     public function products_by_letter($letter) {
@@ -585,165 +568,5 @@ class ProductController extends Controller
            'success' => true,
             'products' => $products,
         ]);
-    }
-
-    private function updateProductsFromAlegra($search_keyword){
-        $updateProducts = (new AlegraServices)->getProductsByQuery($search_keyword);
-
-        foreach($updateProducts as $product){
-            $this->syncAlegraProduct($product, 'PRECIOS APPWEB');
-        }
-    }
-
-    private function syncAlegraProduct(array $product, string $priceListName = 'PUNTO DE VENTA'): bool
-    {
-        if (!isset($product['id'])) {
-            return false;
-        }
-
-        $categoryId = $this->resolveAlegraCategoryId($product);
-        $productStorage = Product::find($product['id']) ?: new Product;
-        $productStorage->id = $product['id'];
-        $productStorage->name = $product['name'] ?? '';
-        $productStorage->reference = $product['reference'] ?? '';
-        $productStorage->description = $product['description'] ?? '';
-        $productStorage->tax = $this->getAlegraTaxPercentage($product);
-        $price = $this->calculateAlegraPrice($product, $priceListName);
-        $productStorage->lowest_price = $price;
-        $productStorage->highest_price = $price;
-        $productStorage->shop_id = 1;
-        $productStorage->slug = $productStorage->slug ?: Str::slug($productStorage->name, '-') . '-' . strtolower(Str::random(5));
-        $productStorage->published = ($product['status'] ?? '') == 'active' ? 1 : 0;
-
-        $this->syncAlegraProductImages($productStorage, $product);
-
-        $productStorage->save();
-
-        if ($categoryId && Category::whereKey($categoryId)->exists()) {
-            $productStorage->categories()->sync([$categoryId]);
-        }
-
-        return true;
-    }
-
-    private function resolveAlegraCategoryId(array $product)
-    {
-        return $product['itemCategory']['id']
-            ?? $product['category']['id']
-            ?? $product['idItemCategory']
-            ?? null;
-    }
-
-    private function getAlegraTaxPercentage(array $product)
-    {
-        return isset($product['tax'][0]['percentage']) ? (float) $product['tax'][0]['percentage'] : 0;
-    }
-
-    private function calculateAlegraPrice(array $product, string $priceListName)
-    {
-        $percentage = $this->getAlegraTaxPercentage($product);
-        $prices = $product['price'] ?? [];
-        $basePrice = 0;
-
-        foreach ($prices as $listPrice) {
-            if (($listPrice['name'] ?? '') === $priceListName) {
-                $basePrice = (float) ($listPrice['price'] ?? 0);
-                break;
-            }
-        }
-
-        if ($basePrice == 0 && isset($prices[0]['price'])) {
-            $basePrice = (float) $prices[0]['price'];
-        }
-
-        return floor($basePrice * (($percentage / 100) + 1));
-    }
-
-    private function syncAlegraProductImages(Product $productStorage, array $product): void
-    {
-        $images = array_values($product['images'] ?? []);
-
-        for ($index = 0; $index < 4; $index++) {
-            $field = 'imagen'.($index + 1);
-            $imageUrl = $images[$index]['url'] ?? null;
-
-            if ($imageUrl) {
-                $productStorage->{$field} = $this->storeAlegraImage($imageUrl, $product['id'], $index + 1, $productStorage->{$field});
-            } elseif (!$productStorage->{$field}) {
-                $productStorage->{$field} = null;
-            }
-        }
-
-        if (isset($images[0]['url'])) {
-            $productStorage->thumbnail_img = $this->storeAlegraImage($images[0]['url'], $product['id'], 0, $productStorage->thumbnail_img);
-        } elseif (!$productStorage->thumbnail_img) {
-            $productStorage->thumbnail_img = null;
-        }
-    }
-
-    private function storeAlegraImage(?string $url, $productId, int $index, $currentValue = null)
-    {
-        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
-            return $currentValue;
-        }
-
-        if ($this->hasLocalUpload($currentValue)) {
-            return $currentValue;
-        }
-
-        try {
-            $path = parse_url($url, PHP_URL_PATH) ?: '';
-            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $extension = in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif']) ? $extension : 'jpg';
-            $hash = substr(sha1($path ?: $url), 0, 16);
-            $fileName = 'alegra-'.$productId.'-'.$index.'-'.$hash.'.'.$extension;
-            $relativePath = 'uploads/all/'.$fileName;
-            $absolutePath = public_path($relativePath);
-
-            $upload = Upload::where('file_name', $relativePath)->first();
-            if (File::exists($absolutePath) && $upload) {
-                return $upload->id;
-            }
-
-            File::ensureDirectoryExists(dirname($absolutePath));
-
-            $response = Http::timeout(45)
-                ->withOptions(['verify' => false])
-                ->retry(2, 500)
-                ->get($url);
-
-            if (!$response->successful() || empty($response->body())) {
-                return $currentValue;
-            }
-
-            File::put($absolutePath, $response->body());
-
-            $contentType = $response->header('Content-Type', 'image/'.$extension);
-
-            $upload = $upload ?: new Upload;
-            $upload->file_original_name = $fileName;
-            $upload->file_name = $relativePath;
-            $upload->user_id = 1;
-            $upload->extension = $extension;
-            $upload->type = str_contains($contentType, 'image') ? 'image' : 'others';
-            $upload->file_size = File::size($absolutePath);
-            $upload->save();
-
-            return $upload->id;
-        } catch (Exception $e) {
-            report($e);
-            return $currentValue;
-        }
-    }
-
-    private function hasLocalUpload($value): bool
-    {
-        if (!$value || !ctype_digit((string) $value)) {
-            return false;
-        }
-
-        $upload = Upload::find($value);
-
-        return $upload && File::exists(public_path($upload->file_name));
     }
 }

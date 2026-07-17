@@ -4,7 +4,12 @@
     <div class="aiz-titlebar text-left mt-2 mb-3">
         <div class="row align-items-center">
             <div class="col-md-2">
-                <h1 class="h3">{{ translate('All products') }}</h1>
+                <h1 class="h3 mb-1">{{ translate('All products') }}</h1>
+                @if ($uncategorizedCount > 0)
+                    <span class="badge badge-inline badge-soft-warning fs-12">
+                        {{ translate('Without category') }}: {{ number_format($uncategorizedCount) }}
+                    </span>
+                @endif
             </div>
             <div class="col-md-2 offset-md-2 text-md-right">
                 @can('add_products')
@@ -55,12 +60,31 @@
             </div>
 
             <div class="col-md-2 text-md-right">
-                <a
-                    href="{{ config('app.url') }}/api/v1/product/update-alegra"
-                    class="btn btn-primary w-100"
+                <button
+                    type="button"
+                    id="btn-alegra-import"
+                    class="btn btn-outline-primary w-100"
+                    title="{{ translate('Sync products from Alegra (takes several minutes, runs in background)') }}"
                 >
-                    <span>{{ translate('Update Product') }}</span>
-                </a>
+                    <span id="span-btn-alegra">{{ translate('Update Product') }}</span>
+                    <div
+                        class="spinner-border spinner-border-sm m-auto"
+                        id="spinner-alegra"
+                        role="status"
+                        style="display: none"
+                    >
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </button>
+                <div id="alegra-import-progress" class="text-left mt-2 small" style="display: none">
+                    <div class="d-flex align-items-center mb-1">
+                        <div class="progress flex-grow-1 mr-2" style="height: 6px">
+                            <div id="alegra-progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <span id="alegra-progress-percent" class="text-muted" style="min-width: 36px; text-align: right;"></span>
+                    </div>
+                    <div id="alegra-progress-text" class="text-muted"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -183,13 +207,30 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $isGrouped = !$col_name;
+                        $lastCategoryId = null;
+                        $categoryColors = ['primary', 'success', 'info', 'warning', 'danger', 'dark', 'secondary'];
+                    @endphp
                     @foreach ($products as $key => $product)
-                        <tr>
+                        @php
+                            $primaryCategory = $product->categories->first();
+                            $isNewGroup = $isGrouped && $primaryCategory && $primaryCategory->id !== $lastCategoryId;
+                            if ($isNewGroup) {
+                                $lastCategoryId = $primaryCategory->id;
+                            }
+                        @endphp
+                        <tr @if ($isNewGroup) class="border-top border-2" @endif>
                             <td>{{ $key + 1 + ($products->currentPage() - 1) * $products->perPage() }}</td>
-                            <td>            
+                            <td>
+                                @if ($isNewGroup)
+                                    <div class="fs-10 text-uppercase text-muted fw-600 mb-1">
+                                        {{ $primaryCategory->name }}
+                                    </div>
+                                @endif
                                 <div class="d-flex align-items-center">
                                     <img
-                                        src="{{ $product->thumbnail_img }}"
+                                        src="{{ uploaded_asset($product->thumbnail_img) }}"
                                         alt="Image"
                                         class="size-60px size-xxl-80px mr-2"
                                         onerror="this.onerror=null;this.src='{{ static_asset('/assets/img/placeholder.jpg') }}';"
@@ -218,11 +259,12 @@
                             </td>
                             <td>
                                 @foreach ($product->categories as $category)
+                                    @php $color = $categoryColors[$category->id % count($categoryColors)]; @endphp
                                     <span
-                                        class="badge badge-inline badge-md bg-soft-dark mb-1">{{ $category->name }}</span>
+                                        class="badge badge-inline badge-md badge-soft-{{ $color }} mb-1">{{ $category->name }}</span>
                                 @endforeach
-                            </td>                            
-                            
+                            </td>
+
                             <td class="text-right">
                                 @can('view_products')
                                     <a
@@ -242,25 +284,39 @@
                                         <i class="las la-edit"></i>
                                     </a>
                                 @endcan
-                                @can('duplicate_products')
-                                    <a
-                                        class="btn btn-soft-success btn-icon btn-circle btn-sm"
-                                        href="{{ route('product.duplicate', ['id' => $product->id, 'type' => $type]) }}"
-                                        title="{{ translate('Duplicate') }}"
-                                    >
-                                        <i class="las la-copy"></i>
-                                    </a>
-                                @endcan
-                                @can('delete_products')
-                                    <a
-                                        href="#"
-                                        class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete"
-                                        data-href="{{ route('product.destroy', $product->id) }}"
-                                        title="{{ translate('Delete') }}"
-                                    >
-                                        <i class="las la-trash"></i>
-                                    </a>
-                                @endcan
+                                @canany(['duplicate_products', 'delete_products'])
+                                    <div class="dropdown d-inline-block">
+                                        <a
+                                            class="btn btn-soft-secondary btn-icon btn-circle btn-sm"
+                                            href="#"
+                                            data-toggle="dropdown"
+                                            title="{{ translate('More') }}"
+                                        >
+                                            <i class="las la-ellipsis-v"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            @can('duplicate_products')
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="{{ route('product.duplicate', ['id' => $product->id, 'type' => $type]) }}"
+                                                >
+                                                    <i class="las la-copy mr-2"></i>
+                                                    <span>{{ translate('Duplicate') }}</span>
+                                                </a>
+                                            @endcan
+                                            @can('delete_products')
+                                                <a
+                                                    href="#"
+                                                    class="dropdown-item confirm-delete"
+                                                    data-href="{{ route('product.destroy', $product->id) }}"
+                                                >
+                                                    <i class="las la-trash mr-2"></i>
+                                                    <span>{{ translate('Delete') }}</span>
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcanany
                             </td>
                         </tr>
                     @endforeach
@@ -311,5 +367,135 @@
         function sort_products(el) {
             $('#sort_products').submit();
         }
+
+        (function () {
+            var $btn = $('#btn-alegra-import');
+            var $span = $('#span-btn-alegra');
+            var $spinner = $('#spinner-alegra');
+            var $progressWrap = $('#alegra-import-progress');
+            var $progressBar = $('#alegra-progress-bar');
+            var $progressPercent = $('#alegra-progress-percent');
+            var $progressText = $('#alegra-progress-text');
+            var pollTimer = null;
+            var isLiveSession = false;
+
+            function formatElapsed(seconds) {
+                seconds = Math.max(0, Math.floor(seconds));
+                var m = Math.floor(seconds / 60);
+                var s = seconds % 60;
+                return m + 'm ' + s + 's';
+            }
+
+            function stopPolling() {
+                if (pollTimer) {
+                    clearInterval(pollTimer);
+                    pollTimer = null;
+                }
+                $span.show();
+                $spinner.hide();
+                $btn.prop('disabled', false);
+            }
+
+            function renderStatus(data) {
+                var status = data.status || 'idle';
+
+                if (status === 'idle') {
+                    return;
+                }
+
+                $progressWrap.show();
+
+                var imported = data.imported || 0;
+                var total = data.total || null;
+                var elapsed = data.started_at ? (Date.now() - new Date(data.started_at).getTime()) / 1000 : 0;
+
+                if (status === 'starting') {
+                    $progressBar.css('width', '3%');
+                    $progressPercent.text('...');
+                    $progressText.text('{{ translate('Starting import...') }}');
+                    return;
+                }
+
+                if (status === 'running') {
+                    var isEstimate = !!data.total_is_estimate;
+                    var percent = total ? Math.min(99, Math.round((imported / total) * 100)) : null;
+                    $progressBar.css('width', (percent !== null ? percent : 10) + '%');
+                    $progressPercent.text(percent !== null ? percent + (isEstimate ? '%~' : '%') : '...');
+
+                    var text = imported + (total ? ' / ' + (isEstimate ? '~' : '') + total : '') + ' {{ translate('products imported') }} - {{ translate('elapsed') }}: ' + formatElapsed(elapsed);
+
+                    if (total && imported > 0) {
+                        var remaining = (elapsed / imported) * (total - imported);
+                        text += ' - {{ translate('estimated time remaining') }}: ' + formatElapsed(remaining);
+                    }
+
+                    $progressText.text(text);
+                    return;
+                }
+
+                if (status === 'completed') {
+                    $progressBar.css('width', '100%');
+                    $progressPercent.text('100%');
+                    $progressText.text(
+                        imported + ' {{ translate('products updated successfully') }}' +
+                        (data.errors ? ' (' + data.errors + ' {{ translate('errors') }})' : '')
+                    );
+                    stopPolling();
+
+                    // Only notify + reload the first time we witness this completion
+                    // (i.e. we were actively polling a run). A plain page load that
+                    // finds an already-completed status must not repeat this, or a
+                    // reload would keep finding "completed" and reload forever.
+                    if (isLiveSession) {
+                        isLiveSession = false;
+                        AIZ.plugins.notify('success', imported + ' {{ translate('products updated successfully') }}');
+                        setTimeout(function () { window.location.reload(); }, 2500);
+                    }
+                    return;
+                }
+
+                if (status === 'failed') {
+                    $progressText.text('{{ translate('The import failed, please check the logs.') }}');
+                    stopPolling();
+
+                    if (isLiveSession) {
+                        isLiveSession = false;
+                        AIZ.plugins.notify('danger', '{{ translate('The import failed, please check the logs.') }}');
+                    }
+                }
+            }
+
+            function poll() {
+                $.get('{{ route('product.alegra_import_status') }}', renderStatus);
+            }
+
+            function startPolling() {
+                isLiveSession = true;
+                $span.hide();
+                $spinner.show();
+                $btn.prop('disabled', true);
+                $progressWrap.show();
+                poll();
+                pollTimer = setInterval(poll, 3000);
+            }
+
+            $btn.on('click', function () {
+                $.ajax({
+                    url: '{{ route('product.alegra_import') }}',
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': AIZ.data.csrf },
+                    success: startPolling
+                });
+            });
+
+            // Resume polling if an import is already running (e.g. after a page refresh)
+            $.get('{{ route('product.alegra_import_status') }}', function (data) {
+                if (data.status === 'starting' || data.status === 'running') {
+                    startPolling();
+                } else if (data.status === 'completed' || data.status === 'failed') {
+                    renderStatus(data);
+                }
+            });
+        })();
     </script>
 @endsection

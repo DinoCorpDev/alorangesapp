@@ -156,6 +156,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
 
         Route::post('/import', [ProductController::class, 'import'])->name('product.import');
 
+        Route::post('/alegra-import', [ProductController::class, 'alegraImport'])->name('product.alegra_import');
+        Route::get('/alegra-import/status', [ProductController::class, 'alegraImportStatus'])->name('product.alegra_import_status');
+
         Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
         Route::get('/duplicate/{id}', [ProductController::class, 'duplicate'])->name('product.duplicate');
         Route::post('/update/{id}', [ProductController::class, 'update'])->name('product.update');
