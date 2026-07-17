@@ -91,6 +91,16 @@ class SyncAlegraProductsJob
             return PHP_BINARY;
         }
 
+        // CloudLinux/LiteSpeed: PHP_BINARY points at the "lsphp" LSAPI binary
+        // (e.g. /opt/alt/php83/usr/bin/lsphp), which isn't a general-purpose
+        // CLI runner. Its sibling "php" binary in the same directory is.
+        if (basename(PHP_BINARY) === 'lsphp' || str_contains(basename(PHP_BINARY), 'lsphp')) {
+            $sibling = dirname(PHP_BINARY).'/php';
+            if (File::exists($sibling)) {
+                return $sibling;
+            }
+        }
+
         if (PHP_OS_FAMILY === 'Windows') {
             $candidate = 'C:/laragon/bin/php/php-'.PHP_VERSION.'/php.exe';
             if (File::exists($candidate)) {
