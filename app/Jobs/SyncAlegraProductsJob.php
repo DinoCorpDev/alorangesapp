@@ -54,7 +54,12 @@ class SyncAlegraProductsJob
             $cmd = 'start "" /B '.escapeshellarg($phpBinary).' '.escapeshellarg($artisan).' alegra:sync-products';
             $process = Process::fromShellCommandline($cmd);
         } else {
-            $process = new Process([$phpBinary, $artisan, 'alegra:sync-products']);
+            // Under PHP-FPM, a plain proc_open child stays in the worker's
+            // process/session group and can be killed when that worker is
+            // recycled. setsid + nohup fully detaches it from that group.
+            $cmd = 'setsid nohup '.escapeshellarg($phpBinary).' '.escapeshellarg($artisan)
+                .' alegra:sync-products > /dev/null 2>&1 &';
+            $process = Process::fromShellCommandline($cmd);
         }
 
         $process->setTimeout(null);
