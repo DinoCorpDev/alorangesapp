@@ -23,6 +23,8 @@ use CoreComponentRepository;
 use Artisan;
 use Carbon\Carbon;
 use App\Models\Upload;
+use App\Jobs\SyncAlegraProductsJob;
+use Illuminate\Support\Facades\Cache;
 use Auth;
 
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
@@ -51,10 +53,19 @@ class ProductController extends Controller
         $col_name = null;
         $query = null;
         $sort_search = null;
-        $products = Product::orderBy('created_at', 'desc')->where('shop_id', auth()->user()->shop_id);
+
+        $products = Product::select('products.*')
+            ->with(['categories' => function ($q) {
+                $q->orderBy('order_level');
+            }])
+            ->leftJoin('product_categories', 'product_categories.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'categories.id', '=', 'product_categories.category_id')
+            ->where('products.shop_id', auth()->user()->shop_id)
+            ->whereNotNull('categories.id')
+            ->groupBy('products.id');
 
         if ($request->search != null) {
-            $products = $products->where('name', 'like', '%' . $request->search . '%');
+            $products = $products->where('products.name', 'like', '%' . $request->search . '%');
             $sort_search = $request->search;
         }
 
@@ -62,14 +73,22 @@ class ProductController extends Controller
             $var = explode(",", $request->type);
             $col_name = $var[0];
             $query = $var[1];
-            $products = $products->orderBy($col_name, $query);
+            $products = $products->orderBy('products.' . $col_name, $query);
             $sort_type = $request->type;
+        } else {
+            // Group products by their category's Ordering Number, ascending.
+            $products = $products->orderByRaw('MAX(categories.order_level) ASC')
+                ->orderBy('products.created_at', 'desc');
         }
 
         $products = $products->paginate(15);
         $type = 'All';
 
-        return view('backend.product.products.index', compact('products', 'type', 'col_name', 'query', 'sort_search'));
+        $uncategorizedCount = Product::where('shop_id', auth()->user()->shop_id)
+            ->whereDoesntHave('categories')
+            ->count();
+
+        return view('backend.product.products.index', compact('products', 'type', 'col_name', 'query', 'sort_search', 'uncategorizedCount'));
     }
 
     /**
@@ -1189,5 +1208,15 @@ class ProductController extends Controller
         $product->save();
         cache_clear();
         return 1;
+    }
+
+    public function alegraImport()
+    {
+        return response()->json(SyncAlegraProductsJob::trigger());
+    }
+
+    public function alegraImportStatus()
+    {
+        return response()->json(Cache::get(SyncAlegraProductsJob::CACHE_KEY, ['status' => 'idle']));
     }
 }
