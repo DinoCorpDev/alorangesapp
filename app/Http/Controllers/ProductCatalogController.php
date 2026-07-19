@@ -720,14 +720,18 @@ class ProductCatalogController extends Controller
 
     protected function sanitizeFontFamily($fontFamily)
     {
+        // Solo fuentes con archivo TTF/OTF real dentro de mPDF (vendor/mpdf/mpdf/ttfonts) —
+        // cualquier otro nombre ("Arial", "Georgia", etc.) no tiene archivo propio y mPDF lo
+        // sustituye en silencio por una de estas mismas fuentes.
         $allowedFonts = [
             'DejaVu Sans',
-            'Arial',
-            'Georgia',
-            'Times New Roman',
-            'Verdana',
-            'Tahoma',
-            'Courier New',
+            'DejaVu Sans Condensed',
+            'DejaVu Serif',
+            'DejaVu Serif Condensed',
+            'DejaVu Sans Mono',
+            'FreeSans',
+            'FreeSerif',
+            'FreeMono',
         ];
 
         return in_array($fontFamily, $allowedFonts, true) ? $fontFamily : 'DejaVu Sans';

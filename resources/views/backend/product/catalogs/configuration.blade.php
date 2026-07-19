@@ -60,7 +60,10 @@
 
         $fullPageImageHint = 'Tamano recomendado: 2550 x 3300 px - carta vertical';
 
-        $fontFamilies = ['DejaVu Sans', 'Arial', 'Georgia', 'Times New Roman', 'Verdana', 'Tahoma', 'Courier New'];
+        // Fuentes con archivo TTF/OTF realmente incluido en mPDF (vendor/mpdf/mpdf/ttfonts).
+        // No se listan "Arial", "Georgia", etc. porque mPDF no trae esos archivos: los sustituye
+        // en silencio por una de estas mismas fuentes, dando la falsa impresion de que no cambian.
+        $fontFamilies = ['DejaVu Sans', 'DejaVu Sans Condensed', 'DejaVu Serif', 'DejaVu Serif Condensed', 'DejaVu Sans Mono', 'FreeSans', 'FreeSerif', 'FreeMono'];
         $typographyFields = [
             ['label' => 'Titulo del producto', 'family' => 'product_title_font_family', 'size' => 'product_title_font_size', 'default_size' => 12],
             ['label' => 'Descripcion', 'family' => 'product_description_font_family', 'size' => 'product_description_font_size', 'default_size' => 10],
@@ -440,7 +443,7 @@
                                                 <tr>
                                                     <td class="fw-600">{{ $field['label'] }}</td>
                                                     <td>
-                                                        <select class="form-control aiz-selectpicker" name="{{ $field['family'] }}">
+                                                        <select class="form-control aiz-selectpicker" name="{{ $field['family'] }}" data-live-search="true">
                                                             @foreach ($fontFamilies as $fontFamily)
                                                                 <option value="{{ $fontFamily }}" @if (old($field['family'], $settings[$field['family']] ?? 'DejaVu Sans') === $fontFamily) selected @endif>{{ $fontFamily }}</option>
                                                             @endforeach
