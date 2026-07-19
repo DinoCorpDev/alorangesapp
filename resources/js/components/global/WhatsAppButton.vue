@@ -15,18 +15,12 @@
         </div>
 
         <div v-if="showModal" class="response what-chat">
-            <div class="row row-wha">
-                <div class="col-12 header-wha">
-                    <div class="row header-row">
-                        <div class="col-3">
-                            <div class="header-logo"></div>
-                        </div>
-                        <div class="col-9 text-left title-header">
-                            ¡Háblanos por WhatsApp! <br /><br />
-                            <span class="sub-header">
-                              Te atienden <b>humanos de verdad,</b> rápidos, amables y sin respuestas de robot.
-                            </span>
-                        </div>
+            <div class="wa-panel">
+                <div class="wa-panel-header">
+                    <div class="wa-panel-avatar"></div>
+                    <div class="wa-panel-heading">
+                        <strong>¡Háblanos por WhatsApp!</strong>
+                        <span>Te atienden <b>humanos de verdad,</b> rápidos, amables y sin respuestas de robot.</span>
                     </div>
                 </div>
 
@@ -35,16 +29,12 @@
                     :href="whatsappUrl"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="col-12 box-wha"
+                    class="wa-panel-contact"
                 >
-                    <div class="row items-box">
-                        <div class="col-2">
-                            <div class="modal-whats"></div>
-                        </div>
-                        <div class="col-10 text-center">
-                            Eduardo Ramirez<br />
-                            <span class="sub-box"> +57 3174420109 </span>
-                        </div>
+                    <div class="wa-panel-contact-avatar"></div>
+                    <div class="wa-panel-contact-info">
+                        <strong>Eduardo Ramirez</strong>
+                        <span>+57 3174420109</span>
                     </div>
                 </a>
             </div>
@@ -77,46 +67,6 @@ export default {
 <style>
 /* whats */
 
-.row-wha {
-  padding: 0px 12px;
-}
-
-.div-what {
-  position: fixed;
-  width: 5%;
-  height: 10%;
-  bottom: 90px;
-  right: 40px;
-}
-
-.header-wha {
-  height: 85px;
-  padding: 15px 15px;
-  background-color: #2db742 !important;
-  color: #fff !important;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  line-height: 12px;
-}
-
-.sub-header {
-  text-align: center !important;
-  font-size: 11px;
-  color: #fff;
-  font-weight: 400;
-}
-
-.title-header {
-  font-size: 15px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
-}
-
 .response.what-chat {
   position: fixed;
   width: 320px;
@@ -125,54 +75,89 @@ export default {
   z-index: 10001;
 }
 
-.box-wha {
-  display: block;
-  height: 57px;
-  padding: 10px 15px;
-  color: #000 !important;
-  margin-bottom: 3px;
-  text-decoration: none !important;
+.wa-panel {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
 }
 
-.box-wha-final {
-  height: 57px;
-  padding: 10px 15px;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  color: #000 !important;
-}
-
-.sub-box {
-  text-align: center !important;
-  font-size: 11px;
-  color: #837f7f;
-}
-
-.sub-boxtitle {
-  font-size: 9px;
-  color: #837f7f;
-}
-
-.boxtitle {
-  text-align: left !important;
-  padding: 7px 10px;
-}
-
-.items-box {
+.wa-panel-header {
   display: flex;
   align-items: center;
-  line-height: 15px;
-  height: 48px;
-  background: #f3f3f3;
-  margin: 0 -6px;
-  border-radius: px;
-  box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
+  gap: 12px;
+  padding: 16px;
+  background-color: #2db742;
+  color: #fff;
 }
 
-.items-box:hover {
-  -webkit-transform: scale(1.1);
-  transform: scale(1.1);
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+.wa-panel-avatar,
+.wa-panel-contact-avatar {
+  flex: 0 0 auto;
+  background-color: #fff;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url('/public/images/WhatsappIcon.png');
+  border-radius: 50%;
+}
+
+.wa-panel-avatar {
+  width: 44px;
+  height: 44px;
+}
+
+.wa-panel-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wa-panel-heading strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.wa-panel-heading span {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  opacity: 0.95;
+}
+
+.wa-panel-contact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  color: #111 !important;
+  text-decoration: none !important;
+  transition: background-color .15s ease;
+}
+
+.wa-panel-contact:hover {
+  background-color: #f5f5f5;
+}
+
+.wa-panel-contact-avatar {
+  width: 38px;
+  height: 38px;
+}
+
+.wa-panel-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wa-panel-contact-info strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wa-panel-contact-info span {
+  font-size: 12px;
+  color: #6b7280;
 }
 
 .float {
@@ -208,50 +193,9 @@ export default {
     font-size: 18px;
     line-height: 1.3;
     border: 0;
+    white-space: nowrap;
     cursor: pointer;
   }
-
-  .float-message:focus {
-    position: fixed;
-    background-size: contain;
-    width: 74px;
-    height: 74px;
-    bottom: 35px;
-    background-repeat: no-repeat;
-    right: 40px;
-    border-radius: 50px;
-    text-align: center;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
-    z-index: 10000;
-  }
-
-  .float:focus {
-    position: fixed;
-    background-size: contain;
-    width: 74px;
-    height: 74px;
-    background-image: url('/public/images/WhatsappIcon.png');
-    border-radius: 50px;
-    text-align: center;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
-    z-index: 10000;
-  }
-
-.modal-whats {
-  background-size: contain;
-    width: 42px;
-    height: 42px;
-    background-repeat: no-repeat;
-    background-image: url('/public/images/WhatsappIcon.png');
-  }
-
-  .header-logo {
-    background-size: contain;
-    margin: auto;
-    display: block;
-    width: 130px;
-    height: 65px;
-}
 
 .btn-close {
   position: fixed;
@@ -286,10 +230,6 @@ export default {
     bottom: 30px;
   }
 
-  .float:focus {
-    right: 35px;
-    bottom: 60px;
-  }
   .float-message {
     bottom: 35px;
   }
@@ -310,11 +250,8 @@ export default {
     right: 20px;
   }
 
-  .sub-box {
-    font-size: 12px;
-  }
-
-  .sub-header {
+  .wa-panel-contact-info span,
+  .wa-panel-heading span {
     font-size: 12px;
   }
 }
