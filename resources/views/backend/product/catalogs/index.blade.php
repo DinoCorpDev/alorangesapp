@@ -34,7 +34,6 @@
             $letterIntroAdRows = [['image' => '', 'category_id' => '', 'letter' => 'A']];
         }
 
-        $coverTitlePosition = old('cover_title_position', $settings['cover_title_position'] ?? 'middle');
         $productsPerPage = (int) old('products_per_page', $settings['products_per_page'] ?? 12) === 20 ? 20 : 12;
         $fullPageImageHint = 'Tamano recomendado: 2550 x 3300 px - carta vertical';
         $advertisingImageHint = 'Tamano recomendado: 1600 x 900 px - imagen horizontal';
@@ -224,6 +223,7 @@
             margin-top: 10px;
         }
         .catalog-index-shell .catalog-tip i { margin-right: 6px; }
+        .catalog-index-shell .letter-intro-ad-row-empty { background: #fffbeb; }
         .catalog-index-shell .catalog-product-toolbar {
             display: flex;
             align-items: center;
@@ -462,7 +462,7 @@
                             <div>
                                 <div class="section-kicker"><span>1</span> Portada</div>
                                 <h6>Datos de la primera pagina</h6>
-                                <p>Elige una portada configurada por categoria y completa la informacion del asesor.</p>
+                                <p>Elige una portada configurada por categoria y, si aplica, la imagen final del catalogo.</p>
                             </div>
                         </div>
 
@@ -492,42 +492,23 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="col-lg-8">
-                                <div class="row gutters-10">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Posicion del titulo</label>
-                                            <select class="form-control aiz-selectpicker" name="cover_title_position">
-                                                <option value="top" @if ($coverTitlePosition === 'top') selected @endif>Arriba</option>
-                                                <option value="middle" @if ($coverTitlePosition === 'middle') selected @endif>Centro</option>
-                                                <option value="bottom" @if ($coverTitlePosition === 'bottom') selected @endif>Abajo</option>
-                                            </select>
+                            <div class="col-lg-4">
+                                <div class="form-group mb-lg-0">
+                                    <label>Imagen final del catalogo</label>
+                                    <div class="input-group" data-toggle="aizuploader" data-type="image">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div>
                                         </div>
+                                        <div class="form-control file-amount">Elegir archivo</div>
+                                        <input type="hidden" name="final_page_image" class="selected-files" value="{{ old('final_page_image', $settings['final_page_image'] ?? '') }}">
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Nombre del asesor</label>
-                                            <input type="text" class="form-control" name="advisor_name" value="{{ old('advisor_name', $settings['advisor_name'] ?? '') }}" placeholder="Nombre del asesor">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Telefono del asesor</label>
-                                            <input type="text" class="form-control" name="advisor_phone" value="{{ old('advisor_phone', $settings['advisor_phone'] ?? '') }}" placeholder="Telefono del asesor">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-md-0">
-                                            <label>Correo del asesor 1</label>
-                                            <input type="email" class="form-control" name="advisor_email_1" value="{{ old('advisor_email_1', $settings['advisor_email_1'] ?? '') }}" placeholder="correo@ejemplo.com">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-0">
-                                            <label>Correo del asesor 2</label>
-                                            <input type="email" class="form-control" name="advisor_email_2" value="{{ old('advisor_email_2', $settings['advisor_email_2'] ?? '') }}" placeholder="correo@ejemplo.com">
-                                        </div>
-                                    </div>
+                                    <div class="file-preview box sm"></div>
+                                    <small class="text-muted d-block mt-1">{{ $fullPageImageHint }} — la imagen es obligatoria para mostrar la pagina final.</small>
+                                    <label class="aiz-checkbox mb-0 mt-2">
+                                        <input type="checkbox" name="final_page_blank" value="1" @if (old('final_page_blank', $settings['final_page_blank'] ?? false)) checked @endif>
+                                        <span class="aiz-square-check"></span>
+                                        <span>Mostrar pagina final (requiere haber subido la imagen)</span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -604,8 +585,8 @@
                                                     <div class="form-control file-amount">Elegir archivo</div>
                                                     <input type="hidden" name="advertising_images[]" class="selected-files" value="{{ $advertisingRow['image'] ?? '' }}">
                                                 </div>
-                                                <small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small>
                                                 <div class="file-preview box sm"></div>
+                                                <small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small>
                                             </td>
                                             <td>
                                                 <select class="form-control aiz-selectpicker" name="advertising_letters[]">
@@ -632,6 +613,7 @@
                                 <div class="section-kicker"><span>4</span> Separadores</div>
                                 <h6>Publicidad al iniciar una letra</h6>
                                 <p>Imagen a pagina completa que se muestra una sola vez antes de iniciar la letra elegida.</p>
+                                <p class="text-muted mb-0"><small>Solo se muestra si la categoria seleccionada tiene productos con esa letra. Las letras sin productos quedan deshabilitadas.</small></p>
                             </div>
                             <button type="button" class="btn btn-soft-primary btn-sm" id="add-letter-intro-ad-row">
                                 <i class="las la-plus"></i>
@@ -659,8 +641,8 @@
                                                     <div class="form-control file-amount">Elegir archivo</div>
                                                     <input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value="{{ $letterIntroAdRow['image'] ?? '' }}">
                                                 </div>
-                                                <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                                 <div class="file-preview box sm"></div>
+                                                <small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small>
                                             </td>
                                             <td>
                                                 <select class="form-control aiz-selectpicker letter-intro-ad-category" name="letter_intro_ad_category_ids[]" data-live-search="true">
@@ -864,6 +846,7 @@
     <script type="text/javascript">
         var selectedProductIds = @json($selectedProductIds);
         var advertisingLetterOptions = @json($advertisingLetters);
+        var categoryLetterMap = {};
         var catalogCategoryOptions = @json($categories->map(function ($category) {
             return [
                 'id' => $category->id,
@@ -887,7 +870,7 @@
             }).join('');
 
             return '<tr class="advertising-row">' +
-                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="advertising_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="advertising_images[]" class="selected-files" value=""></div><div class="file-preview box sm"></div><small class="text-muted d-block mt-1">{{ $advertisingImageHint }}</small></td>' +
                 '<td><select class="form-control aiz-selectpicker" name="advertising_letters[]">' + options + '</select></td>' +
                 '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-advertising-row" title="Eliminar"><i class="las la-trash"></i></button></td>' +
             '</tr>';
@@ -905,7 +888,7 @@
             }).join('');
 
             return '<tr class="letter-intro-ad-row">' +
-                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value=""></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small><div class="file-preview box sm"></div></td>' +
+                '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value=""></div><div class="file-preview box sm"></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small></td>' +
                 '<td><select class="form-control aiz-selectpicker letter-intro-ad-category" name="letter_intro_ad_category_ids[]" data-live-search="true">' + categoryOptionsTemplate() + '</select></td>' +
                 '<td><select class="form-control aiz-selectpicker" name="letter_intro_ad_letters[]">' + letterOptions + '</select></td>' +
                 '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="Eliminar"><i class="las la-trash"></i></button></td>' +
@@ -938,7 +921,8 @@
                 }
             });
 
-            $('#catalog-cover-empty-tip').toggleClass('d-none', categoryIds.length > 0 && availableOptions === 0);
+            var hasCoverGap = categoryIds.length > 0 && availableOptions === 0;
+            $('#catalog-cover-empty-tip').toggleClass('d-none', !hasCoverGap);
             if ($.fn.selectpicker) { coverSelect.selectpicker('refresh'); }
         }
 
@@ -1002,11 +986,14 @@
         }
 
         function renderProducts(categoryGroups) {
+            categoryLetterMap = {};
+
             if (categoryGroups.length === 0) {
                 $('#catalog-products').html(productEmptyState('las la-search', catalogMessages.noProductsTitle, catalogMessages.noProductsBody));
                 $('#select-all-products').prop('checked', false).prop('disabled', true);
                 $('#catalog-product-search').addClass('d-none').val('');
                 refreshGenerateButton();
+                refreshLetterIntroAdLetterOptions();
                 return;
             }
 
@@ -1014,13 +1001,17 @@
 
             categoryGroups.forEach(function(categoryGroup) {
                 var groups = {};
+                var enabledLetters = {};
 
                 categoryGroup.products.forEach(function(product) {
                     var letter = (product.name || '#').trim().charAt(0).toUpperCase();
                     if (!letter.match(/[A-Z0-9]/)) { letter = '#'; }
                     groups[letter] = groups[letter] || [];
                     groups[letter].push(product);
+                    if (!product.is_disabled) { enabledLetters[letter] = true; }
                 });
+
+                categoryLetterMap[String(categoryGroup.category_id)] = Object.keys(enabledLetters).sort();
 
                 html += '<tr class="catalog-category-row"><td colspan="3"><i class="las la-folder-open"></i> ' + escapeHtml(categoryGroup.category_name) + '</td></tr>';
 
@@ -1049,6 +1040,28 @@
             $('#catalog-product-search').removeClass('d-none').val('');
             refreshSelectAllState();
             refreshGenerateButton();
+            refreshLetterIntroAdLetterOptions();
+        }
+
+        function refreshLetterIntroAdLetterOptions() {
+            $('.letter-intro-ad-row').each(function() {
+                var row = $(this);
+                var categoryId = String(row.find('.letter-intro-ad-category').val() || '');
+                var availableLetters = categoryLetterMap[categoryId];
+                var letterSelect = row.find('select[name="letter_intro_ad_letters[]"]');
+
+                letterSelect.find('option').each(function() {
+                    var optionValue = ($(this).val() || '').toString();
+                    var isSelected = $(this).is(':selected');
+                    var isAvailable = !availableLetters || availableLetters.indexOf(optionValue) !== -1 || isSelected;
+
+                    $(this).prop('disabled', !isAvailable);
+                });
+
+                row.toggleClass('letter-intro-ad-row-empty', !!availableLetters && availableLetters.length === 0);
+            });
+
+            if ($.fn.selectpicker) { $('.letter-intro-ad-row select[name="letter_intro_ad_letters[]"]').selectpicker('refresh'); }
         }
 
         function loadCatalogProducts() {
@@ -1099,7 +1112,12 @@
         $('#add-letter-intro-ad-row').on('click', function() {
             $('#letter-intro-ad-table tbody').append(letterIntroAdRowTemplate());
             refreshLetterIntroCategoryOptions();
+            refreshLetterIntroAdLetterOptions();
             if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
+        });
+
+        $(document).on('change', '.letter-intro-ad-category', function() {
+            refreshLetterIntroAdLetterOptions();
         });
 
         $(document).on('click', '.remove-letter-intro-ad-row', function() {

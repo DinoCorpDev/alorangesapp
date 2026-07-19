@@ -20,6 +20,12 @@
         'payment_cash_icon'              => null,
         'info_page_image'                => null,
         'page_four_image'                => null,
+        'final_page_image'               => null,
+        'final_page_blank'               => false,
+        'payment_page_position'          => 'start',
+        'info_page_position'             => 'start',
+        'extra_pages_position'           => 'start',
+        'additional_pages'               => [],
         'payment_title'                  => 'MEDIOS DE PAGO',
         'payment_delivery_title'         => 'EFECTIVO CONTRA ENTREGA, DEPOSITO O TRANSFERENCIA DIRECTA',
         'payment_bank_info'              => '',
@@ -116,6 +122,21 @@
         $extraPageImages = collect([$pageFourImage]);
     }
 
+    // Cada uno de estos 3 tipos de pagina se ubica al inicio o al final del catalogo, de forma independiente
+    $paymentPagePosition = ($settings['payment_page_position'] ?? 'start') === 'end' ? 'end' : 'start';
+    $infoPagePosition    = ($settings['info_page_position'] ?? 'start') === 'end' ? 'end' : 'start';
+    $extraPagesPosition  = ($settings['extra_pages_position'] ?? 'start') === 'end' ? 'end' : 'start';
+
+    // Paginas adicionales configurables: cada una elige su propia posicion (inicio / final)
+    $additionalPagesByPosition = collect($settings['additional_pages'] ?? [])->map(function ($item) use ($pageImage) {
+        $position = $item['position'] ?? 'start';
+
+        return [
+            'image' => $pageImage($item['image'] ?? null),
+            'position' => in_array($position, ['start', 'end'], true) ? $position : 'start',
+        ];
+    })->filter(fn($item) => $item['image'])->groupBy('position');
+
     $fallbackImage = $localPublicAsset('assets/img/item-placeholder.png') ?: ($fallbackImage ?? null);
 
     $advertisingItems = $settings['advertising_items'] ?? [];
@@ -211,13 +232,18 @@
         : min(9, max(7, (int) ($settings['product_reference_font_size'] ?: 9)));
 
     $pdfPageRendered = false;
-    $pageBreak = function () use (&$pdfPageRendered) {
-        if ($pdfPageRendered) {
-            return '<pagebreak />';
+    // $showPageNumber = true shows the page number (used only on product pages);
+    // every other page explicitly turns it off so numbering never leaks onto other pages.
+    $pageBreak = function ($showPageNumber = false) use (&$pdfPageRendered) {
+        $margins = $showPageNumber ? ' margin-bottom="3" margin-footer="3"' : ' margin-bottom="0" margin-footer="0"';
+        $toggle = '<sethtmlpagefooter name="pageFooter" page="ALL" value="' . ($showPageNumber ? 'ON' : 'OFF') . '" />';
+
+        if (! $pdfPageRendered) {
+            $pdfPageRendered = true;
+            return $toggle;
         }
 
-        $pdfPageRendered = true;
-        return '';
+        return '<pagebreak' . $margins . ' />' . $toggle;
     };
 @endphp
 <!doctype html>
@@ -235,7 +261,6 @@
         .cover-bg     { background: #f4f5f7; }
         .cover-title  { font-size: 34px; font-weight: 700; color: #f36f21; line-height: 1.15; margin: 0; text-align: center; }
         .cover-meta   { font-size: 14px; color: #555; margin: 8mm 0 0; text-align: center; }
-        .cover-overlay-title { color: #ff5a00; font-size: 32px; font-weight: 700; text-transform: uppercase; line-height: 1.08; margin: 0; text-align: center; }
         .cover-advisor { text-align: center; color: #007a3d; font-size: 20px; font-weight: 700; line-height: 1.25; }
         .cover-advisor-name { display: block; font-size: 22px; text-transform: uppercase; margin-bottom: 2mm; }
         .cover-advisor-contact { display: block; font-size: 17px; }
@@ -256,16 +281,6 @@
         .info-table tr:last-child td { border-bottom: 0; }
         .info-table-label { width: 34%; background-color: #f0fff3; color: #008847; font-weight: 700; }
 
-        /* ─── PRODUCTS ───────────────────────────── */
-        .product-card  { border-collapse: collapse; }
-        .product-banner { font-weight: 700; overflow: hidden; white-space: nowrap; padding: 2mm 4mm; height: 10mm; }
-        .product-img-cell { width: 38mm; padding: 4mm 2mm 4mm 4mm; vertical-align: middle; text-align: center; height: 62mm; }
-        .product-img   { max-width: 30mm; max-height: 50mm; }
-        .product-info  { padding: 4mm; vertical-align: top; width: 52mm; }
-        .product-name  { font-weight: 700; line-height: 1.25; margin: 0; }
-        .product-price { font-weight: 700; color: #f36f21; margin: 2mm 0 0; }
-        .product-ref   { color: #8a93a3; margin: 2mm 0 0; }
-        .product-desc  { color: #59606b; line-height: 1.35; margin: 3mm 0 0; }
         /* Executive report refresh - mPDF safe overrides */
         body { color: #1f2937; font-size: 10px; background: #ffffff; }
         .muted { color: #64748b; }
@@ -281,7 +296,6 @@
         .report-card-body { color: #334155; font-size: 9.5px; line-height: 1.45; }
         .full-page-bg { display: block; width: 216mm; height: 276mm; }
         .cover-page { width: 216mm; height: 276mm; overflow: hidden; background: #f4f5f7; }
-        .cover-overlay-table { width: 216mm; height: 276mm; border-collapse: collapse; }
         .report-overlay { margin-left: 14mm; width: 188mm; }
         .payment-icon { max-width: 24mm; max-height: 14mm; }
         .payment-method-table { width: 100%; border-collapse: separate; border-spacing: 4mm 0; margin-top: 5mm; }
@@ -302,12 +316,12 @@
         .product-head { width: {{ $productCardWidth }}mm; height: {{ $productHeadHeight }}mm; padding: {{ $compactProducts ? 1.2 : 1.8 }}mm {{ $compactProducts ? 1.6 : 2.2 }}mm; font-weight: 700; line-height: 1.13; vertical-align: middle; text-transform: uppercase; }
         .product-media { width: {{ $productCardWidth }}mm; height: {{ $productMediaHeight }}mm; padding: {{ $compactProducts ? 1 : 1.5 }}mm; text-align: center; vertical-align: middle; background: #ffffff; }
         .product-img { max-width: {{ $productImageWidth }}mm; max-height: {{ $productImageHeight }}mm; }
-        .product-info { width: {{ $productCardWidth }}mm; height: {{ $productInfoHeight }}mm; padding: 0 {{ $compactProducts ? 1.5 : 2 }}mm {{ $compactProducts ? 1.2 : 1.8 }}mm; text-align: center; vertical-align: middle; }
+        .product-info { width: {{ $productCardWidth }}mm; height: {{ $productInfoHeight }}mm; padding: 0 {{ $compactProducts ? 1.5 : 2 }}mm {{ $compactProducts ? 1.2 : 1.8 }}mm; text-align: center; vertical-align: middle; background: #ffffff; }
         .product-name { color: #111827; font-weight: 700; line-height: 1.22; margin: 0; }
         .product-price { color: #d9832e; font-weight: 500; line-height: 1.1; margin: 0; text-align: center; }
         .product-ref { color: #475569; font-weight: 400; line-height: 1.1; margin: 0; text-align: center; }
-        .product-detail-table { width: 100%; border-collapse: collapse; }
-        .product-detail-table td { padding: 0; vertical-align: middle; }
+        .product-detail-table { width: 100%; border-collapse: collapse; background: #ffffff; }
+        .product-detail-table td { padding: 0; vertical-align: middle; background: #ffffff; }
         .product-price-gap { height: {{ $compactProducts ? 1.5 : 2.2 }}mm; line-height: {{ $compactProducts ? 1.5 : 2.2 }}mm; font-size: 1px; }
         .product-advertising-cell { width: {{ $advertisingWidth }}mm; height: {{ $advertisingHeight }}mm; padding: {{ $productCellPaddingTop }}mm 0 {{ $productCellPaddingBottom }}mm; text-align: center; vertical-align: middle; }
         .product-advertising-frame { width: {{ $advertisingWidth }}mm; height: {{ $advertisingHeight - $productCellPaddingTop - $productCellPaddingBottom }}mm; border: 0.3mm solid #dfe5e8; background: #ffffff; text-align: center; vertical-align: middle; overflow: hidden; }
@@ -317,6 +331,10 @@
 </head>
 <body>
 
+<htmlpagefooter name="pageFooter">
+    <div style="text-align:right; font-size:12px; line-height:1; font-weight:700; color:#64748b; padding-right:{{ $compactProducts ? 8 : 10 }}mm;">{PAGENO}</div>
+</htmlpagefooter>
+
 {{-- ═══════════════════════════════════════════════════════ --}}
 {{-- PORTADA                                                  --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
@@ -324,35 +342,6 @@
     {!! $pageBreak() !!}
     <div class="cover-page">
         <img class="full-page-bg" src="{{ $coverImage }}" alt="">
-        <div style="margin-top:-276mm;">
-            <table class="cover-overlay-table">
-                <tr><td style="height:{{ $coverTitleTop }}mm;">&nbsp;</td></tr>
-                <tr>
-                    <td style="text-align:center; vertical-align:middle; padding-left:16mm; padding-right:16mm; height:{{ $coverTitleHeight }}mm;">
-                        <div class="cover-overlay-title">{{ $catalogName }}</div>
-                    </td>
-                </tr>
-                <tr><td style="height:{{ $coverTitleBottomSpace }}mm;">&nbsp;</td></tr>
-                @if ($hasAdvisor)
-                    <tr>
-                        <td style="text-align:center; vertical-align:bottom; padding:0 12mm 8mm; height:{{ $coverFooterHeight }}mm;">
-                            <div class="cover-advisor">
-                                @if ($settings['advisor_name'])
-                                    <div style="font-size:22px; text-transform:uppercase; margin-bottom:2mm; font-weight:700;">{{ $settings['advisor_name'] }}</div>
-                                @endif
-                                @if ($settings['advisor_phone'] || $advisorEmails->isNotEmpty())
-                                    <div style="font-size:17px;">
-                                        {{ $settings['advisor_phone'] }}
-                                        @if ($settings['advisor_phone'] && $advisorEmails->isNotEmpty()) | @endif
-                                        {{ $advisorEmails->join(' - ') }}
-                                    </div>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @endif
-            </table>
-        </div>
     </div>
 @else
     {!! $pageBreak() !!}
@@ -386,26 +375,38 @@
 @endif
 
 {{-- ═══════════════════════════════════════════════════════ --}}
-{{-- PÁGINA DE MEDIOS DE PAGO                                --}}
+{{-- PÁGINA DE MEDIOS DE PAGO, INFORMACIÓN Y EXTRA - INICIO  --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
-@if ($settings['show_payment_page'] && $paymentImage)
+@if ($settings['show_payment_page'] && $paymentImage && $paymentPagePosition === 'start')
     {!! $pageBreak() !!}
     <div class="pdf-page">
         <img class="full-page-bg" src="{{ $paymentImage }}" alt="">
     </div>
 @endif
 
-@if ($settings['show_info_page'] && $infoImage)
+@if ($settings['show_info_page'] && $infoImage && $infoPagePosition === 'start')
     {!! $pageBreak() !!}
     <div class="pdf-page">
         <img class="full-page-bg" src="{{ $infoImage }}" alt="">
     </div>
 @endif
 
-@foreach ($extraPageImages as $extraPageImage)
+@if ($extraPagesPosition === 'start')
+    @foreach ($extraPageImages as $extraPageImage)
+        {!! $pageBreak() !!}
+        <div class="pdf-page">
+            <img class="full-page-bg" src="{{ $extraPageImage }}" alt="">
+        </div>
+    @endforeach
+@endif
+
+{{-- ═══════════════════════════════════════════════════════ --}}
+{{-- PAGINAS ADICIONALES - DESPUES DE PAGO/INFORMACION/EXTRA --}}
+{{-- ═══════════════════════════════════════════════════════ --}}
+@foreach ($additionalPagesByPosition->get('start', collect()) as $additionalPage)
     {!! $pageBreak() !!}
     <div class="pdf-page">
-        <img class="full-page-bg" src="{{ $extraPageImage }}" alt="">
+        <img class="full-page-bg" src="{{ $additionalPage['image'] }}" alt="">
     </div>
 @endforeach
 
@@ -468,7 +469,7 @@
                     : $chunk;
             @endphp
 
-            {!! $pageBreak() !!}
+            {!! $pageBreak(true) !!}
             <table class="product-sheet">
                 <tr>
                     <td colspan="{{ $productTableColspan }}" class="product-sheet-header" style="text-align:right;">
@@ -542,131 +543,48 @@
     @endforeach
 @endforeach
 
-@if ($finalPageImage)
+{{-- ═══════════════════════════════════════════════════════ --}}
+{{-- PÁGINA DE MEDIOS DE PAGO, INFORMACIÓN Y EXTRA - FINAL   --}}
+{{-- ═══════════════════════════════════════════════════════ --}}
+@if ($settings['show_payment_page'] && $paymentImage && $paymentPagePosition === 'end')
+    {!! $pageBreak() !!}
+    <div class="pdf-page">
+        <img class="full-page-bg" src="{{ $paymentImage }}" alt="">
+    </div>
+@endif
+
+@if ($settings['show_info_page'] && $infoImage && $infoPagePosition === 'end')
+    {!! $pageBreak() !!}
+    <div class="pdf-page">
+        <img class="full-page-bg" src="{{ $infoImage }}" alt="">
+    </div>
+@endif
+
+@if ($extraPagesPosition === 'end')
+    @foreach ($extraPageImages as $extraPageImage)
+        {!! $pageBreak() !!}
+        <div class="pdf-page">
+            <img class="full-page-bg" src="{{ $extraPageImage }}" alt="">
+        </div>
+    @endforeach
+@endif
+
+{{-- ═══════════════════════════════════════════════════════ --}}
+{{-- PAGINAS ADICIONALES - FINAL                             --}}
+{{-- ═══════════════════════════════════════════════════════ --}}
+@foreach ($additionalPagesByPosition->get('end', collect()) as $additionalPage)
+    {!! $pageBreak() !!}
+    <div class="pdf-page">
+        <img class="full-page-bg" src="{{ $additionalPage['image'] }}" alt="">
+    </div>
+@endforeach
+
+@if (! empty($settings['final_page_blank']) && $finalPageImage)
     {!! $pageBreak() !!}
     <div class="pdf-page">
         <img class="full-page-bg" src="{{ $finalPageImage }}" alt="">
     </div>
 @endif
-
-@foreach ([] as $categoryGroup)
-    @foreach ($categoryGroup['letter_groups'] as $letter => $letterProducts)
-        @foreach ($letterProducts->chunk(6) as $chunkIdx => $chunk)
-            @php
-                $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
-                $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
-            @endphp
-
-            {{-- Una tabla por página de productos --}}
-            {!! $pageBreak() !!}
-            <table class="pdf-page" style="width:216mm; border-collapse:collapse;">
-
-                {{-- Fila encabezado de letra (22mm) --}}
-                <tr style="height:22mm;">
-                    <td colspan="2" style="text-align:right; vertical-align:bottom;
-                        padding:0 10mm 0 10mm; font-size:34px; font-weight:700; color:{{ $boxColor }};">
-                        {{ $letter }}
-                    </td>
-                </tr>
-
-                {{-- Filas de productos (máx 3 × 2 = 6 productos) --}}
-                @foreach ($chunk->values()->chunk(2) as $row)
-                    <tr style="height:80mm;">
-                        @foreach ($row as $colIdx => $product)
-                            @php
-                                $image = $pageImage($product->thumbnail_img)
-                                    ?: $pageImage($product->meta_image)
-                                    ?: $fallbackImage;
-                                $description = trim(strip_tags(
-                                    $product->getTranslation('description')
-                                    ?: $product->meta_description
-                                    ?: ''
-                                ));
-                                $description = \Illuminate\Support\Str::limit($description, $descriptionLimit);
-                                $leftPad  = $colIdx === 0 ? '10mm' : '2mm';
-                                $rightPad = $colIdx === 0 ? '2mm'  : '10mm';
-                            @endphp
-                            <td style="width:50%; padding:2mm {{ $rightPad }} 2mm {{ $leftPad }}; vertical-align:top;">
-
-                                {{-- Tarjeta de producto (tabla anidada) --}}
-                                <table class="product-card" style="width:94mm; height:72mm;
-                                    border:1px solid {{ $boxColor }};">
-
-                                    {{-- Banner de color con nombre --}}
-                                    <tr>
-                                        <td colspan="2" class="product-banner"
-                                            style="background-color:{{ $boxColor }}; color:{{ $textColor }};
-                                                   font-size:{{ (int) $settings['product_title_font_size'] }}px;">
-                                            {{ $product->getTranslation('name') }}
-                                        </td>
-                                    </tr>
-
-                                    {{-- Imagen + info --}}
-                                    <tr>
-                                        <td class="product-img-cell">
-                                            @if ($image)
-                                                <img class="product-img" src="{{ $image }}" alt="">
-                                            @endif
-                                        </td>
-                                        <td class="product-info">
-                                            <div class="product-name"
-                                                 style="font-family:{{ $cssFont($settings['product_title_font_family']) }}, sans-serif;
-                                                        font-size:{{ (int) $settings['product_title_font_size'] }}px;">
-                                                {{ $product->getTranslation('name') }}
-                                            </div>
-
-                                            @if ($settings['show_prices'])
-                                                <div class="product-price"
-                                                     style="font-family:{{ $cssFont($settings['product_price_font_family']) }}, sans-serif;
-                                                            font-size:{{ (int) $settings['product_price_font_size'] }}px;">
-                                                    {{ format_price($product->lowest_price) }}
-                                                </div>
-                                            @endif
-
-                                            @if ($product->reference)
-                                                <div class="product-ref"
-                                                     style="font-family:{{ $cssFont($settings['product_reference_font_family']) }}, sans-serif;
-                                                            font-size:{{ (int) $settings['product_reference_font_size'] }}px;">
-                                                    {{ $product->reference }}
-                                                </div>
-                                            @endif
-
-                                            @if ($description)
-                                                <div class="product-desc"
-                                                     style="font-family:{{ $cssFont($settings['product_description_font_family']) }}, sans-serif;
-                                                            font-size:{{ (int) $settings['product_description_font_size'] }}px;">
-                                                    {{ $description }}
-                                                </div>
-                                            @endif
-                                        </td>
-                                    </tr>
-
-                                </table>
-                            </td>
-                        @endforeach
-
-                        {{-- Celda vacía si la fila tiene solo 1 producto --}}
-                        @if ($row->count() === 1)
-                            <td style="width:50%;"></td>
-                        @endif
-                    </tr>
-                @endforeach
-
-            </table>
-
-            {{-- Página de publicidad después de esta letra --}}
-            @if ($advertisingByLetter->has($letter))
-                @foreach ($advertisingByLetter->get($letter) as $advertisingItem)
-                    {!! $pageBreak() !!}
-                    <div class="pdf-page">
-                        <img src="{{ $advertisingItem['image'] }}" style="display:block; width:216mm; height:276mm;" alt="">
-                    </div>
-                @endforeach
-            @endif
-
-        @endforeach
-    @endforeach
-@endforeach
 
 </body>
 </html>

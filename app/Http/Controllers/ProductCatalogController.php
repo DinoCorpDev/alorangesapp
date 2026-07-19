@@ -96,6 +96,8 @@ class ProductCatalogController extends Controller
         $settings['advisor_phone'] = $existing['settings']['advisor_phone'] ?? '';
         $settings['advisor_email_1'] = $existing['settings']['advisor_email_1'] ?? '';
         $settings['advisor_email_2'] = $existing['settings']['advisor_email_2'] ?? '';
+        $settings['final_page_image'] = $existing['settings']['final_page_image'] ?? ($settings['final_page_image'] ?? null);
+        $settings['final_page_blank'] = $existing['settings']['final_page_blank'] ?? ($settings['final_page_blank'] ?? false);
         $settings['advertising_items'] = $this->catalogAdvertisingItems($existing['settings'] ?? []);
         $settings['letter_intro_ads'] = $this->catalogLetterIntroAds($existing['settings'] ?? []);
         $settings['products_per_page'] = (int) ($existing['settings']['products_per_page'] ?? 12) === 20 ? 20 : 12;
@@ -270,11 +272,7 @@ class ProductCatalogController extends Controller
             'product_ids.*' => 'integer|exists:products,id',
             'name' => 'nullable|string|max:255',
             'cover_image' => 'nullable|string|max:255',
-            'cover_title_position' => 'nullable|in:top,middle,bottom',
-            'advisor_name' => 'nullable|string|max:120',
-            'advisor_phone' => 'nullable|string|max:60',
-            'advisor_email_1' => 'nullable|email|max:120',
-            'advisor_email_2' => 'nullable|email|max:120',
+            'final_page_image' => 'nullable|string|max:255',
             'advertising_images' => 'nullable|array',
             'advertising_images.*' => 'nullable|string|max:255',
             'advertising_letters' => 'nullable|array',
@@ -306,17 +304,19 @@ class ProductCatalogController extends Controller
             return null;
         }
 
-        $settings = array_merge($this->catalogDefaultsConfig(), $existing['settings'] ?? [], [
+        // Los ajustes de Configuracion del catalogo (medios de pago, informacion, paginas
+        // adicionales, tipografia, colores, etc.) siempre se toman frescos desde el default
+        // global vigente, sin congelar una copia por catalogo — asi un cambio global aplica
+        // de inmediato la proxima vez que se edite o regenere cualquier catalogo.
+        $settings = array_merge($this->catalogDefaultsConfig(), [
             'cover_image' => $request->cover_image,
-            'cover_title_position' => $request->cover_title_position ?: 'middle',
-            'advisor_name' => $request->advisor_name,
-            'advisor_phone' => $request->advisor_phone,
-            'advisor_email_1' => $request->advisor_email_1,
-            'advisor_email_2' => $request->advisor_email_2,
             'advertising_items' => $this->sanitizeAdvertisingItems($request),
             'letter_intro_ads' => $this->sanitizeLetterIntroAds($request),
             'products_per_page' => (int) $request->products_per_page,
         ]);
+
+        $settings['final_page_image'] = $request->final_page_image ?: ($existing['settings']['final_page_image'] ?? null);
+        $settings['final_page_blank'] = $request->boolean('final_page_blank');
 
         $catalogName = $request->name ?: translate('Catalog') . ' - ' . $categoryNames->join(', ') . ' - ' . now()->format('Y-m-d H:i');
         $productsByCategory = $this->productsByCategory($categories, $productIds);
@@ -604,9 +604,13 @@ class ProductCatalogController extends Controller
             'cover_category_ids.*' => 'nullable|integer|exists:categories,id',
             'cover_category_images' => 'nullable|array',
             'cover_category_images.*' => 'nullable|string|max:255',
-            'extra_page_images' => 'nullable|array',
-            'extra_page_images.*' => 'nullable|string|max:255',
             'final_page_image' => 'nullable|string|max:255',
+            'payment_page_position' => 'nullable|in:start,end',
+            'info_page_position' => 'nullable|in:start,end',
+            'additional_page_images' => 'nullable|array',
+            'additional_page_images.*' => 'nullable|string|max:255',
+            'additional_page_positions' => 'nullable|array',
+            'additional_page_positions.*' => 'nullable|in:start,end',
             'payment_title' => 'nullable|string|max:120',
             'payment_delivery_title' => 'nullable|string|max:160',
             'payment_bank_info' => 'nullable|string|max:1000',
@@ -659,8 +663,10 @@ class ProductCatalogController extends Controller
             'info_page_title' => $request->info_page_title,
             'info_table_rows' => $this->sanitizeInfoTableRows($request),
             'cover_category_images' => $this->sanitizeCoverCategoryImages($request),
-            'extra_page_images' => $this->sanitizeImageList($request->extra_page_images ?: []),
             'final_page_image' => $request->final_page_image,
+            'payment_page_position' => $request->payment_page_position === 'end' ? 'end' : 'start',
+            'info_page_position' => $request->info_page_position === 'end' ? 'end' : 'start',
+            'additional_pages' => $this->sanitizeAdditionalPages($request),
             'product_title_font_family' => $this->sanitizeFontFamily($request->product_title_font_family),
             'product_title_font_size' => (int) ($request->product_title_font_size ?: 12),
             'product_description_font_family' => $this->sanitizeFontFamily($request->product_description_font_family),
@@ -772,13 +778,6 @@ class ProductCatalogController extends Controller
         return $items;
     }
 
-    protected function sanitizeImageList(array $images)
-    {
-        return collect($images)->map(function ($image) {
-            return trim((string) $image);
-        })->filter()->values()->all();
-    }
-
     protected function sanitizeCoverCategoryImages(Request $request)
     {
         $categoryIds = $request->cover_category_ids ?: [];
@@ -795,6 +794,31 @@ class ProductCatalogController extends Controller
                     'image' => $image,
                 ];
             }
+        }
+
+        return $items;
+    }
+
+    protected function sanitizeAdditionalPages(Request $request)
+    {
+        $images = $request->additional_page_images ?: [];
+        $positions = $request->additional_page_positions ?: [];
+        $allowedPositions = ['start', 'end'];
+        $items = [];
+
+        foreach ($images as $index => $image) {
+            $image = trim((string) $image);
+
+            if ($image === '') {
+                continue;
+            }
+
+            $position = $positions[$index] ?? 'start';
+
+            $items[] = [
+                'image' => $image,
+                'position' => in_array($position, $allowedPositions, true) ? $position : 'start',
+            ];
         }
 
         return $items;
@@ -879,6 +903,11 @@ class ProductCatalogController extends Controller
             'page_four_image' => null,
             'extra_page_images' => [],
             'final_page_image' => null,
+            'final_page_blank' => false,
+            'payment_page_position' => 'start',
+            'info_page_position' => 'start',
+            'extra_pages_position' => 'start',
+            'additional_pages' => [],
             'payment_title' => 'MEDIOS DE PAGO',
             'payment_delivery_title' => 'EFECTIVO CONTRA ENTREGA, DEPOSITO O TRANSFERENCIA DIRECTA',
             'payment_bank_info' => '',
