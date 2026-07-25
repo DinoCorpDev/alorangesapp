@@ -262,7 +262,7 @@ class SyncAlegraProductsJob
             $slots[$field] = $images[$index === 0 ? 0 : $index - 1]['url'] ?? null;
         }
 
-        $pending = [];
+        $candidates = [];
         foreach ($slots as $field => $url) {
             if (!$url) {
                 if (!$productStorage->{$field}) {
@@ -271,11 +271,44 @@ class SyncAlegraProductsJob
                 continue;
             }
 
-            if (!filter_var($url, FILTER_VALIDATE_URL) || $this->hasLocalUpload($productStorage->{$field})) {
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
                 continue;
             }
 
-            $pending[$url][] = $field;
+            $candidates[$url][] = $field;
+        }
+
+        if (empty($candidates)) {
+            return;
+        }
+
+        // Cheap freshness check: HEAD each candidate and compare Content-Length
+        // against what we already have on disk, so an unchanged image is
+        // skipped without re-downloading its full body. A previous version
+        // skipped whenever *any* valid file already existed for the slot,
+        // which meant a product's image was never refreshed again once it
+        // had one, even if the source image in Alegra changed afterwards.
+        $urls = array_keys($candidates);
+        $headResponses = Http::pool(fn ($pool) => array_map(
+            fn ($url) => $pool->as($url)->timeout(20)->withOptions(['verify' => false])->head($url),
+            $urls
+        ));
+
+        $pending = [];
+        foreach ($candidates as $url => $fields) {
+            $head = $headResponses[$url] ?? null;
+            $remoteSize = null;
+            if ($head && !($head instanceof Throwable) && $head->successful() && $head->hasHeader('Content-Length')) {
+                $remoteSize = (int) $head->header('Content-Length');
+            }
+
+            foreach ($fields as $field) {
+                if ($remoteSize !== null && $this->isUploadUpToDate($productStorage->{$field}, $remoteSize)) {
+                    continue;
+                }
+
+                $pending[$url][] = $field;
+            }
         }
 
         if (empty($pending)) {
@@ -341,7 +374,7 @@ class SyncAlegraProductsJob
         }
     }
 
-    private function hasLocalUpload($value): bool
+    private function isUploadUpToDate($value, int $remoteSize): bool
     {
         if (!$value || !ctype_digit((string) $value)) {
             return false;
@@ -349,6 +382,8 @@ class SyncAlegraProductsJob
 
         $upload = Upload::find($value);
 
-        return $upload && File::exists(public_path($upload->file_name));
+        return $upload
+            && File::exists(public_path($upload->file_name))
+            && (int) $upload->file_size === $remoteSize;
     }
 }
