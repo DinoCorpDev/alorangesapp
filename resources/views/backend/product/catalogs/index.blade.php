@@ -1,10 +1,24 @@
-@extends('backend.layouts.app')
+﻿@extends('backend.layouts.app')
 
 @section('content')
     @php
         $isEdit = $mode === 'edit';
         $selectedCategoryIds = collect(old('category_ids', $catalog['category_ids'] ?? []))->map(fn($id) => (string) $id)->all();
-        $selectedProductIds = collect(old('product_ids', $catalog['product_ids'] ?? []))->map(fn($id) => (string) $id)->all();
+        // product_ids llega como lista separada por coma desde el formulario (ver el input
+        // oculto mas abajo), pero en el catalogo guardado es un array de enteros.
+        $oldProductIds = old('product_ids');
+        $selectedProductIds = is_string($oldProductIds)
+            ? array_values(array_unique(array_filter(preg_split('/[^0-9]+/', $oldProductIds, -1, PREG_SPLIT_NO_EMPTY) ?: [])))
+            : collect($oldProductIds ?? ($catalog['product_ids'] ?? []))->map(fn($id) => (string) $id)->all();
+        $catalogStatusMap = $catalogs->mapWithKeys(function ($item) {
+            return [$item['id'] => [
+                'status' => $item['status'] ?? 'ready',
+                'status_message' => $item['status_message'] ?? null,
+                'products_count' => $item['products_count'] ?? 0,
+                'has_file' => ! empty($item['file_path']) && is_file(public_path($item['file_path'])),
+                'progress' => \App\Jobs\GenerateProductCatalogJob::progress($item['id']),
+            ]];
+        });
         $advertisingLetters = array_merge(range('A', 'Z'), ['#']);
         $advertisingRows = old('advertising_images')
             ? collect(old('advertising_images'))->map(function ($image, $index) {
@@ -233,6 +247,68 @@
         }
         .catalog-index-shell .catalog-product-toolbar .form-control {
             max-width: 320px;
+        }
+        .catalog-index-shell .catalog-bulk-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .catalog-index-shell .catalog-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .catalog-index-shell .catalog-status-ready { background: #ecfdf5; color: #047857; }
+        .catalog-index-shell .catalog-status-pending { background: #fffbeb; color: #92400e; }
+        .catalog-index-shell .catalog-status-failed { background: #fef2f2; color: #b91c1c; }
+        .catalog-index-shell .catalog-progress {
+            margin-top: 6px;
+            min-width: 150px;
+            max-width: 220px;
+        }
+        .catalog-index-shell .catalog-progress-track {
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            overflow: hidden;
+        }
+        .catalog-index-shell .catalog-progress-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 3px;
+            background: #f36f21;
+            transition: width .4s ease;
+        }
+        /* Fases sin total conocido (consultas, armado del HTML, guardado): franja que se
+           desplaza, en vez de un porcentaje inventado. */
+        .catalog-index-shell .catalog-progress-indeterminate .catalog-progress-fill {
+            width: 40%;
+            background: linear-gradient(90deg, rgba(243,111,33,.25), #f36f21, rgba(243,111,33,.25));
+            animation: catalog-progress-slide 1.2s linear infinite;
+        }
+        @keyframes catalog-progress-slide {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+        }
+        .catalog-index-shell .catalog-progress-text {
+            display: block;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        .catalog-index-shell .catalog-download.disabled {
+            opacity: .45;
+            pointer-events: none;
+        }
+        .catalog-index-shell .catalog-status-error {
+            display: block;
+            color: #b91c1c;
+            margin-top: 4px;
+            word-break: break-word;
+            max-width: 420px;
         }
         .catalog-index-shell .catalog-density-options {
             display: grid;
@@ -503,7 +579,7 @@
                                         <input type="hidden" name="final_page_image" class="selected-files" value="{{ old('final_page_image', $settings['final_page_image'] ?? '') }}">
                                     </div>
                                     <div class="file-preview box sm"></div>
-                                    <small class="text-muted d-block mt-1">{{ $fullPageImageHint }} — la imagen es obligatoria para mostrar la pagina final.</small>
+                                    <small class="text-muted d-block mt-1">{{ $fullPageImageHint }} â€” la imagen es obligatoria para mostrar la pagina final.</small>
                                     <label class="aiz-checkbox mb-0 mt-2">
                                         <input type="checkbox" name="final_page_blank" value="1" @if (old('final_page_blank', $settings['final_page_blank'] ?? false)) checked @endif>
                                         <span class="aiz-square-check"></span>
@@ -717,7 +793,7 @@
                             </div>
                             <div class="catalog-stat">
                                 <strong id="loaded-products-count">0</strong>
-                                <span>Productos cargados</span>
+                                <span>Productos en pantalla</span>
                             </div>
                             <div class="catalog-stat">
                                 <strong id="unavailable-products-count">0</strong>
@@ -725,19 +801,37 @@
                             </div>
                         </div>
 
+                        {{-- Un solo campo con los ids separados por coma: un input por producto
+                             choca contra max_input_vars de PHP (1000 por defecto), que descarta
+                             en silencio todo lo que pase de esa cantidad. --}}
+                        <input type="hidden" name="product_ids" id="catalog-product-ids" value="{{ implode(',', $selectedProductIds) }}">
+
                         <div class="catalog-product-toolbar">
-                            <input type="text" class="form-control form-control-sm d-none" id="catalog-product-search" placeholder="Buscar productos por nombre, ID o categoria">
-                            <label class="aiz-checkbox mb-0 fw-600">
-                                <input type="checkbox" id="select-all-products" disabled>
-                                <span class="aiz-square-check"></span>
-                                <span>Seleccionar visibles</span>
-                            </label>
+                            <input type="text" class="form-control form-control-sm d-none" id="catalog-product-search" placeholder="Buscar por nombre, referencia o ID">
+                            <div class="catalog-bulk-actions d-none" id="catalog-bulk-actions">
+                                <button type="button" class="btn btn-soft-primary btn-sm" id="select-all-matching">
+                                    <i class="las la-check-double"></i>
+                                    <span id="select-all-matching-label">Seleccionar todos</span>
+                                </button>
+                                <button type="button" class="btn btn-soft-secondary btn-sm" id="clear-selection">
+                                    <i class="las la-times"></i>
+                                    Quitar seleccion
+                                </button>
+                            </div>
                         </div>
 
                         <div id="catalog-products" class="catalog-empty-state">
                             <i class="las la-box-open"></i>
                             <strong>Selecciona categorias para cargar productos</strong>
                             <div>La lista aparecera agrupada por categoria y letra</div>
+                        </div>
+
+                        <div class="text-center mt-3 d-none" id="catalog-load-more-wrap">
+                            <button type="button" class="btn btn-soft-primary btn-sm" id="catalog-load-more">
+                                <i class="las la-angle-down"></i>
+                                Cargar mas productos
+                            </button>
+                            <small class="d-block text-muted mt-2" id="catalog-load-more-hint"></small>
                         </div>
                     </div>
 
@@ -780,6 +874,7 @@
                             <th>Nombre</th>
                             <th data-breakpoints="lg">Categorias</th>
                             <th data-breakpoints="lg">Productos</th>
+                            <th>Estado</th>
                             <th data-breakpoints="lg">Creado</th>
                             <th class="text-right">Opciones</th>
                         </tr>
@@ -788,8 +883,10 @@
                         @foreach ($catalogs as $key => $catalogItem)
                             @php
                                 $catalogSearch = strtolower(($catalogItem['name'] ?? '') . ' ' . ($catalogItem['category_name'] ?? '') . ' ' . ($catalogItem['created_at'] ?? ''));
+                                $catalogStatus = $catalogItem['status'] ?? 'ready';
+                                $catalogHasFile = ! empty($catalogItem['file_path']);
                             @endphp
-                            <tr class="catalog-list-row" data-catalog-search="{{ $catalogSearch }}">
+                            <tr class="catalog-list-row" data-catalog-search="{{ $catalogSearch }}" data-catalog-id="{{ $catalogItem['id'] }}">
                                 <td>{{ $key + 1 }}</td>
                                 <td>
                                     <span class="fw-700 text-dark">{{ $catalogItem['name'] }}</span>
@@ -798,17 +895,34 @@
                                     @endif
                                 </td>
                                 <td>{{ $catalogItem['category_name'] }}</td>
-                                <td><span class="badge badge-inline badge-soft-info">{{ $catalogItem['products_count'] }}</span></td>
+                                <td><span class="badge badge-inline badge-soft-info catalog-products-count">{{ $catalogItem['products_count'] }}</span></td>
+                                <td class="catalog-status-cell">
+                                    <span class="catalog-status"></span>
+                                    <div class="catalog-progress d-none">
+                                        <div class="catalog-progress-track">
+                                            <div class="catalog-progress-fill"></div>
+                                        </div>
+                                        <small class="catalog-progress-text"></small>
+                                    </div>
+                                    <small class="catalog-status-error d-none"></small>
+                                </td>
                                 <td>{{ $catalogItem['created_at'] }}</td>
                                 <td class="text-right catalog-actions">
                                     <a class="btn btn-soft-info btn-sm" href="{{ route('product_catalogs.edit', $catalogItem['id']) }}" title="Editar">
                                         <i class="las la-edit"></i>
                                         Editar
                                     </a>
-                                    <a class="btn btn-soft-primary btn-sm" href="{{ route('product_catalogs.download', $catalogItem['id']) }}" title="Descargar">
+                                    <a class="btn btn-soft-primary btn-sm catalog-download" href="{{ route('product_catalogs.download', $catalogItem['id']) }}" title="Descargar">
                                         <i class="las la-download"></i>
                                         Descargar
                                     </a>
+                                    <form action="{{ route('product_catalogs.regenerate', $catalogItem['id']) }}" method="POST" class="d-inline-block">
+                                        @csrf
+                                        <button type="submit" class="btn btn-soft-warning btn-sm catalog-regenerate" title="Volver a generar el PDF">
+                                            <i class="las la-redo-alt"></i>
+                                            Regenerar
+                                        </button>
+                                    </form>
                                     <form action="{{ route('product_catalogs.destroy', $catalogItem['id']) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Seguro que deseas eliminar este catalogo?');">
                                         @csrf
                                         @method('DELETE')
@@ -822,7 +936,7 @@
                         @endforeach
                         @if ($catalogs->isEmpty())
                             <tr>
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     <div class="catalog-empty-state">
                                         <i class="las la-file-pdf"></i>
                                         <strong>No hay catalogos generados</strong>
@@ -832,7 +946,7 @@
                             </tr>
                         @else
                             <tr id="catalogs-no-results" class="d-none">
-                                <td colspan="6" class="text-center text-muted py-4">No hay catalogos que coincidan con la busqueda</td>
+                                <td colspan="7" class="text-center text-muted py-4">No hay catalogos que coincidan con la busqueda</td>
                             </tr>
                         @endif
                     </tbody>
@@ -844,7 +958,17 @@
 
 @section('script')
     <script type="text/javascript">
-        var selectedProductIds = @json($selectedProductIds);
+        var PRODUCTS_PER_REQUEST = 250;
+        var CATEGORY_PRODUCTS_URL = '{{ route('product_catalogs.category_products') }}';
+        var CATALOG_STATUSES_URL = '{{ route('product_catalogs.statuses') }}';
+        // Solo se consulta mientras haya un catalogo en cola o generandose, y el renderer
+        // publica progreso como maximo una vez por segundo, asi que 2 s va sobrado.
+        var STATUS_POLL_MS = 2000;
+
+        // La seleccion vive en este Set, no en los checkboxes: de un catalogo de miles de
+        // productos solo hay una pagina pintada a la vez, asi que el estado no puede
+        // depender de lo que este en el DOM.
+        var selectedIds = new Set(@json($selectedProductIds));
         var advertisingLetterOptions = @json($advertisingLetters);
         var categoryLetterMap = {};
         var catalogCategoryOptions = @json($categories->map(function ($category) {
@@ -855,9 +979,32 @@
         })->values());
         var generateCatalogText = @json($isEdit ? 'Actualizar catalogo PDF' : 'Generar catalogo PDF');
         var catalogMessages = @json($catalogMessages);
+        var catalogStatuses = @json($catalogStatusMap);
+
+        var picker = {
+            page: 0,
+            total: 0,
+            selectableTotal: 0,
+            loaded: 0,
+            hasMore: false,
+            search: '',
+            token: 0,
+            loading: false,
+            lastCategoryId: null,
+            lastLetter: null
+        };
+        var searchTimer = null;
+        var statusTimer = null;
+
+        var STATUS_LABELS = {
+            queued:     { text: 'En cola',   cls: 'catalog-status-pending', icon: 'las la-clock' },
+            processing: { text: 'Generando', cls: 'catalog-status-pending', icon: 'las la-spinner la-spin' },
+            ready:      { text: 'Listo',     cls: 'catalog-status-ready',   icon: 'las la-check-circle' },
+            failed:     { text: 'Error',     cls: 'catalog-status-failed',  icon: 'las la-exclamation-triangle' }
+        };
 
         function escapeHtml(value) {
-            return $('<div>').text(value || '').html();
+            return $('<div>').text(value === null || typeof value === 'undefined' ? '' : value).html();
         }
 
         function productEmptyState(icon, title, body) {
@@ -945,104 +1092,6 @@
             if ($.fn.selectpicker) { $('.letter-intro-ad-category').selectpicker('refresh'); }
         }
 
-        function refreshGenerateButton() {
-            var selected = $('.catalog-product-checkbox:checked').length;
-            var loaded = $('.catalog-product-checkbox').length;
-            var unavailable = $('.catalog-product-checkbox:disabled').length;
-            var hasProducts = selected > 0;
-
-            $('#selected-products-count').text(selected);
-            $('#loaded-products-count').text(loaded);
-            $('#unavailable-products-count').text(unavailable);
-            $('#generate-catalog, #generate-catalog-bottom').prop('disabled', ! hasProducts);
-            $('#catalog-submit-hint').text(hasProducts ? selected + ' ' + catalogMessages.productsSelected : catalogMessages.selectProductsHint);
-            $('.submit-label').text(generateCatalogText);
-        }
-
-        function refreshSelectAllState() {
-            var visibleCheckboxes = $('.catalog-product-row:visible .catalog-product-checkbox:not(:disabled)');
-            var checkedVisibleCheckboxes = visibleCheckboxes.filter(':checked');
-            $('#select-all-products')
-                .prop('disabled', visibleCheckboxes.length === 0)
-                .prop('checked', visibleCheckboxes.length > 0 && visibleCheckboxes.length === checkedVisibleCheckboxes.length);
-        }
-
-        function filterCatalogProducts() {
-            var search = ($('#catalog-product-search').val() || '').toLowerCase().trim();
-            $('.catalog-product-row').each(function() {
-                var haystack = ($(this).data('search') || '').toString();
-                $(this).toggle(search === '' || haystack.indexOf(search) !== -1);
-            });
-            $('.catalog-letter-row').each(function() {
-                var rows = $(this).nextUntil('.catalog-letter-row, .catalog-category-row', '.catalog-product-row');
-                $(this).toggle(rows.filter(':visible').length > 0);
-            });
-            $('.catalog-category-row').each(function() {
-                var rows = $(this).nextUntil('.catalog-category-row', '.catalog-product-row');
-                $(this).toggle(rows.filter(':visible').length > 0);
-            });
-            $('#catalog-no-search-results').toggle($('.catalog-product-row:visible').length === 0);
-            refreshSelectAllState();
-        }
-
-        function renderProducts(categoryGroups) {
-            categoryLetterMap = {};
-
-            if (categoryGroups.length === 0) {
-                $('#catalog-products').html(productEmptyState('las la-search', catalogMessages.noProductsTitle, catalogMessages.noProductsBody));
-                $('#select-all-products').prop('checked', false).prop('disabled', true);
-                $('#catalog-product-search').addClass('d-none').val('');
-                refreshGenerateButton();
-                refreshLetterIntroAdLetterOptions();
-                return;
-            }
-
-            var html = '<div class="table-responsive"><table class="table table-hover mb-0 catalog-product-table"><thead><tr><th width="58">Sel.</th><th>Producto</th><th width="180" class="text-right">Precio</th></tr></thead><tbody>';
-
-            categoryGroups.forEach(function(categoryGroup) {
-                var groups = {};
-                var enabledLetters = {};
-
-                categoryGroup.products.forEach(function(product) {
-                    var letter = (product.name || '#').trim().charAt(0).toUpperCase();
-                    if (!letter.match(/[A-Z0-9]/)) { letter = '#'; }
-                    groups[letter] = groups[letter] || [];
-                    groups[letter].push(product);
-                    if (!product.is_disabled) { enabledLetters[letter] = true; }
-                });
-
-                categoryLetterMap[String(categoryGroup.category_id)] = Object.keys(enabledLetters).sort();
-
-                html += '<tr class="catalog-category-row"><td colspan="3"><i class="las la-folder-open"></i> ' + escapeHtml(categoryGroup.category_name) + '</td></tr>';
-
-                Object.keys(groups).sort().forEach(function(letter) {
-                    html += '<tr class="catalog-letter-row"><td colspan="3">' + letter + '</td></tr>';
-
-                    groups[letter].forEach(function(product) {
-                        var disabled = product.is_disabled ? ' disabled' : '';
-                        var disabledClass = product.is_disabled ? ' opacity-60' : '';
-                        var checked = selectedProductIds.indexOf(String(product.id)) !== -1 && !product.is_disabled ? ' checked' : '';
-                        var rowClass = product.is_disabled ? ' catalog-product-row' : ' catalog-product-row catalog-product-row-selectable';
-                        var checkboxId = 'catalog-product-' + categoryGroup.category_id + '-' + product.id;
-                        var searchText = (product.name + ' ' + product.id + ' ' + categoryGroup.category_name).toLowerCase();
-
-                        html += '<tr class="' + rowClass + disabledClass + '" data-search="' + escapeHtml(searchText) + '">';
-                        html += '<td class="align-middle"><label class="aiz-checkbox mb-0' + (product.is_disabled ? ' aiz-checkbox-disabled' : '') + '"><input type="checkbox" id="' + checkboxId + '" class="catalog-product-checkbox" name="product_ids[]" value="' + product.id + '"' + disabled + checked + '><span class="aiz-square-check"></span></label></td>';
-                        html += '<td class="align-middle"><label class="mb-0 d-block' + (product.is_disabled ? '' : ' c-pointer') + '" for="' + checkboxId + '"><span class="d-block fw-600 text-dark" style="white-space: normal; word-break: break-word;">' + escapeHtml(product.name) + '</span><small class="text-muted">ID: ' + product.id + '</small>';
-                        if (product.is_disabled) { html += '<span class="badge badge-inline badge-soft-danger ml-2">Precio en cero</span>'; }
-                        html += '</label></td><td class="align-middle text-right fw-600">' + escapeHtml(product.price) + '</td></tr>';
-                    });
-                });
-            });
-
-            html += '<tr id="catalog-no-search-results" class="d-none"><td colspan="3" class="text-center text-muted py-4">No hay productos que coincidan con la busqueda</td></tr></tbody></table></div>';
-            $('#catalog-products').html(html);
-            $('#catalog-product-search').removeClass('d-none').val('');
-            refreshSelectAllState();
-            refreshGenerateButton();
-            refreshLetterIntroAdLetterOptions();
-        }
-
         function refreshLetterIntroAdLetterOptions() {
             $('.letter-intro-ad-row').each(function() {
                 var row = $(this);
@@ -1064,46 +1113,341 @@
             if ($.fn.selectpicker) { $('.letter-intro-ad-row select[name="letter_intro_ad_letters[]"]').selectpicker('refresh'); }
         }
 
-        function loadCatalogProducts() {
+        // El campo oculto se mantiene siempre sincronizado con el Set, de modo que el envio
+        // no depende de un hook de submit.
+        function refreshSelectionUi() {
+            var selected = selectedIds.size;
+
+            $('#catalog-product-ids').val(Array.from(selectedIds).join(','));
+            $('#selected-products-count').text(selected);
+            $('#loaded-products-count').text(picker.loaded);
+            $('#unavailable-products-count').text(Math.max(0, picker.total - picker.selectableTotal));
+            $('#generate-catalog, #generate-catalog-bottom').prop('disabled', selected === 0);
+            $('#catalog-submit-hint').text(selected > 0 ? selected + ' ' + catalogMessages.productsSelected : catalogMessages.selectProductsHint);
+            $('.submit-label').text(generateCatalogText);
+            $('#select-all-matching-label').text(picker.selectableTotal > 0
+                ? 'Seleccionar los ' + picker.selectableTotal
+                : 'Seleccionar todos');
+        }
+
+        function productListShell() {
+            return '<div class="table-responsive"><table class="table table-hover mb-0 catalog-product-table">' +
+                '<thead><tr><th width="58">Sel.</th><th>Producto</th><th width="180" class="text-right">Precio</th></tr></thead>' +
+                '<tbody id="catalog-product-rows"></tbody></table></div>';
+        }
+
+        // Los productos llegan ya ordenados por categoria y nombre, asi que los encabezados
+        // de grupo se emiten cuando cambia la categoria o la letra.
+        function appendProductRows(products) {
+            var html = '';
+
+            products.forEach(function(product) {
+                if (product.category_id !== picker.lastCategoryId) {
+                    picker.lastCategoryId = product.category_id;
+                    picker.lastLetter = null;
+                    html += '<tr class="catalog-category-row"><td colspan="3"><i class="las la-folder-open"></i> ' + escapeHtml(product.category_name) + '</td></tr>';
+                }
+
+                if (product.letter !== picker.lastLetter) {
+                    picker.lastLetter = product.letter;
+                    html += '<tr class="catalog-letter-row"><td colspan="3">' + escapeHtml(product.letter) + '</td></tr>';
+                }
+
+                var disabled = product.is_disabled ? ' disabled' : '';
+                var checked = (!product.is_disabled && selectedIds.has(product.id)) ? ' checked' : '';
+                var rowClass = product.is_disabled ? 'catalog-product-row opacity-60' : 'catalog-product-row catalog-product-row-selectable';
+                var checkboxId = 'catalog-product-' + product.category_id + '-' + product.id;
+
+                html += '<tr class="' + rowClass + '">';
+                html += '<td class="align-middle"><label class="aiz-checkbox mb-0' + (product.is_disabled ? ' aiz-checkbox-disabled' : '') + '"><input type="checkbox" id="' + checkboxId + '" class="catalog-product-checkbox" data-product-id="' + escapeHtml(product.id) + '"' + disabled + checked + '><span class="aiz-square-check"></span></label></td>';
+                html += '<td class="align-middle"><label class="mb-0 d-block' + (product.is_disabled ? '' : ' c-pointer') + '" for="' + checkboxId + '"><span class="d-block fw-600 text-dark" style="white-space: normal; word-break: break-word;">' + escapeHtml(product.name) + '</span><small class="text-muted">ID: ' + escapeHtml(product.id) + '</small>';
+
+                if (product.is_disabled) {
+                    html += '<span class="badge badge-inline badge-soft-danger ml-2">Precio en cero</span>';
+                }
+
+                html += '</label></td><td class="align-middle text-right fw-600">' + escapeHtml(product.price) + '</td></tr>';
+            });
+
+            $('#catalog-product-rows').append(html);
+            picker.loaded += products.length;
+        }
+
+        function resetPickerChrome() {
+            $('#catalog-product-search').addClass('d-none');
+            $('#catalog-bulk-actions').addClass('d-none');
+            $('#catalog-load-more-wrap').addClass('d-none');
+        }
+
+        function loadProducts(append) {
             var categoryIds = $('#catalog-category').val() || [];
+
             refreshCategorySummary();
             refreshCoverImageOptions();
             refreshLetterIntroCategoryOptions();
-            $('#catalog-products').html(productEmptyState('las la-spinner la-spin', catalogMessages.loadingProductsTitle, catalogMessages.loadingProductsBody));
-            $('#select-all-products').prop('checked', false).prop('disabled', true);
-            $('#generate-catalog, #generate-catalog-bottom').prop('disabled', true);
-            $('#catalog-product-search').addClass('d-none').val('');
 
             if (categoryIds.length === 0) {
+                picker.token++;
+                picker.loading = false;
+                picker.page = 0;
+                picker.total = 0;
+                picker.selectableTotal = 0;
+                picker.loaded = 0;
+                picker.hasMore = false;
+                categoryLetterMap = {};
+                resetPickerChrome();
                 $('#catalog-products').html(productEmptyState('las la-box-open', catalogMessages.selectCategoriesTitle, catalogMessages.selectCategoriesBody));
-                refreshGenerateButton();
+                refreshSelectionUi();
+                refreshLetterIntroAdLetterOptions();
                 return;
             }
 
-            $.get('{{ route('product_catalogs.category_products') }}', { category_ids: categoryIds }, function(products) {
-                renderProducts(products);
+            if (append && picker.loading) { return; }
+
+            picker.loading = true;
+            var token = ++picker.token;
+
+            if (append) {
+                $('#catalog-load-more').prop('disabled', true);
+            } else {
+                picker.page = 0;
+                picker.loaded = 0;
+                picker.lastCategoryId = null;
+                picker.lastLetter = null;
+                $('#catalog-load-more-wrap').addClass('d-none');
+                $('#catalog-products').html(productEmptyState('las la-spinner la-spin', catalogMessages.loadingProductsTitle, catalogMessages.loadingProductsBody));
+            }
+
+            $.get(CATEGORY_PRODUCTS_URL, {
+                category_ids: categoryIds,
+                search: picker.search,
+                page: picker.page + 1,
+                per_page: PRODUCTS_PER_REQUEST
+            }).done(function(response) {
+                if (token !== picker.token) { return; }
+
+                picker.page = response.page;
+                picker.total = response.total;
+                picker.selectableTotal = response.selectable_total;
+                picker.hasMore = response.has_more;
+
+                if (response.letters_by_category) {
+                    categoryLetterMap = response.letters_by_category;
+                }
+
+                if (!append) {
+                    $('#catalog-product-search').removeClass('d-none');
+
+                    if (response.total === 0) {
+                        $('#catalog-bulk-actions').addClass('d-none');
+                        $('#catalog-products').html(productEmptyState('las la-search', catalogMessages.noProductsTitle, catalogMessages.noProductsBody));
+                        refreshSelectionUi();
+                        refreshLetterIntroAdLetterOptions();
+                        return;
+                    }
+
+                    $('#catalog-bulk-actions').removeClass('d-none');
+                    $('#catalog-products').html(productListShell());
+                }
+
+                appendProductRows(response.products || []);
+                $('#catalog-load-more-wrap').toggleClass('d-none', !picker.hasMore);
+                $('#catalog-load-more-hint').text('Mostrando ' + picker.loaded + ' de ' + picker.total + ' productos');
+                refreshSelectionUi();
+                refreshLetterIntroAdLetterOptions();
             }).fail(function() {
-                $('#catalog-products').html(productEmptyState('las la-exclamation-circle', catalogMessages.loadErrorTitle, catalogMessages.loadErrorBody));
-                refreshGenerateButton();
+                if (token !== picker.token) { return; }
+
+                if (!append) {
+                    resetPickerChrome();
+                    $('#catalog-products').html(productEmptyState('las la-exclamation-circle', catalogMessages.loadErrorTitle, catalogMessages.loadErrorBody));
+                }
+
+                refreshSelectionUi();
+            }).always(function() {
+                // Se libera siempre, no solo para la peticion vigente: si se descarta por
+                // token, dejar el flag arriba bloquearia cualquier carga posterior.
+                picker.loading = false;
+                $('#catalog-load-more').prop('disabled', false);
             });
         }
 
-        $('#catalog-category').on('change', loadCatalogProducts);
-        $('#select-all-products').on('change', function() {
-            $('.catalog-product-row:visible .catalog-product-checkbox:not(:disabled)').prop('checked', this.checked);
-            refreshGenerateButton();
-            refreshSelectAllState();
+        // Fases que el renderer reporta. Solo "paginating" conoce el total de paginas; el
+        // resto se muestra como barra indeterminada.
+        var PHASE_LABELS = {
+            loading:    'Cargando productos',
+            rendering:  'Armando el contenido',
+            paginating: 'Maquetando paginas',
+            writing:    'Guardando el PDF'
+        };
+
+        function renderCatalogProgress(row, data) {
+            var wrap = row.find('.catalog-progress');
+            var isPending = data.status === 'queued' || data.status === 'processing';
+
+            if (!isPending) {
+                wrap.addClass('d-none').removeClass('catalog-progress-indeterminate');
+                wrap.find('.catalog-progress-fill').css('width', '0');
+                wrap.find('.catalog-progress-text').text('');
+                return;
+            }
+
+            wrap.removeClass('d-none');
+
+            var progress = data.progress || null;
+            var phase = progress ? progress.phase : null;
+            var total = progress ? Number(progress.total_pages || 0) : 0;
+            var done = progress ? Number(progress.done_pages || 0) : 0;
+
+            if (phase === 'paginating' && total > 0) {
+                // done_pages puede pasarse del total si una pagina desborda; se acota para
+                // que la barra no supere el 100%.
+                var capped = Math.min(done, total);
+                var percent = Math.round((capped / total) * 100);
+
+                wrap.removeClass('catalog-progress-indeterminate');
+                wrap.find('.catalog-progress-fill').css('width', percent + '%');
+                wrap.find('.catalog-progress-text').text('Pagina ' + capped + ' de ' + total + ' (' + percent + '%)');
+                return;
+            }
+
+            wrap.addClass('catalog-progress-indeterminate');
+            wrap.find('.catalog-progress-fill').css('width', '');
+            wrap.find('.catalog-progress-text').text(
+                phase && PHASE_LABELS[phase] ? PHASE_LABELS[phase] : 'Preparando la generacion'
+            );
+        }
+
+        function renderCatalogStatus(id, data) {
+            var row = $('.catalog-list-row[data-catalog-id="' + id + '"]');
+
+            if (!row.length) { return; }
+
+            var meta = STATUS_LABELS[data.status] || STATUS_LABELS.ready;
+            var isPending = data.status === 'queued' || data.status === 'processing';
+
+            row.find('.catalog-status')
+                .attr('class', 'catalog-status ' + meta.cls)
+                .html('<i class="' + meta.icon + '"></i> ' + meta.text);
+
+            renderCatalogProgress(row, data);
+
+            var error = row.find('.catalog-status-error');
+
+            if (data.status === 'failed' && data.status_message) {
+                error.removeClass('d-none').text(data.status_message);
+            } else {
+                error.addClass('d-none').text('');
+            }
+
+            if (typeof data.products_count !== 'undefined' && data.products_count !== null) {
+                row.find('.catalog-products-count').text(data.products_count);
+            }
+
+            row.find('.catalog-download').toggleClass('disabled', !data.has_file);
+            row.find('.catalog-regenerate').prop('disabled', isPending);
+        }
+
+        function hasPendingCatalogs() {
+            return Object.keys(catalogStatuses).some(function(id) {
+                var status = (catalogStatuses[id] || {}).status;
+                return status === 'queued' || status === 'processing';
+            });
+        }
+
+        function scheduleStatusPoll() {
+            if (statusTimer) {
+                clearTimeout(statusTimer);
+                statusTimer = null;
+            }
+
+            if (!hasPendingCatalogs()) { return; }
+
+            statusTimer = setTimeout(pollCatalogStatuses, STATUS_POLL_MS);
+        }
+
+        function pollCatalogStatuses() {
+            $.get(CATALOG_STATUSES_URL).done(function(map) {
+                Object.keys(map || {}).forEach(function(id) {
+                    catalogStatuses[id] = map[id];
+                    renderCatalogStatus(id, map[id]);
+                });
+            }).always(scheduleStatusPoll);
+        }
+
+        $('#catalog-category').on('change', function() { loadProducts(false); });
+        $('#catalog-load-more').on('click', function() { loadProducts(true); });
+
+        $('#catalog-product-search').on('input', function() {
+            var value = $(this).val() || '';
+
+            if (searchTimer) { clearTimeout(searchTimer); }
+
+            searchTimer = setTimeout(function() {
+                picker.search = value.trim();
+                loadProducts(false);
+            }, 350);
         });
+
         $(document).on('change', '.catalog-product-checkbox', function() {
-            refreshGenerateButton();
-            refreshSelectAllState();
+            var id = String($(this).data('product-id'));
+
+            if (this.checked) {
+                selectedIds.add(id);
+            } else {
+                selectedIds.delete(id);
+            }
+
+            refreshSelectionUi();
         });
-        $('#catalog-product-search').on('input', filterCatalogProducts);
+
         $(document).on('click', '.catalog-product-row-selectable', function(e) {
             if ($(e.target).is('input, label, span, small')) { return; }
-            var checkbox = $(this).closest('tr').find('.catalog-product-checkbox');
+            var checkbox = $(this).find('.catalog-product-checkbox');
             checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
         });
+
+        // Selecciona todo lo que coincide con el filtro actual, no solo lo que esta pintado:
+        // los ids los devuelve el servidor en una sola consulta.
+        $('#select-all-matching').on('click', function() {
+            var categoryIds = $('#catalog-category').val() || [];
+
+            if (categoryIds.length === 0) { return; }
+
+            var button = $(this);
+            button.prop('disabled', true);
+
+            $.get(CATEGORY_PRODUCTS_URL, {
+                category_ids: categoryIds,
+                search: picker.search,
+                mode: 'ids'
+            }).done(function(response) {
+                (response.ids || []).forEach(function(id) { selectedIds.add(String(id)); });
+
+                $('.catalog-product-checkbox').each(function() {
+                    if (!this.disabled && selectedIds.has(String($(this).data('product-id')))) {
+                        this.checked = true;
+                    }
+                });
+
+                refreshSelectionUi();
+            }).always(function() {
+                button.prop('disabled', false);
+            });
+        });
+
+        $('#clear-selection').on('click', function() {
+            selectedIds.clear();
+            $('.catalog-product-checkbox').prop('checked', false);
+            refreshSelectionUi();
+        });
+
+        $('#catalog-form').on('submit', function() {
+            $('#catalog-product-ids').val(Array.from(selectedIds).join(','));
+            $('#generate-catalog, #generate-catalog-bottom').prop('disabled', true);
+            $('.submit-label').text('Enviando...');
+        });
+
         $('#add-advertising-row').on('click', function() {
             $('#advertising-table tbody').append(advertisingRowTemplate());
             if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
@@ -1147,6 +1491,7 @@
             }
             $(this).closest('.advertising-row').remove();
         });
+
         $('#catalog-list-search').on('input', function() {
             var search = ($(this).val() || '').toLowerCase().trim();
             $('.catalog-list-row').each(function() {
@@ -1156,10 +1501,15 @@
             $('#catalogs-no-results').toggle($('.catalog-list-row:visible').length === 0);
         });
 
+        Object.keys(catalogStatuses).forEach(function(id) {
+            renderCatalogStatus(id, catalogStatuses[id]);
+        });
+        scheduleStatusPoll();
+
         refreshCategorySummary();
         refreshCoverImageOptions();
         refreshLetterIntroCategoryOptions();
-        refreshGenerateButton();
-        if (($('#catalog-category').val() || []).length > 0) { loadCatalogProducts(); }
+        refreshSelectionUi();
+        if (($('#catalog-category').val() || []).length > 0) { loadProducts(false); }
     </script>
 @endsection

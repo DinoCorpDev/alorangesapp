@@ -2,20 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\ProductCatalogPdfRenderer;
+use App\Http\Services\ProductCatalogStore;
+use App\Jobs\GenerateProductCatalogJob;
 use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Mpdf\Mpdf;
-use Mpdf\Output\Destination;
-use Symfony\Component\Process\Process;
+use Throwable;
 
 class ProductCatalogController extends Controller
 {
-    public function __construct()
+    /** Rows returned per page by the product picker. */
+    private const PRODUCTS_PER_REQUEST = 250;
+
+    private const MAX_PRODUCTS_PER_REQUEST = 1000;
+
+    /** Ids are sent to MySQL in batches so a huge selection never builds one giant query. */
+    private const ID_QUERY_CHUNK = 5000;
+
+    protected ProductCatalogStore $store;
+
+    protected ProductCatalogPdfRenderer $renderer;
+
+    public function __construct(ProductCatalogStore $store, ProductCatalogPdfRenderer $renderer)
     {
         $this->middleware(['permission:show_categories']);
+
+        $this->store = $store;
+        $this->renderer = $renderer;
     }
 
     public function index()
@@ -25,7 +42,7 @@ class ProductCatalogController extends Controller
 
     public function edit($catalog)
     {
-        $catalog = collect($this->catalogs())->firstWhere('id', $catalog);
+        $catalog = $this->store->find($catalog);
 
         if (! $catalog) {
             flash(translate('Catalog was not found'))->error();
@@ -38,11 +55,11 @@ class ProductCatalogController extends Controller
     public function configurationDefaults()
     {
         $catalog = null;
-        $settings = $this->catalogDefaultsConfig();
-        $sharedBlocks = $this->sharedBlocksConfig();
+        $settings = $this->store->defaults();
+        $sharedBlocks = $this->store->sharedBlocks();
         $categories = Category::orderBy('order_level')->orderBy('name')->get();
         $letters = array_merge(range('A', 'Z'), ['#']);
-        $letterPalette = $this->letterPalette();
+        $letterPalette = $this->renderer->letterPalette();
         $action = route('product_catalogs.configuration.defaults.update');
         $method = 'POST';
 
@@ -53,7 +70,7 @@ class ProductCatalogController extends Controller
     {
         $settings = $this->validatedConfigurationSettings($request);
         unset($settings['cover_image']);
-        $this->saveJson($this->catalogDefaultsPath(), $settings);
+        $this->store->saveDefaults($settings);
 
         flash(translate('Catalog configuration updated successfully'))->success();
         return redirect()->route('product_catalogs.index');
@@ -61,18 +78,18 @@ class ProductCatalogController extends Controller
 
     public function configuration($catalog)
     {
-        $catalog = collect($this->catalogs())->firstWhere('id', $catalog);
+        $catalog = $this->store->find($catalog);
 
         if (! $catalog) {
             flash(translate('Catalog was not found'))->error();
             return redirect()->route('product_catalogs.index');
         }
 
-        $settings = array_merge($this->catalogDefaultsConfig(), $catalog['settings'] ?? []);
-        $sharedBlocks = $this->sharedBlocksConfig();
+        $settings = array_merge($this->store->defaults(), $catalog['settings'] ?? []);
+        $sharedBlocks = $this->store->sharedBlocks();
         $categories = Category::orderBy('order_level')->orderBy('name')->get();
         $letters = array_merge(range('A', 'Z'), ['#']);
-        $letterPalette = $this->letterPalette();
+        $letterPalette = $this->renderer->letterPalette();
         $action = route('product_catalogs.configuration.update', $catalog['id']);
         $method = 'PUT';
 
@@ -81,8 +98,7 @@ class ProductCatalogController extends Controller
 
     public function updateConfiguration(Request $request, $catalog)
     {
-        $catalogs = collect($this->catalogs());
-        $existing = $catalogs->firstWhere('id', $catalog);
+        $existing = $this->store->find($catalog);
 
         if (! $existing) {
             flash(translate('Catalog was not found'))->error();
@@ -102,61 +118,89 @@ class ProductCatalogController extends Controller
         $settings['letter_intro_ads'] = $this->catalogLetterIntroAds($existing['settings'] ?? []);
         $settings['products_per_page'] = (int) ($existing['settings']['products_per_page'] ?? 12) === 20 ? 20 : 12;
 
-        $categories = Category::whereIn('id', $existing['category_ids'] ?? [])
-            ->orderBy('order_level')->orderBy('name')->get();
-        $products = Product::whereIn('id', $existing['product_ids'] ?? [])->where('lowest_price', '>', 0)->get();
-        $productsByCategory = $this->productsByCategory($categories, $existing['product_ids'] ?? []);
-        $filePath = $this->renderCatalogPdf($existing['name'], $categories, $products, $productsByCategory, $settings);
-
-        $oldPath = public_path($existing['file_path'] ?? '');
-        if (! empty($existing['file_path']) && file_exists($oldPath)) {
-            unlink($oldPath);
-        }
-
-        $updated = array_merge($existing, [
+        $this->store->update($catalog, [
             'settings' => $settings,
-            'file_path' => $filePath,
             'updated_at' => now()->format('Y-m-d H:i:s'),
         ]);
 
-        $this->saveCatalogs($catalogs->map(function ($item) use ($catalog, $updated) {
-            return $item['id'] === $catalog ? $updated : $item;
-        })->values()->all());
+        $this->queueGeneration($catalog, translate('Catalog configuration updated successfully') . ' ');
 
-        flash(translate('Catalog configuration updated successfully'))->success();
         return redirect()->route('product_catalogs.index');
     }
 
+    /**
+     * Product picker data.
+     *
+     * Paginated on the server: a category can hold thousands of products and returning them
+     * all at once produced a payload and a DOM the browser could not work with. mode=ids
+     * returns only the matching ids, which is what "select everything" needs.
+     */
     public function categoryProducts(Request $request)
     {
         $request->validate([
             'category_ids' => 'required|array|min:1',
             'category_ids.*' => 'integer|exists:categories,id',
+            'search' => 'nullable|string|max:255',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:' . self::MAX_PRODUCTS_PER_REQUEST,
+            'mode' => 'nullable|in:rows,ids',
         ]);
 
-        $categories = Category::whereIn('id', array_values(array_unique($request->category_ids)))
-            ->orderBy('order_level')->orderBy('name')->get();
+        $categoryIds = array_values(array_unique(array_map('intval', $request->category_ids)));
+        $search = trim((string) $request->input('search', ''));
 
-        return response()->json($categories->map(function ($category) {
-            $products = Product::whereHas('categories', function ($query) use ($category) {
-                    $query->where('categories.id', $category->id);
-                })->get()->map(function ($product) {
-                    return [
-                        'id' => $product->id,
-                        'name' => $product->getTranslation('name'),
-                        'price' => format_price($product->lowest_price),
-                        'is_disabled' => (float) $product->lowest_price <= 0,
-                    ];
-                })->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
+        if ($request->input('mode') === 'ids') {
+            return response()->json([
+                'ids' => $this->productQuery($categoryIds, $search)
+                    ->where('products.lowest_price', '>', 0)
+                    ->pluck('products.id')
+                    ->map(fn ($id) => (string) $id)
+                    ->all(),
+            ]);
+        }
 
-            return [
-                'category_id' => $category->id,
-                'category_name' => $category->getTranslation('name'),
-                'products' => $products,
-            ];
-        })->filter(function ($group) {
-            return $group['products']->isNotEmpty();
-        })->values());
+        $perPage = (int) ($request->input('per_page') ?: self::PRODUCTS_PER_REQUEST);
+        $page = (int) ($request->input('page') ?: 1);
+
+        $total = $this->productQuery($categoryIds, $search)->count();
+        $selectableTotal = $this->productQuery($categoryIds, $search)
+            ->where('products.lowest_price', '>', 0)
+            ->count();
+        $rows = $this->productQuery($categoryIds, $search)
+            ->orderBy('categories.order_level')
+            ->orderBy('categories.name')
+            ->orderByRaw($this->productNameExpression())
+            ->orderBy('products.id')
+            ->forPage($page, $perPage)
+            ->get([
+                'products.id',
+                'products.lowest_price',
+                'categories.id as category_id',
+                'categories.name as category_name',
+                DB::raw($this->productNameExpression() . ' as product_name'),
+            ]);
+
+        return response()->json([
+            'products' => $rows->map(function ($row) {
+                $name = (string) $row->product_name;
+
+                return [
+                    'id' => (string) $row->id,
+                    'name' => $name,
+                    'price' => format_price($row->lowest_price),
+                    'is_disabled' => (float) $row->lowest_price <= 0,
+                    'category_id' => (string) $row->category_id,
+                    'category_name' => (string) $row->category_name,
+                    'letter' => $this->productLetter($name),
+                ];
+            })->values(),
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'selectable_total' => $selectableTotal,
+            'has_more' => ($page * $perPage) < $total,
+            'letters_by_category' => $page === 1 ? $this->lettersByCategory($categoryIds) : null,
+        ]);
     }
 
     public function store(Request $request)
@@ -167,18 +211,15 @@ class ProductCatalogController extends Controller
             return back()->withInput();
         }
 
-        $catalogs = $this->catalogs();
-        array_unshift($catalogs, $catalog);
-        $this->saveCatalogs($catalogs);
+        $this->store->put($catalog);
+        $this->queueGeneration($catalog['id'], 'Catalogo creado. ');
 
-        flash(translate('Catalog generated successfully'))->success();
         return redirect()->route('product_catalogs.index');
     }
 
     public function update(Request $request, $catalog)
     {
-        $catalogs = collect($this->catalogs());
-        $existing = $catalogs->firstWhere('id', $catalog);
+        $existing = $this->store->find($catalog);
 
         if (! $existing) {
             flash(translate('Catalog was not found'))->error();
@@ -191,25 +232,57 @@ class ProductCatalogController extends Controller
             return back()->withInput();
         }
 
-        $oldPath = public_path($existing['file_path'] ?? '');
-        if (! empty($existing['file_path']) && file_exists($oldPath)) {
-            unlink($oldPath);
+        $this->store->put($updated);
+        $this->queueGeneration($catalog, 'Catalogo actualizado. ');
+
+        return redirect()->route('product_catalogs.index');
+    }
+
+    /**
+     * Current state of every catalog, polled by the listing while one is being generated.
+     */
+    public function statuses()
+    {
+        return response()->json(collect($this->store->all())->mapWithKeys(function ($catalog) {
+            return [$catalog['id'] => [
+                'status' => $catalog['status'],
+                'status_message' => $catalog['status_message'],
+                'products_count' => $catalog['products_count'],
+                'generated_at' => $catalog['generated_at'],
+                'updated_at' => $catalog['updated_at'],
+                'has_file' => ! empty($catalog['file_path']) && is_file(public_path($catalog['file_path'])),
+                'progress' => GenerateProductCatalogJob::progress($catalog['id']),
+            ]];
+        }));
+    }
+
+    public function regenerate($catalog)
+    {
+        $existing = $this->store->find($catalog);
+
+        if (! $existing) {
+            flash(translate('Catalog was not found'))->error();
+            return back();
         }
 
-        $this->saveCatalogs($catalogs->map(function ($item) use ($catalog, $updated) {
-            return $item['id'] === $catalog ? $updated : $item;
-        })->values()->all());
+        $this->queueGeneration($catalog, '');
 
-        flash(translate('Catalog updated successfully'))->success();
         return redirect()->route('product_catalogs.index');
     }
 
     public function download($catalog)
     {
-        $catalog = collect($this->catalogs())->firstWhere('id', $catalog);
+        $catalog = $this->store->find($catalog);
 
         if (! $catalog) {
             flash(translate('Catalog was not found'))->error();
+            return back();
+        }
+
+        if (empty($catalog['file_path'])) {
+            flash($catalog['status'] === ProductCatalogStore::STATUS_FAILED
+                ? 'La generacion del catalogo fallo: ' . $catalog['status_message']
+                : 'El catalogo todavia se esta generando.')->error();
             return back();
         }
 
@@ -225,34 +298,58 @@ class ProductCatalogController extends Controller
 
     public function destroy($catalog)
     {
-        $catalogs = collect($this->catalogs());
-        $catalogToDelete = $catalogs->firstWhere('id', $catalog);
+        $catalogToDelete = $this->store->find($catalog);
 
         if (! $catalogToDelete) {
             flash(translate('Catalog was not found'))->error();
             return back();
         }
 
-        $path = public_path($catalogToDelete['file_path']);
+        if (! empty($catalogToDelete['file_path'])) {
+            $path = public_path($catalogToDelete['file_path']);
 
-        if (file_exists($path)) {
-            unlink($path);
+            if (file_exists($path)) {
+                unlink($path);
+            }
         }
 
-        $this->saveCatalogs($catalogs->reject(function ($item) use ($catalog) {
-            return $item['id'] === $catalog;
-        })->values()->all());
+        $this->store->forget($catalog);
 
         flash(translate('Catalog deleted successfully'))->success();
         return redirect()->route('product_catalogs.index');
     }
 
+    /**
+     * Hands generation to the background worker. A failure to even start it is reported on
+     * the catalog instead of bubbling up as a 500 that would lose the admin's selection.
+     */
+    protected function queueGeneration(string $catalogId, string $prefix): void
+    {
+        try {
+            GenerateProductCatalogJob::trigger($catalogId);
+
+            flash($prefix . 'El PDF se esta generando en segundo plano. La lista se actualiza sola cuando este listo.')->success();
+        } catch (Throwable $e) {
+            Log::error('Could not start catalog PDF generation', [
+                'catalog_id' => $catalogId,
+                'exception' => $e,
+            ]);
+
+            $this->store->update($catalogId, [
+                'status' => ProductCatalogStore::STATUS_FAILED,
+                'status_message' => Str::limit(trim($e->getMessage()) ?: get_class($e), 400),
+            ]);
+
+            flash('No se pudo iniciar la generacion del PDF: ' . $e->getMessage())->error();
+        }
+    }
+
     protected function formView($catalog = null)
     {
         $categories = Category::orderBy('order_level')->orderBy('name')->get();
-        $catalogs = collect($this->catalogs())->sortByDesc('created_at')->values();
-        $sharedBlocks = $this->sharedBlocksConfig();
-        $defaultSettings = $this->catalogDefaultsConfig();
+        $catalogs = collect($this->store->all())->sortByDesc('created_at')->values();
+        $sharedBlocks = $this->store->sharedBlocks();
+        $defaultSettings = $this->store->defaults();
         $settings = array_merge($defaultSettings, $catalog['settings'] ?? []);
 
         if (empty($settings['cover_category_images']) && ! empty($defaultSettings['cover_category_images'])) {
@@ -268,8 +365,10 @@ class ProductCatalogController extends Controller
         $request->validate([
             'category_ids' => 'required|array|min:1',
             'category_ids.*' => 'integer|exists:categories,id',
-            'product_ids' => 'required|array|min:1',
-            'product_ids.*' => 'integer|exists:products,id',
+            // A comma separated list rather than product_ids[]: one input per product hits
+            // PHP's max_input_vars (1000 by default), which silently drops everything past
+            // the first thousand checkboxes without any error.
+            'product_ids' => 'required|string',
             'name' => 'nullable|string|max:255',
             'cover_image' => 'nullable|string|max:255',
             'final_page_image' => 'nullable|string|max:255',
@@ -286,29 +385,34 @@ class ProductCatalogController extends Controller
             'products_per_page' => 'required|integer|in:12,20',
         ]);
 
-        $categoryIds = array_values(array_unique($request->category_ids));
-        $productIds = array_values(array_unique($request->product_ids));
-        $categories = Category::whereIn('id', $categoryIds)->orderBy('order_level')->orderBy('name')->get();
-        $categoryNames = $categories->map(function ($category) { return $category->getTranslation('name'); })->values();
+        $categoryIds = array_values(array_unique(array_map('intval', $request->category_ids)));
+        $requestedIds = $this->parseIdList($request->input('product_ids'));
 
-        $products = Product::whereIn('id', $productIds)
-            ->where('lowest_price', '>', 0)
-            ->whereHas('categories', function ($query) use ($categoryIds) {
-                $query->whereIn('categories.id', $categoryIds);
-            })->get()->sortBy(function ($product) {
-                return Str::lower($product->getTranslation('name'));
-            })->values();
-
-        if ($products->isEmpty()) {
+        if (empty($requestedIds)) {
             flash(translate('Select at least one product from the selected categories'))->error();
             return null;
         }
+
+        // One query instead of an "exists" rule per id, which would have run thousands of
+        // queries, and it doubles as the filter for products without a price.
+        $productIds = $this->selectableProductIds($requestedIds, $categoryIds);
+
+        if (empty($productIds)) {
+            flash(translate('Select at least one product from the selected categories'))->error();
+            return null;
+        }
+
+        $categoryNames = Category::whereIn('id', $categoryIds)
+            ->orderBy('order_level')->orderBy('name')
+            ->get()
+            ->map(fn ($category) => $category->getTranslation('name'))
+            ->values();
 
         // Los ajustes de Configuracion del catalogo (medios de pago, informacion, paginas
         // adicionales, tipografia, colores, etc.) siempre se toman frescos desde el default
         // global vigente, sin congelar una copia por catalogo — asi un cambio global aplica
         // de inmediato la proxima vez que se edite o regenere cualquier catalogo.
-        $settings = array_merge($this->catalogDefaultsConfig(), [
+        $settings = array_merge($this->store->defaults(), [
             'cover_image' => $request->cover_image,
             'advertising_items' => $this->sanitizeAdvertisingItems($request),
             'letter_intro_ads' => $this->sanitizeLetterIntroAds($request),
@@ -319,8 +423,6 @@ class ProductCatalogController extends Controller
         $settings['final_page_blank'] = $request->boolean('final_page_blank');
 
         $catalogName = $request->name ?: translate('Catalog') . ' - ' . $categoryNames->join(', ') . ' - ' . now()->format('Y-m-d H:i');
-        $productsByCategory = $this->productsByCategory($categories, $productIds);
-        $filePath = $this->renderCatalogPdf($catalogName, $categories, $products, $productsByCategory, $settings);
 
         return [
             'id' => $existing['id'] ?? (string) Str::uuid(),
@@ -328,266 +430,127 @@ class ProductCatalogController extends Controller
             'category_name' => $categoryNames->join(', '),
             'category_ids' => $categoryIds,
             'category_names' => $categoryNames->all(),
-            'product_ids' => $products->pluck('id')->values()->all(),
-            'file_path' => $filePath,
-            'products_count' => $products->count(),
+            'product_ids' => $productIds,
+            // Kept from the previous run so the old PDF stays downloadable while the new one
+            // is being built; the job swaps it once the new file exists.
+            'file_path' => $existing['file_path'] ?? null,
+            'products_count' => count($productIds),
             'settings' => $settings,
+            'status' => ProductCatalogStore::STATUS_QUEUED,
+            'status_message' => null,
+            'generated_at' => $existing['generated_at'] ?? null,
             'created_by' => $existing['created_by'] ?? auth()->id(),
             'created_at' => $existing['created_at'] ?? now()->format('Y-m-d H:i:s'),
             'updated_at' => now()->format('Y-m-d H:i:s'),
         ];
     }
 
-    protected function productsByCategory($categories, array $productIds)
+    /**
+     * @return int[]
+     */
+    protected function parseIdList($raw): array
     {
-        return $categories->map(function ($category) use ($productIds) {
-            $products = Product::whereIn('id', $productIds)
-                ->where('lowest_price', '>', 0)
-                ->whereHas('categories', function ($query) use ($category) {
-                    $query->where('categories.id', $category->id);
-                })->get()->sortBy(function ($product) {
-                    return Str::lower($product->getTranslation('name'));
-                })->values();
+        $parts = preg_split('/[^0-9]+/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-            return [
-                'category' => $category,
-                'letter_groups' => $products->groupBy(function ($product) {
-                    $letter = Str::upper(Str::substr(trim($product->getTranslation('name')), 0, 1));
-                    return preg_match('/[A-Z0-9]/', $letter) ? $letter : '#';
-                })->sortKeys(),
-            ];
-        })->filter(function ($group) {
-            return $group['letter_groups']->isNotEmpty();
-        })->values();
+        return array_values(array_unique(array_filter(array_map('intval', $parts))));
     }
 
-    protected function renderCatalogPdf($catalogName, $categories, $products, $productsByCategory, array $settings)
+    /**
+     * Ids from the submitted selection that actually belong to the chosen categories and
+     * have a price, queried in batches so the selection size never caps out.
+     *
+     * @return int[]
+     */
+    protected function selectableProductIds(array $productIds, array $categoryIds): array
     {
-        $directory = public_path('uploads/catalogs');
+        $found = [];
 
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
+        foreach (array_chunk($productIds, self::ID_QUERY_CHUNK) as $chunk) {
+            $found = array_merge($found, DB::table('product_categories')
+                ->join('products', 'products.id', '=', 'product_categories.product_id')
+                ->whereIn('product_categories.category_id', $categoryIds)
+                ->whereIntegerInRaw('products.id', $chunk)
+                ->where('products.lowest_price', '>', 0)
+                ->distinct()
+                ->pluck('products.id')
+                ->all());
         }
 
-        $fileName = Str::slug($catalogName) . '-' . now()->format('YmdHis') . '.pdf';
-        $relativePath = 'uploads/catalogs/' . $fileName;
-        $absolutePath = public_path($relativePath);
-
-        $viewData = [
-            'catalogName' => $catalogName,
-            'categories' => $categories,
-            'products' => $products,
-            'productsByCategory' => $productsByCategory,
-            'settings' => $settings,
-            'sharedBlocks' => $this->sharedBlocksConfig(),
-            'letterPalette' => $this->letterPalette(),
-            'fallbackImage' => uploaded_asset(get_setting('header_logo')) ?: static_asset('assets/img/logo.png'),
-        ];
-
-        $this->renderCatalogWithMpdf($viewData, $absolutePath);
-
-        return $relativePath;
+        return array_values(array_unique(array_map('intval', $found)));
     }
 
-    protected function renderCatalogWithMpdf(array $viewData, string $absolutePath): void
+    /**
+     * Base picker query. Uses the translated name when there is one, matching what the PDF
+     * prints, resolved in the query so ordering and paging can happen in the database.
+     */
+    protected function productQuery(array $categoryIds, string $search)
     {
-        $tempDir = storage_path('app/product_catalogs/mpdf_temp');
+        $query = DB::table('product_categories')
+            ->join('products', 'products.id', '=', 'product_categories.product_id')
+            ->join('categories', 'categories.id', '=', 'product_categories.category_id')
+            ->leftJoin('product_translations', function ($join) {
+                $join->on('product_translations.product_id', '=', 'products.id')
+                    ->where('product_translations.lang', '=', App::getLocale());
+            })
+            ->whereIn('product_categories.category_id', $categoryIds);
 
-        if (! is_dir($tempDir)) {
-            mkdir($tempDir, 0755, true);
+        if ($search !== '') {
+            $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $search) . '%';
+
+            $query->where(function ($where) use ($like, $search) {
+                $where->whereRaw($this->productNameExpression() . ' like ?', [$like])
+                    ->orWhere('products.reference', 'like', $like);
+
+                if (ctype_digit($search)) {
+                    $where->orWhere('products.id', (int) $search);
+                }
+            });
         }
 
-        $mpdf = new Mpdf([
-            'mode'          => 'utf-8',
-            'format'        => [216, 279],
-            'margin_left'   => 0,
-            'margin_right'  => 0,
-            'margin_top'    => 0,
-            'margin_bottom' => 0,
-            'margin_header' => 0,
-            'margin_footer' => 0,
-            'tempDir'       => $tempDir,
-        ]);
-
-        $mpdf->SetTitle($viewData['catalogName'] ?? 'Catalog');
-        $mpdf->SetDisplayMode('fullpage');
-        $mpdf->shrink_tables_to_fit = 0;
-
-        $html = view('backend.product.catalogs.pdf_mpdf', $viewData)->render();
-        $mpdf->WriteHTML($html);
-        $this->removeBlankMpdfPages($mpdf);
-        $mpdf->Output($absolutePath, Destination::FILE);
+        return $query;
     }
 
-    protected function removeBlankMpdfPages(Mpdf $mpdf): void
+    protected function productNameExpression(): string
     {
-        $visiblePages = [];
-
-        foreach ($mpdf->pages as $content) {
-            if (strlen(trim((string) $content)) <= 220) {
-                continue;
-            }
-
-            $visiblePages[] = $content;
-        }
-
-        if (count($visiblePages) === count($mpdf->pages) || empty($visiblePages)) {
-            return;
-        }
-
-        $mpdf->pages = [];
-
-        foreach ($visiblePages as $index => $content) {
-            $mpdf->pages[$index + 1] = $content;
-        }
-
-        $mpdf->page = count($visiblePages);
+        // Single quotes on purpose: with ANSI_QUOTES in sql_mode, "" would be read as an
+        // identifier instead of an empty string.
+        return "COALESCE(NULLIF(product_translations.name, ''), products.name)";
     }
 
-    protected function renderCatalogWithBrowser(array $viewData, $absolutePath)
+    /**
+     * Letters that actually have selectable products, per category. The letter separator
+     * pages need this and it can no longer be derived from the rows on screen, since only a
+     * page of them is loaded at a time.
+     */
+    protected function lettersByCategory(array $categoryIds): array
     {
-        $chromePath = str_replace('/', DIRECTORY_SEPARATOR, (string) config('services.browsershot.chrome_path'));
-
-        if (! $chromePath || ! file_exists($chromePath)) {
-            throw new \RuntimeException('Chrome executable was not found. Check BROWSERSHOT_CHROME_PATH in .env (current: ' . $chromePath . ')');
-        }
-
-        $tempDirectory = storage_path('app/product_catalogs/browser');
-
-        if (! is_dir($tempDirectory)) {
-            mkdir($tempDirectory, 0755, true);
-        }
-
-        $htmlPath = $tempDirectory . DIRECTORY_SEPARATOR . Str::uuid() . '.html';
-        $userDataDirectory = $tempDirectory . DIRECTORY_SEPARATOR . 'chrome-' . Str::uuid();
-
-        if (! is_dir($userDataDirectory)) {
-            mkdir($userDataDirectory, 0755, true);
-        }
-
-        $html = view('backend.product.catalogs.pdf', $viewData)->render();
-        file_put_contents($htmlPath, $html);
-
-        $fileUrl = 'file:///' . str_replace('\\', '/', $htmlPath);
-        $process = new Process([
-            $chromePath,
-            '--headless=new',
-            '--user-data-dir=' . $userDataDirectory,
-            '--disable-gpu',
-            '--disable-dev-shm-usage',
-            '--disable-setuid-sandbox',
-            '--no-sandbox',
-            '--ignore-certificate-errors',
-            '--allow-file-access-from-files',
-            '--run-all-compositor-stages-before-draw',
-            '--virtual-time-budget=10000',
-            '--print-to-pdf-no-header',
-            '--print-to-pdf=' . $absolutePath,
-            $fileUrl,
-        ], base_path(), null, null, 300);
-
-        $process->run();
-        $pdfReady = $this->waitForPdfFile($absolutePath);
-
-        if (! $process->isSuccessful() || ! $pdfReady) {
-            Log::error('Chrome catalog PDF generation failed', [
-                'exit_code' => $process->getExitCode(),
-                'exit_code_text' => $process->getExitCodeText(),
-                'output' => trim($process->getOutput()),
-                'error_output' => trim($process->getErrorOutput()),
-                'html_path' => $htmlPath,
-                'pdf_path' => $absolutePath,
-                'pdf_exists' => file_exists($absolutePath),
-                'pdf_size' => file_exists($absolutePath) ? filesize($absolutePath) : 0,
+        $rows = $this->productQuery($categoryIds, '')
+            ->where('products.lowest_price', '>', 0)
+            ->distinct()
+            ->get([
+                'categories.id as category_id',
+                DB::raw('UPPER(SUBSTRING(TRIM(' . $this->productNameExpression() . '), 1, 1)) as letter'),
             ]);
 
-            throw new \RuntimeException(trim($process->getErrorOutput() ?: $process->getOutput() ?: 'Chrome could not generate the PDF. HTML debug file: '.$htmlPath));
+        $letters = [];
+
+        foreach ($rows as $row) {
+            $letter = $this->productLetter((string) $row->letter);
+            $letters[(string) $row->category_id][$letter] = true;
         }
 
-        if (file_exists($htmlPath)) {
-            @unlink($htmlPath);
-        }
-
-        if (is_dir($userDataDirectory)) {
-            $this->deleteDirectory($userDataDirectory);
-        }
+        return array_map(function ($group) {
+            $keys = array_keys($group);
+            sort($keys);
+            return $keys;
+        }, $letters);
     }
 
-    protected function waitForPdfFile($absolutePath, int $seconds = 30): bool
+    protected function productLetter(string $name): string
     {
-        $deadline = microtime(true) + $seconds;
-        $lastSize = 0;
-        $stableChecks = 0;
+        $letter = Str::upper(Str::substr(trim($name), 0, 1));
 
-        while (microtime(true) < $deadline) {
-            clearstatcache(true, $absolutePath);
-
-            if (file_exists($absolutePath)) {
-                $size = filesize($absolutePath);
-
-                if ($size > 0 && $size === $lastSize) {
-                    $stableChecks++;
-
-                    if ($stableChecks >= 2) {
-                        return true;
-                    }
-                } else {
-                    $stableChecks = 0;
-                    $lastSize = $size;
-                }
-            }
-
-            usleep(250000);
-        }
-
-        clearstatcache(true, $absolutePath);
-
-        return file_exists($absolutePath) && filesize($absolutePath) > 0;
-    }
-
-    protected function deleteDirectory($directory)
-    {
-        $items = @scandir($directory);
-
-        if ($items === false) {
-            return;
-        }
-
-        foreach (array_diff($items, ['.', '..']) as $item) {
-            $path = $directory . DIRECTORY_SEPARATOR . $item;
-
-            is_dir($path) ? $this->deleteDirectory($path) : @unlink($path);
-        }
-
-        @rmdir($directory);
-    }
-
-    protected function catalogs()
-    {
-        $catalogs = $this->readJson($this->catalogIndexPath(), []);
-
-        return collect(is_array($catalogs) ? $catalogs : [])->map(function ($catalog) {
-            $catalog['settings'] = array_merge($this->defaultSettings(), $catalog['settings'] ?? []);
-            $catalog['category_ids'] = $catalog['category_ids'] ?? [];
-            $catalog['product_ids'] = $catalog['product_ids'] ?? [];
-            $catalog['updated_at'] = $catalog['updated_at'] ?? null;
-            return $catalog;
-        })->all();
-    }
-
-    protected function saveCatalogs(array $catalogs)
-    {
-        $this->saveJson($this->catalogIndexPath(), $catalogs);
-    }
-
-    protected function sharedBlocksConfig()
-    {
-        return array_merge($this->defaultSharedBlocks(), $this->readJson($this->sharedBlocksPath(), []));
-    }
-
-    protected function catalogDefaultsConfig()
-    {
-        return array_merge($this->defaultSettings(), $this->readJson($this->catalogDefaultsPath(), []));
+        return preg_match('/^[A-Z0-9]$/', $letter) ? $letter : '#';
     }
 
     protected function validatedConfigurationSettings(Request $request)
@@ -638,7 +601,7 @@ class ProductCatalogController extends Controller
             'product_text_colors' => 'nullable|array',
         ]);
 
-        return array_merge($this->defaultSettings(), [
+        return array_merge($this->store->defaultSettings(), [
             'show_prices' => $request->has('show_prices'),
             'show_payment_page' => $request->has('show_payment_page'),
             'show_info_page' => $request->has('show_info_page'),
@@ -678,28 +641,6 @@ class ProductCatalogController extends Controller
             'product_box_colors' => $this->sanitizeColors($request->product_box_colors ?: []),
             'product_text_colors' => $this->sanitizeColors($request->product_text_colors ?: []),
         ]);
-    }
-
-    protected function readJson($path, $default)
-    {
-        if (! file_exists($path)) {
-            return $default;
-        }
-
-        $content = json_decode(file_get_contents($path), true);
-
-        return is_array($content) ? $content : $default;
-    }
-
-    protected function saveJson($path, array $content)
-    {
-        $directory = dirname($path);
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        file_put_contents($path, json_encode($content, JSON_PRETTY_PRINT));
     }
 
     protected function sanitizeColors(array $colors)
@@ -876,101 +817,5 @@ class ProductCatalogController extends Controller
         return ! empty($settings['letter_intro_ads']) && is_array($settings['letter_intro_ads'])
             ? $settings['letter_intro_ads']
             : [];
-    }
-
-    protected function defaultSettings()
-    {
-        return [
-            'show_prices' => true,
-            'show_payment_page' => true,
-            'show_info_page' => true,
-            'show_page_four' => false,
-            'description_limit' => 90,
-            'products_per_page' => 12,
-            'cover_image' => null,
-            'cover_category_images' => [],
-            'cover_title_position' => 'middle',
-            'advisor_name' => '',
-            'advisor_phone' => '',
-            'advisor_email_1' => '',
-            'advisor_email_2' => '',
-            'advertising_image' => null,
-            'advertising_position' => 'before_products',
-            'advertising_items' => [],
-            'letter_intro_ads' => [],
-            'payment_page_image' => null,
-            'payment_bank_icon' => null,
-            'payment_debit_icon' => null,
-            'payment_credit_icon' => null,
-            'payment_cash_icon' => null,
-            'info_page_image' => null,
-            'page_four_image' => null,
-            'extra_page_images' => [],
-            'final_page_image' => null,
-            'final_page_blank' => false,
-            'payment_page_position' => 'start',
-            'info_page_position' => 'start',
-            'extra_pages_position' => 'start',
-            'additional_pages' => [],
-            'payment_title' => 'MEDIOS DE PAGO',
-            'payment_delivery_title' => 'EFECTIVO CONTRA ENTREGA, DEPOSITO O TRANSFERENCIA DIRECTA',
-            'payment_bank_info' => '',
-            'payment_debit_title' => 'TARJETAS DEBITO',
-            'payment_debit_info' => '',
-            'payment_credit_title' => 'TARJETAS CREDITO',
-            'payment_credit_info' => '',
-            'payment_cash_title' => 'PAGUE EN EFECTIVO EN MAS DE 14.000 PUNTOS',
-            'payment_cash_info' => '',
-            'info_page_title' => 'INFORMACION',
-            'info_page_content' => '',
-            'info_table_rows' => [],
-            'product_title_font_family' => 'DejaVu Sans',
-            'product_title_font_size' => 12,
-            'product_description_font_family' => 'DejaVu Sans',
-            'product_description_font_size' => 10,
-            'product_price_font_family' => 'DejaVu Sans',
-            'product_price_font_size' => 16,
-            'product_reference_font_family' => 'DejaVu Sans',
-            'product_reference_font_size' => 12,
-            'product_box_colors' => [],
-            'product_text_colors' => [],
-        ];
-    }
-
-    protected function defaultSharedBlocks()
-    {
-        return [
-            'payment_page_image' => null,
-            'info_page_image' => null,
-            'updated_at' => null,
-        ];
-    }
-
-    protected function letterPalette()
-    {
-        return [
-            'A' => '#f36f21', 'B' => '#00a86b', 'C' => '#0f75bc', 'D' => '#ec1c24',
-            'E' => '#8dc63f', 'F' => '#662d91', 'G' => '#f7941d', 'H' => '#00a99d',
-            'I' => '#2e3192', 'J' => '#ed145b', 'K' => '#39b54a', 'L' => '#f15a24',
-            'M' => '#0072bc', 'N' => '#92278f', 'O' => '#d4145a', 'P' => '#009245',
-            'Q' => '#fbb03b', 'R' => '#1b75bb', 'S' => '#c1272d', 'T' => '#006837',
-            'U' => '#9e005d', 'V' => '#29abe2', 'W' => '#f7931e', 'X' => '#7ac943',
-            'Y' => '#3fa9f5', 'Z' => '#ff5a5f', '#' => '#4d4d4d',
-        ];
-    }
-
-    protected function catalogIndexPath()
-    {
-        return storage_path('app/product_catalogs/catalogs.json');
-    }
-
-    protected function sharedBlocksPath()
-    {
-        return storage_path('app/product_catalogs/shared_blocks.json');
-    }
-
-    protected function catalogDefaultsPath()
-    {
-        return storage_path('app/product_catalogs/defaults.json');
     }
 }

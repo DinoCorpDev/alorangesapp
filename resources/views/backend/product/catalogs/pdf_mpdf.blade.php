@@ -50,6 +50,11 @@
         'product_text_colors'            => [],
     ], $settings ?? []);
 
+    // id => file_name for every Upload referenced by this catalog, resolved in a single
+    // query by ProductCatalogPdfRenderer. Looking each id up here instead meant two
+    // queries per product card, which does not scale with the product count.
+    $uploadMap = $uploadMap ?? [];
+
     // Returns a local file:/// URL that mPDF can read, or null if the file doesn't exist
     $localFileUrl = function ($path) {
         if (! $path || ! file_exists($path)) {
@@ -63,7 +68,7 @@
     };
 
     // Resolves an image value (upload ID, public path, or URL) to a file:/// URL for mPDF
-    $pageImage = function ($value) use ($localFileUrl) {
+    $pageImage = function ($value) use ($localFileUrl, $uploadMap) {
         if (! $value) {
             return null;
         }
@@ -91,14 +96,14 @@
             return null;
         }
 
-        $asset = \App\Models\Upload::find($value);
+        $fileName = $uploadMap[(int) $value] ?? null;
 
-        if (! $asset) {
+        if (! $fileName) {
             return null;
         }
 
         if (env('FILESYSTEM_DRIVER') !== 's3') {
-            $localPath = public_path($asset->file_name);
+            $localPath = public_path($fileName);
             if (file_exists($localPath)) {
                 return $localFileUrl($localPath);
             }
@@ -234,16 +239,20 @@
     $pdfPageRendered = false;
     // $showPageNumber = true shows the page number (used only on product pages);
     // every other page explicitly turns it off so numbering never leaks onto other pages.
-    $pageBreak = function ($showPageNumber = false) use (&$pdfPageRendered) {
+    // Every page also opens with a marker so the renderer can split this document into
+    // fragments small enough for mPDF's pcre.backtrack_limit guard, always cutting between
+    // pages and never inside a table.
+    $marker = \App\Http\Services\ProductCatalogPdfRenderer::PAGE_MARKER;
+    $pageBreak = function ($showPageNumber = false) use (&$pdfPageRendered, $marker) {
         $margins = $showPageNumber ? ' margin-bottom="3" margin-footer="3"' : ' margin-bottom="0" margin-footer="0"';
         $toggle = '<sethtmlpagefooter name="pageFooter" page="ALL" value="' . ($showPageNumber ? 'ON' : 'OFF') . '" />';
 
         if (! $pdfPageRendered) {
             $pdfPageRendered = true;
-            return $toggle;
+            return $marker . $toggle;
         }
 
-        return '<pagebreak' . $margins . ' />' . $toggle;
+        return $marker . '<pagebreak' . $margins . ' />' . $toggle;
     };
 @endphp
 <!doctype html>

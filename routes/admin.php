@@ -102,6 +102,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::post('/categories/status', [CategoryController::class, 'updateStatus'])->name('categories.status');
     Route::get('/product-catalogs', [ProductCatalogController::class, 'index'])->name('product_catalogs.index');
     Route::get('/product-catalogs/category-products', [ProductCatalogController::class, 'categoryProducts'])->name('product_catalogs.category_products');
+    Route::get('/product-catalogs/statuses', [ProductCatalogController::class, 'statuses'])->name('product_catalogs.statuses');
     Route::post('/product-catalogs', [ProductCatalogController::class, 'store'])->name('product_catalogs.store');
     Route::get('/product-catalogs/configuration', [ProductCatalogController::class, 'configurationDefaults'])->name('product_catalogs.configuration.defaults');
     Route::post('/product-catalogs/configuration', [ProductCatalogController::class, 'updateConfigurationDefaults'])->name('product_catalogs.configuration.defaults.update');
@@ -111,6 +112,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::put('/product-catalogs/{catalog}', [ProductCatalogController::class, 'update'])->name('product_catalogs.update');
     Route::delete('/product-catalogs/{catalog}', [ProductCatalogController::class, 'destroy'])->name('product_catalogs.destroy');
     Route::get('/product-catalogs/{catalog}/download', [ProductCatalogController::class, 'download'])->name('product_catalogs.download');
+    Route::post('/product-catalogs/{catalog}/regenerate', [ProductCatalogController::class, 'regenerate'])->name('product_catalogs.regenerate');
 
     Route::resource('brands', BrandController::class)->except(['edit', 'destroy']);
     Route::get('/brands/edit/{id}', [BrandController::class, 'edit'])->name('brands.edit');
