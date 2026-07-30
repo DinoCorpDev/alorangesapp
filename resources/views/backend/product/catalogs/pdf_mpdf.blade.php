@@ -112,6 +112,23 @@
         return uploaded_asset($value);
     };
 
+    // Product photos are shot with generous white/transparent padding around the item;
+    // trimming that margin is what lets the bigger image box actually show a bigger
+    // product instead of a bigger empty area. Only applies to local files — S3-backed
+    // images are skipped rather than downloaded just to be cropped.
+    $imageTrimmer = new \App\Http\Services\ProductImageTrimmer();
+    $productImage = function ($value) use ($pageImage, $imageTrimmer) {
+        $resolved = $pageImage($value);
+
+        if (! $resolved || strpos($resolved, 'file:///') !== 0) {
+            return $resolved;
+        }
+
+        $trimmedPath = $imageTrimmer->trim(urldecode(substr($resolved, 8)));
+
+        return $trimmedPath ? ('file:///' . str_replace('\\', '/', $trimmedPath)) : $resolved;
+    };
+
     $coverImage       = $pageImage($settings['cover_image']);
     $paymentImage     = $pageImage($settings['payment_page_image']);
     $paymentBankIcon  = $pageImage($settings['payment_bank_icon']);
@@ -213,10 +230,10 @@
     $productCardWidth = $compactProducts ? 45 : 58;
     $productCardHeight = $compactProducts ? 45 : 54;
     $productHeadHeight = $compactProducts ? 8 : 10;
-    $productMediaHeight = $compactProducts ? 23 : 27;
+    $productMediaHeight = $compactProducts ? 27 : 32;
     $productInfoHeight = $productCardHeight - $productHeadHeight - $productMediaHeight;
-    $productImageWidth = $compactProducts ? 37 : 48;
-    $productImageHeight = $compactProducts ? 20 : 23;
+    $productImageWidth = $compactProducts ? 42 : 54;
+    $productImageHeight = $compactProducts ? 24 : 28;
     $productRowHeight = $compactProducts ? 48 : 62;
     $productCellPaddingTop = $compactProducts ? 1.5 : 4;
     $productCellPaddingBottom = $compactProducts ? 1 : 3;
@@ -325,13 +342,13 @@
         .product-head { width: {{ $productCardWidth }}mm; height: {{ $productHeadHeight }}mm; padding: {{ $compactProducts ? 1.2 : 1.8 }}mm {{ $compactProducts ? 1.6 : 2.2 }}mm; font-weight: 700; line-height: 1.13; vertical-align: middle; text-transform: uppercase; }
         .product-media { width: {{ $productCardWidth }}mm; height: {{ $productMediaHeight }}mm; padding: {{ $compactProducts ? 1 : 1.5 }}mm; text-align: center; vertical-align: middle; background: #ffffff; }
         .product-img { max-width: {{ $productImageWidth }}mm; max-height: {{ $productImageHeight }}mm; }
-        .product-info { width: {{ $productCardWidth }}mm; height: {{ $productInfoHeight }}mm; padding: 0 {{ $compactProducts ? 1.5 : 2 }}mm {{ $compactProducts ? 1.2 : 1.8 }}mm; text-align: center; vertical-align: middle; background: #ffffff; }
+        .product-info { width: {{ $productCardWidth }}mm; height: {{ $productInfoHeight }}mm; padding: 0 {{ $compactProducts ? 1 : 1.5 }}mm {{ $compactProducts ? 0.6 : 1 }}mm; text-align: center; vertical-align: bottom; background: #ffffff; }
         .product-name { color: #111827; font-weight: 700; line-height: 1.22; margin: 0; }
         .product-price { color: #d9832e; font-weight: 500; line-height: 1.1; margin: 0; text-align: center; }
         .product-ref { color: #475569; font-weight: 400; line-height: 1.1; margin: 0; text-align: center; }
         .product-detail-table { width: 100%; border-collapse: collapse; background: #ffffff; }
-        .product-detail-table td { padding: 0; vertical-align: middle; background: #ffffff; }
-        .product-price-gap { height: {{ $compactProducts ? 1.5 : 2.2 }}mm; line-height: {{ $compactProducts ? 1.5 : 2.2 }}mm; font-size: 1px; }
+        .product-detail-table td { padding: 0; vertical-align: bottom; background: #ffffff; }
+        .product-price-gap { height: {{ $compactProducts ? 0.8 : 1.2 }}mm; line-height: {{ $compactProducts ? 0.8 : 1.2 }}mm; font-size: 1px; }
         .product-advertising-cell { width: {{ $advertisingWidth }}mm; height: {{ $advertisingHeight }}mm; padding: {{ $productCellPaddingTop }}mm 0 {{ $productCellPaddingBottom }}mm; text-align: center; vertical-align: middle; }
         .product-advertising-frame { width: {{ $advertisingWidth }}mm; height: {{ $advertisingHeight - $productCellPaddingTop - $productCellPaddingBottom }}mm; border: 0.3mm solid #dfe5e8; background: #ffffff; text-align: center; vertical-align: middle; overflow: hidden; }
         .product-advertising-image { max-width: {{ $advertisingWidth - 1 }}mm; max-height: {{ $advertisingHeight - $productCellPaddingTop - $productCellPaddingBottom - 1 }}mm; }

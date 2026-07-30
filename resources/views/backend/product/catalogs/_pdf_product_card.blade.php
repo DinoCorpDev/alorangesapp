@@ -1,6 +1,6 @@
 @php
-    $image = $pageImage($product->thumbnail_img)
-        ?: $pageImage($product->meta_image)
+    $image = $productImage($product->thumbnail_img)
+        ?: $productImage($product->meta_image)
         ?: $fallbackImage;
     $rawName = trim($product->getTranslation('name'));
     $bannerName = \Illuminate\Support\Str::limit($rawName, $productBannerLimit);
