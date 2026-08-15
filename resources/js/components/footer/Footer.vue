@@ -1,26 +1,27 @@
 <template>
     <v-footer class="auth-footer">
-        <v-row class="pt-5">
+        <!-- El v-row colgaba directo del v-footer. Los v-row de Vuetify llevan
+             margenes de -12px que deben compensarse con el padding de un
+             contenedor; sin el, el footer sobresalia y provocaba 8px de scroll
+             horizontal en TODAS las paginas del sitio. -->
+        <v-container fluid class="pa-0">
+            <v-row class="pt-5">
             <!-- <v-col md="1"/> -->
             <v-col cols="12" md="5" class="d-flex justify-start justify-md-center align-center">
-                <div style="max-width: 480px" class="pl-md-5 mr-md-16">
+                <div class="footer-intro pl-md-5 mr-md-16">
                     <LogoAlorange class="mb-1" />
-                    <p style="font-size: 15px">
+                    <p class="footer-intro-text">
                         <b>¡Estamos aquí para ayudarte!</b><br />¿Tienes compras, cotizaciones, preguntas o inquietudes?
                         ¡No dudes en llamarnos o escribirnos! Nuestro equipo de agentes comerciales está listo para
                         atenderte de lunes a viernes, de 8:00 am a 6:00 pm.<br />¿Fuera de horario? ¡No hay problema!
                         Déjanos tu mensaje por Teléfono o WhatsApp
-                        <a
-                            style="font-weight: 700; color: white; font-size: 17px; text-decoration: underline"
-                            href="https://wa.me/573174420109"
-                            target="_blank"
-                        >
+                        <a class="footer-phone-link" href="https://wa.me/573174420109" target="_blank">
                             +57 3174420109
                         </a>
                         o envíanos un correo a ventas5@aloranges.com, y te responderemos en un abrir y cerrar de
                         ojos.<br /><b>¡Tu satisfacción es nuestra misión!</b>
                     </p>
-                    <div style="display: flex; gap: 10px; justify-content: flex-start">
+                    <div class="footer-social">
                         <a href="https://www.facebook.com/share/15iCZJt5Dq/?mibextid=wwXIfr" target="_blank">
                             <img class="redes" src="../icons/facebook.svg" alt="Facebook" />
                         </a>
@@ -43,37 +44,43 @@
                 <a @click="showModalRegister">Regístrate</a>
                 <a @click="showModalRecuperarPass">¿Olvidó su clave?</a>
             </v-col>
-            <v-col cols="12" class="d-none d-md-flex align-center" style="justify-content: space-around">
-                <img src="../icons/Logo_fondo_Emprender_blanco.png" alt="" style="max-width: 266px; height: auto" />
-                <p style="font-size: 13px; margin-bottom: 0">
-                    <b>Copyright © 2022 Aloranges.com.</b> Todos los derechos reservados.
-                </p>
-                <p class="d-flex align-center mb-0">
-                    Powered by <img src="../icons/DinoLabs-logo.svg" style="max-width: 60px" />
-                </p>
-            </v-col>
-            <v-col cols="12" class="d-flex d-md-none pa-0">
-                <v-row class="pt-5">
-                    <v-col cols="12" class="pl-6 pb-0">
-                        <p style="font-size: 17px; margin-bottom: 0">
-                            <b>Copyright © 2022 Aloranges.com.</b><br />Todos los derechos reservados.
+            <!-- Este bloque estaba DUPLICADO en el DOM: una version
+                 `d-none d-md-flex` y otra `d-flex d-md-none` con los mismos
+                 textos y distintos tamanos. Se renderizaban las dos y habia
+                 que mantener los cambios por partida doble. Ahora es uno solo
+                 que se reordena con las props `order` de Vuetify. -->
+            <v-col cols="12" class="footer-legal">
+                <v-row align="center" class="footer-legal-row">
+                    <v-col cols="12" order="1" md="auto" order-md="2" class="pb-0 pb-md-3">
+                        <p class="footer-legal-text mb-0">
+                            <b>Copyright © 2022 Aloranges.com.</b>
+                            <br class="d-md-none" />
+                            Todos los derechos reservados.
                         </p>
                     </v-col>
-                    <v-col cols="6" class="pt-0 d-flex align-center">
+                    <v-col cols="6" order="2" md="auto" order-md="1" class="pt-0 pt-md-3 d-flex align-center">
                         <img
                             src="../icons/Logo_fondo_Emprender_blanco.png"
-                            alt=""
-                            style="max-width: 180px; height: auto"
+                            alt="Fondo Emprender"
+                            class="footer-logo-emprender"
                         />
                     </v-col>
-                    <v-col cols="6" class="d-flex align-center justify-end pr-5 pt-0">
-                        <p class="mb-0 align-center justify-center" style="display: flex">
-                            Powered by <img src="../icons/DinoLabs-logo.svg" style="max-width: 60px" />
+                    <v-col
+                        cols="6"
+                        order="3"
+                        md="auto"
+                        order-md="3"
+                        class="pt-0 pt-md-3 d-flex align-center justify-end justify-md-start"
+                    >
+                        <p class="d-flex align-center mb-0">
+                            Powered by
+                            <img src="../icons/DinoLabs-logo.svg" alt="DinoLabs" class="footer-logo-dinolabs" />
                         </p>
                     </v-col>
                 </v-row>
             </v-col>
-        </v-row>
+            </v-row>
+        </v-container>
 
         <ModalRegister v-model="showRegister" />
         <RecuperarPass v-model="showRecuperarPass" />
@@ -164,69 +171,64 @@ p {
     justify-content: space-between;
     padding: 1rem;
     background-color: #3a3f43;
+}
 
-    @media (max-width: 599px) {
-        flex-direction: column;
+// Se eliminaron ~70 lineas de CSS (`&-copyright`, `&-location`, `&-link a`,
+// `&-copyright-wrap`, `&-links`) cuyas clases no existen en el template: sus
+// media queries no llegaban a ejecutarse nunca. Tambien sobraba el
+// `@media (max-width: 599px) { flex-direction: column }` sobre .auth-footer,
+// que no tenia efecto porque su unico hijo directo es un contenedor.
+
+.footer-intro {
+    max-width: 480px;
+}
+
+.footer-intro-text {
+    font-size: var(--font-size-body1);
+}
+
+.footer-phone-link {
+    font-weight: 700;
+    color: white;
+    font-size: var(--font-size-body1);
+    text-decoration: underline;
+    white-space: nowrap;
+}
+
+.footer-social {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    // Permite que los iconos bajen de linea si se anaden mas redes.
+    flex-wrap: wrap;
+}
+
+.footer-legal-row {
+    // En movil se apila; desde md se reparte en una sola fila.
+    @include respond-up("md") {
+        justify-content: space-around;
+        flex-wrap: nowrap;
     }
+}
 
-    // &.theme--dark {
-    //     background-color: #18191a;
-    // }
+.footer-legal-text {
+    font-size: var(--font-size-body1);
+}
 
-    &-copyright,
-    &-location,
-    &-link a {
-        font-size: var(--font-size-body1);
-        font-weight: 500;
-        letter-spacing: 0;
-        line-height: 1;
-        text-transform: uppercase;
+.footer-logo-emprender {
+    // Antes: 180px en el bloque movil y 266px en el de escritorio, en dos
+    // nodos distintos del DOM. Ahora es una sola imagen que escala.
+    max-width: 180px;
+    width: 100%;
+    height: auto;
 
-        @media (min-width: 960px) {
-            font-weight: 600;
-        }
+    @include respond-up("md") {
+        max-width: 266px;
     }
+}
 
-    &-location {
-        display: flex;
-        align-items: center;
-    }
-
-    &-copyright-wrap,
-    &-links {
-        gap: 1.5rem;
-
-        @media (max-width: 599px) {
-            width: 100%;
-        }
-
-        @media (min-width: 960px) {
-            gap: 3rem;
-        }
-
-        @media (min-width: 1264px) {
-            gap: 5rem;
-        }
-    }
-
-    &-copyright-wrap {
-        display: flex;
-        align-items: center;
-
-        @media (max-width: 599px) {
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-    }
-
-    &-links {
-        display: flex;
-        padding: 0;
-        list-style: none;
-
-        @media (max-width: 599px) {
-            justify-content: space-between;
-        }
-    }
+.footer-logo-dinolabs {
+    max-width: 60px;
+    height: auto;
 }
 </style>

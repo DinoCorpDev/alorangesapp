@@ -6,7 +6,7 @@
                     <v-col cols="4" style="position: relative">
                         <v-avatar class="user-info-avatar">
                             <img
-                                :src="previewAvatar || currentUser.avatar"
+                                :src="previewAvatar || currentUser.avatar || $helpers.imagePlaceholder()"
                                 @error="imageFallback($event)"
                                 class="border border-4"
                             />

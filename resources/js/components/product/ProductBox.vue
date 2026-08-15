@@ -1,20 +1,29 @@
 <template>
     <div class="product-box">
-        <div class="product-box-image">
+        <!-- La imagen es ahora un enlace real al detalle. Antes el unico
+             acceso era el boton "Ver Detalles", que vivia en una capa con
+             `opacity: 0` revelada solo con :hover: en tactil no hay hover, asi
+             que desde movil no habia ninguna forma de abrir el producto desde
+             la tarjeta (y el div tenia `cursor: pointer`, sugiriendo un click
+             que no existia). -->
+        <router-link
+            class="product-box-image"
+            :to="{ name: 'ProductDetails', params: { slug: productDetails.slug } }"
+        >
             <v-img
                 :src="productDetails.thumbnail_image || productPlaceholderUrl"
                 :alt="productDetails.name"
                 :aspect-ratio="1"
             />
-            <div class="product-box-image-hover">
+            <div class="product-box-image-hover" aria-hidden="true">
                 <CustomButton
                     block
                     color="orange"
                     text="Ver Detalles"
                     :to="{ name: 'ProductDetails', params: { slug: productDetails.slug } }"
-                />.
+                />
             </div>
-        </div>
+        </router-link>
         <div class="product-box-body">
             <p class="product-box-reference mb-3" v-if="productDetails.reference">
                 {{ productDetails.reference || "--" }}
@@ -214,6 +223,7 @@ export default {
         cursor: pointer;
         padding: 10px 10px 0px 10px;
         background: transparent;
+        display: block;
         &::after {
             content: "";
             display: block;
@@ -228,19 +238,33 @@ export default {
         }
 
         &-hover {
-            width: 90%;
+            // Estaba en `width: 90%` con `bottom: 0` y sin centrar, asi que
+            // quedaba descuadrado a la izquierda.
             position: absolute;
+            left: 0;
+            right: 0;
             bottom: 0;
+            padding: 0 10px 10px;
             opacity: 0;
         }
 
-        &:hover {
-            &::after {
-                opacity: 1;
-            }
+        // El realce solo se activa en dispositivos que de verdad tienen hover.
+        // En tactil se oculta por completo: alli el enlace es la propia imagen.
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                &::after {
+                    opacity: 1;
+                }
 
+                .product-box-image-hover {
+                    opacity: 1;
+                }
+            }
+        }
+
+        @media (hover: none) {
             .product-box-image-hover {
-                opacity: 1;
+                display: none;
             }
         }
 
@@ -260,14 +284,13 @@ export default {
     }
 
     &-footer {
-        // .v-btn {
-        //     @media (max-width: 600px) {
-        //         font-size: 11px;
-        //         height: 30px !important;
-        //     }
-        // }
         display: flex;
-        justify-content: space-between
+        justify-content: space-between;
+        // La tarjeta se usa a 2 columnas en movil (~160px de ancho). Sin wrap,
+        // el boton "Anadir" y el icono de favoritos se aplastaban entre si.
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     &-reference {
@@ -281,24 +304,31 @@ export default {
     &-name {
         font-size: var(--font-size-body1);
         font-weight: 700;
-        line-height: 24px;
+        // line-height fijo en px contra un font-size fluido: al escalar la
+        // tipografia el texto se salia de su caja.
+        line-height: 1.4;
         letter-spacing: 0;
         text-transform: uppercase;
+        overflow-wrap: anywhere;
     }
 
     &-brand-name {
         font-family: "Roboto", sans-serif;
-        font-size: 15px;
-        line-height: 24px;
+        // Estaba fijo en 15px mientras las clases vecinas ya usaban las
+        // variables de la escala; a 2 columnas en movil no cabia.
+        font-size: var(--font-size-body1);
+        line-height: 1.5;
         letter-spacing: 0;
     }
 
     &-price {
         display: block;
         font-family: "Roboto", sans-serif;
-        font-size: 18px;
-        line-height: 24px;
+        font-size: var(--font-size-h5);
+        line-height: 1.35;
         letter-spacing: 0;
+        // Los importes en COP son largos ($ 1.250.000): que no rompan la caja.
+        overflow-wrap: anywhere;
 
         &.discounted {
             font-size: var(--font-size-body1);

@@ -10,14 +10,16 @@
             </span>
             <span class="d-block white primary--text rounded mt-1 px-1 py-2 lh-1" >{{ format_price(getCartPrice - getTotalCouponDiscount) }}</span>
         </button>
+        <!-- width fijo de 400px: en moviles de 360-390px el panel era MAS
+             ancho que la pantalla. Y con `hide-overlay` no habia fondo que
+             tocar para cerrarlo, asi que en tactil quedaba practicamente
+             atrapado. Ahora ocupa el ancho completo en xs y tiene overlay. -->
         <v-navigation-drawer
             class="cart-drawer"
-            width="400"
-            height="100vh"
+            :width="$vuetify.breakpoint.xsOnly ? '100%' : 400"
             :value="cartDrawerOpen"
             fixed
             temporary
-            hide-overlay
             right
             clipped
             @input="updateCartDrawer"

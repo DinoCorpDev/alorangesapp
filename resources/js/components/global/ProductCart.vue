@@ -347,23 +347,49 @@ export default {
 
 .product-box-cart {
     display: grid;
-    align-items: stretch;
-    grid-template-columns: 6fr 4fr 1fr 1fr;
+    align-items: center;
+
+    // En movil el grid era `6fr 4fr 1fr 1fr`: cantidad y acciones recibian
+    // 1/12 del ancho cada una (~30px en una pantalla de 360px), con lo que el
+    // selector de cantidad no cabia y habia que reposicionarlo a mano con
+    // offsets absolutos. Ahora se reparte en dos filas: la ficha arriba y los
+    // controles debajo, donde si tienen espacio real.
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+        "body  body     body"
+        "price quantity actions";
+    row-gap: 0.5rem;
+
     border: 1px solid #d2d7dd;
     border-radius: 10px;
-    // background-color: #f5f5f5;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     box-sizing: border-box;
     padding: 0.5rem 0;
 
-    @media (min-width: 768px) {
+    // Antes 768px (escala Bootstrap), incoherente con el 600/960 de Vuetify
+    // que usa el resto del proyecto.
+    @include respond-up("sm") {
         grid-template-columns: 5fr 2fr 2fr 3fr;
+        grid-template-areas: "body price quantity actions";
         padding: 0.75rem 0;
     }
 
     &-body {
         display: flex;
+        grid-area: body;
+    }
+
+    &-body-price {
+        grid-area: price;
+    }
+
+    &-quantity {
+        grid-area: quantity;
+    }
+
+    &-actions {
+        grid-area: actions;
     }
 
     &-body-price,
@@ -371,7 +397,7 @@ export default {
     &-actions {
         padding: 0 0.5rem;
 
-        @media (min-width: 768px) {
+        @include respond-up("sm") {
             padding: 0 1.5rem;
         }
     }
@@ -389,7 +415,7 @@ export default {
         margin-top: -0.5rem;
         margin-bottom: -0.5rem;
 
-        @media (min-width: 768px) {
+        @include respond-up("sm") {
             width: 110px;
 
             margin-top: -0.75rem;
@@ -420,7 +446,7 @@ export default {
         justify-content: space-between;
         padding: 0 0.5rem;
 
-        @media (min-width: 768px) {
+        @include respond-up("sm") {
             padding: 0.75rem 1.25rem;
         }
     }
@@ -524,43 +550,25 @@ export default {
     &::v-deep {
         .vue-numeric-input {
             width: 100% !important;
-            min-width: 32px;
+            // El stepper ya no vive en una columna de ~30px, asi que puede
+            // mantener su ancho natural en todos los tamanos.
+            min-width: 110px;
 
-            @media (max-width: 767px) {
-                height: 100%;
-                min-height: 100px;
-
-                .numeric-input {
-                    height: 100%;
-                    padding-top: 15px !important;
-                }
-
-                .btn-increment {
-                    top: 0px;
-                    bottom: unset;
-                    min-height: 35px;
-                    right: 8px;
-                }
-
-                .btn-decrement {
-                    bottom: 12px;
-                    left: 8px;
-                    top: unset;
-                }
+            // Aqui habia un bloque para <768px que estiraba el control a
+            // `min-height: 100px` y recolocaba los botones + y - en vertical
+            // con offsets absolutos (top: 0 / bottom: 12px). Era el parche
+            // para la columna aplastada del grid; con el layout en dos filas
+            // ya no hace falta y el control se ve igual en movil y escritorio.
+            .btn-increment {
+                right: 5px;
+                width: 30px;
+                height: 30px;
             }
 
-            @media (min-width: 768px) {
-                .btn-increment {
-                    right: 5px;
-                    width: 30px;
-                    height: 30px;
-                }
-
-                .btn-decrement {
-                    left: 5px;
-                    width: 30px;
-                    height: 30px;
-                }
+            .btn-decrement {
+                left: 5px;
+                width: 30px;
+                height: 30px;
             }
 
             .numeric-input {

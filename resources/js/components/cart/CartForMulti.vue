@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="side-cart">
         <v-list-item class="d-flex pa-4 border-bottom side-cart-top">
             <i class="la la-shopping-cart la-3x me-2 text-primary" />
             <div class="lh-1-4">
@@ -130,9 +130,23 @@ export default {
 }
 </script>
 <style scoped>
+/* Mismo criterio que CartForSingle: se sustituye el `calc(100vh - 152px)`
+   (aqui 152, alli 205, para el mismo layout) por un flex column que reparte
+   la altura real disponible del drawer. */
+.side-cart {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.side-cart-top,
+.side-cart-bottom {
+    flex: 0 0 auto;
+}
+
 .side-cart-content {
-    height: calc(100vh - 152px);
-    max-height: calc(100vh - 152px);
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
 }
 </style>

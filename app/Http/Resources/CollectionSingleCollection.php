@@ -42,12 +42,14 @@ class CollectionSingleCollection extends JsonResource
             'has_warranty' => $this->has_warranty,
             'description' => $this->description,
             'variations' => filter_product_variations($this->variations, $this),
+            // La coleccion puede no tener tienda asociada (relacion nula):
+            // acceder directo a ->name provocaba un 500 en /collection/{slug}.
             'shop' => [
-                'name' => $this->shop->name,
-                'logo' => api_asset($this->shop->logo),
-                'rating' => (float) $this->shop->rating,
-                'review_count' => $this->shop->reviews_count,
-                'slug' => $this->shop->slug,
+                'name' => optional($this->shop)->name,
+                'logo' => $this->shop ? api_asset($this->shop->logo) : null,
+                'rating' => (float) optional($this->shop)->rating,
+                'review_count' => optional($this->shop)->reviews_count,
+                'slug' => optional($this->shop)->slug,
             ],
         ];
     }

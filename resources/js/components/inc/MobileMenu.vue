@@ -141,7 +141,7 @@
             <div class="align-center border-bottom d-flex py-5">
                 <template v-if="isAuthenticated">
                     <v-avatar size="48" class="">
-                        <img :src="currentUser.avatar" @error="imageFallback($event)" class="" />
+                        <img :src="currentUser.avatar || $helpers.imagePlaceholder()" @error="imageFallback($event)" class="" />
                     </v-avatar>
                     <div class="ms-3">
                         <h4 class="fs-14 fw-700 mb-0 lh-1">

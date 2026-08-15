@@ -48,12 +48,22 @@ export default {
 <style lang="scss" scoped>
 .space-item {
     &-image {
-        border-radius: 100%;
+        /* Recorte circular: la imagen trae el fondo del lienzo pegado */
+        border-radius: 50%;
+        overflow: hidden;
+        max-width: 190px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     &-title {
-        font-size: 35px;
+        /* 35px fijos partian nombres largos como "Seguridad industrial" */
+        font-size: clamp(16px, 1.8vw, 26px);
+        line-height: 1.25;
+        font-weight: 600;
         text-align: center;
+        margin: 0;
+        overflow-wrap: anywhere;
     }
 }
 </style>

@@ -28,69 +28,35 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// Se eliminaron ~60 lineas de CSS de `.v-tabs`: el template solo renderiza
+// <Carousel>, no hay ningun v-tabs, asi que nada de aquello se aplicaba.
 .product-gallery {
     position: relative;
-    height: 100%;
-    height: 82vh;
 
-    .v-tabs {
-        position: absolute;
-        z-index: 2;
-        width: 92.5%;
-        margin: auto;
-        left: 0;
-        right: 0;
-        top: 0.75rem;
+    // Antes: `height: 100%` seguido de `height: 82vh` (ganaba el segundo).
+    // En movil la galeria se comia el 82% de la pantalla y empujaba precio,
+    // cantidad y "Agregar a Compras" por debajo del pliegue.
+    //
+    // La altura debe seguir siendo DEFINIDA (no `auto`): el <v-carousel>
+    // interno usa height="100%" y con un padre auto colapsaria. Con min() se
+    // mantiene definida pero escala con el ancho del viewport y queda acotada.
+    height: min(90vw, 360px);
 
-        @media (min-width: 600px) {
-            width: 90%;
-            top: 1.5rem;
-        }
+    @include respond-up("sm") {
+        height: min(55vw, 440px);
+    }
 
-        &::v-deep {
-            .v-slide-group__prev,
-            .v-slide-group__next {
-                display: none !important;
-            }
+    @include respond-up("md") {
+        height: min(38vw, 520px);
+    }
 
-            .v-tabs-bar__content {
-                gap: 0.75rem;
-
-                @media (min-width: 600px) {
-                    gap: 1.5rem;
-                }
-            }
-        }
-
-        &-items {
-            height: 100%;
-
-            .v-window-item {
-                height: 100%;
-                flex: 1;
-            }
-        }
-
-        .v-tab {
-            background-color: #f5f5f5;
-            border-radius: 5px;
-            color: #000000 !important;
-            font-size: var(--font-size-btn);
-            font-weight: 600;
-            letter-spacing: 1.25px;
-            line-height: 17px;
-            // flex: 1; // All tabs same width
-
-            &:not(.v-tab--active):hover {
-                background-color: rgba(#000000, 0.5);
-                color: #ffffff !important;
-            }
-
-            &--active {
-                background-color: #000000;
-                color: #ffffff !important;
-            }
-        }
+    &::v-deep .carousel-item-image {
+        width: 100%;
+        height: 100%;
+        // `cover` recortaba la foto del producto. En una ficha hay que ver el
+        // articulo completo. Se limita a la galeria: el mismo Carousel se
+        // reutiliza en banners, donde `cover` si es lo correcto.
+        object-fit: contain;
     }
 }
 </style>

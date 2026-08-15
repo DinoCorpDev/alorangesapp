@@ -11,33 +11,40 @@
             shrink-on-scroll
             fixed
         >
-            <v-container class="pa-0 fill-height d-flex justify-space-between" fluid>
-                <router-link :to="{ name: 'Home2' }" class="layout-navbar-auth-brand">
+            <v-container class="navbar-container" fluid>
+                <router-link :to="{ name: 'Home2' }" class="layout-navbar-auth-brand navbar-brand">
                     <LogoAloranges class="d-none d-md-flex" />
                     <LogoAlorange class="d-flex d-md-none" />
                 </router-link>
 
-                <SearchInput
-                    class="d-none d-sm-flex"
-                    :showInput="false"
-                    :placeholder="'Escribe lo que buscas'"
-                    style="max-width: 500px"
-                />
+                <!-- El buscador es la accion principal de una tienda, asi que
+                     ocupa el espacio libre en escritorio y baja a una segunda
+                     linea a ancho completo en movil (antes desaparecia y se
+                     sustituia por un boton que llevaba a otra pantalla). -->
+                <div class="navbar-search">
+                    <SearchInput :showInput="false" :placeholder="'Escribe lo que buscas'" />
+                </div>
 
-                <div class="header-actions">
-                    <CustomButton class="d-flex d-sm-none" color="orange3" :to="{ name: 'Search' }">
-                        <Search class="cart-icon ml-sm-2" style="margin-bottom: 4px" />
-                    </CustomButton>
-                    <CustomButton color="orange3" :to="{ name: 'Shop' }">
-                        <span class="d-none d-sm-flex">Tienda</span>
-                        <Cart class="cart-icon ml-sm-2" style="margin-bottom: 4px" />
-                    </CustomButton>
+                <div class="header-actions navbar-actions">
+                    <!-- Icono de linea, como los del topbar. El anterior era
+                         una bolsa solida y rellena que desentonaba con el
+                         resto del header. -->
+                    <router-link :to="{ name: 'Shop' }" class="navbar-action" title="Tienda" aria-label="Tienda">
+                        <i class="las la-store navbar-action-icono" aria-hidden="true"></i>
+                        <span class="navbar-action-label">Tienda</span>
+                    </router-link>
+
                     <div class="layout-navbar-auth-nav">
                         <DoubleButton />
                         <div class="d-flex d-lg-none" v-if="userIsLoggedIn">
-                            <CustomButton v-if="userIsLoggedIn" @click.stop="toggleMenu" color="orange3">
+                            <button
+                                type="button"
+                                class="navbar-action navbar-action--icon"
+                                aria-label="Abrir menú"
+                                @click.stop="toggleMenu"
+                            >
                                 <BurgerMenu />
-                            </CustomButton>
+                            </button>
                         </div>
                         <div style="display: none">
                             <ToggleMenu />
@@ -55,26 +62,15 @@
                                     </button>
                                 </template>
                                 <template v-slot:default="dialog">
-                                    <v-card class="pa-10" style="position: relative">
-                                        <v-card-text
-                                            style="
-                                                display: flex;
-                                                flex-direction: column;
-                                                justify-content: center;
-                                                align-items: center;
-                                            "
-                                        >
+                                    <!-- pa-10 (40px) fijo dejaba 144px utiles de texto en
+                                         una pantalla de 320px. Ahora el padding escala. -->
+                                    <v-card class="pa-5 pa-sm-10 logout-dialog">
+                                        <v-card-text class="logout-dialog-body">
                                             <LogoAlorange />
-                                            <h3
-                                                class="pa-12"
-                                                style="
-                                                    font-size: 35px;
-                                                    font-weight: 500px;
-                                                    line-height: 42px;
-                                                    text-align: center;
-                                                    color: black;
-                                                "
-                                            >
+                                            <!-- Antes: pa-12 (48px mas) y font-size: 35px inline,
+                                                 ademas de `font-weight: 500px` (unidad invalida en
+                                                 font-weight, la declaracion se descartaba). -->
+                                            <h3 class="pa-4 pa-sm-8 logout-dialog-title">
                                                 ¿Seguro que desea <br />
                                                 cerrar sesión?
                                             </h3>
@@ -85,11 +81,7 @@
                                             >
                                             <CustomButton color="orange" @click="logout">Cerrar sesión</CustomButton>
                                         </v-card-actions>
-                                        <v-btn
-                                            class="logout-icon-esc"
-                                            style="position: absolute; top: 15px; right: 15px"
-                                            @click="dialog.value = false"
-                                        >
+                                        <v-btn class="logout-icon-esc" @click="dialog.value = false">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 width="21"
@@ -192,22 +184,130 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// --- Barra principal ---------------------------------------------------
+// Una sola fila flexible: marca | buscador | acciones. En movil el buscador
+// pasa a una segunda linea completa gracias a `flex-wrap` + `order`, sin
+// duplicar nada en el DOM.
+.navbar-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 8px 12px;
+
+    @include respond-up("md") {
+        gap: 1rem;
+        padding: 10px 16px;
+    }
+}
+
+.navbar-brand {
+    order: 1;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.navbar-search {
+    order: 3;
+    flex: 1 1 100%;
+    min-width: 0;
+
+    @include respond-up("sm") {
+        order: 2;
+        // Crece con el espacio libre en vez de quedarse en 500px fijos.
+        flex: 1 1 auto;
+        max-width: 560px;
+    }
+}
+
 .header-actions {
+    order: 2;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-left: auto;
+
+    @include respond-up("sm") {
+        order: 3;
+        gap: 0.5rem;
+    }
 }
 
-.container {
-    gap: 0.65rem;
+// Accion del header: icono arriba, etiqueta debajo. Objetivo tactil de 44px,
+// que es el minimo recomendado y que varios botones no alcanzaban.
+/* Mismo lenguaje que el buscador (pildora con borde) y el boton de cuenta
+   (circulo con borde): TODAS las acciones del header son circulos de 40px.
+   Antes "Tienda" y el burger eran iconos sueltos con etiqueta de 11px, un
+   tercer estilo que no casaba con ninguno de los otros dos. */
+.navbar-action {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 1.5px solid #e3e7eb;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #3d4248;
+    text-decoration: none;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease,
+        transform 0.15s ease;
 
-    @media (min-width: 960px) {
-        gap: 1rem;
+    &:hover,
+    &:focus-visible {
+        border-color: #f58634;
+        color: #f58634;
+        box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
     }
 
-    @media (max-width: 600px) {
-        flex-wrap: nowrap;
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
+/* La etiqueta ya no se pinta: el circulo se explica con su icono, y el
+   nombre queda en title/aria-label para tooltip y lectores de pantalla. */
+.navbar-action-label {
+    display: none;
+}
+
+.navbar-action-icono {
+    /* Icono de fuente (line-awesome), no SVG: se controla con font-size */
+    font-size: 21px;
+    line-height: 1;
+}
+
+.layout-navbar-auth-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+// El dialogo de cierre de sesion: los tamanos iban inline y no bajaban de
+// 35px de titulo + 88px de padding acumulado, imposible en movil.
+.logout-dialog-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.logout-dialog-title {
+    font-size: var(--font-size-h5);
+    font-weight: 500;
+    line-height: 1.25;
+    text-align: center;
+    color: black;
+
+    @include respond-up("sm") {
+        font-size: var(--font-size-h4);
     }
 }
 .logout-icon {
@@ -234,28 +334,31 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    // Iba inline; se mantiene la posicion pero sin estilo en el template.
+    position: absolute;
+    top: 15px;
+    right: 15px;
 }
 .layout-navbar-auth {
     position: fixed;
-    top: 64px;
+    // Mismo anclaje dinamico que Navbar: antes era 64px fijo.
+    top: var(--topbar-height, 64px);
     left: 0;
     right: 0;
     width: 100%;
-    min-height: 60px;
+    min-height: 64px;
+    // Altura libre: el buscador baja a una segunda linea en movil y antes un
+    // `max-height: 60px` lo habria dejado recortado. TheShop mide el alto real.
+    height: auto !important;
     z-index: 10;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 4px 6px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
-    @media (max-width: 960px) {
-        max-height: 60px;
-    }
+    // Sombra mas sutil que la anterior (0 4px 6px muy marcada) + linea fina.
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
 
     &::v-deep {
         .v-toolbar__content {
-            min-height: 60px;
-            padding: 0 12px;
-
-            @media (max-width: 960px) {
-                max-height: 60px;
-            }
+            min-height: 64px;
+            height: auto !important;
+            padding: 0;
         }
     }
 

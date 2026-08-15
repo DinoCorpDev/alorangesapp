@@ -100,6 +100,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/categories/destroy/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::post('/categories/featured', [CategoryController::class, 'updateFeatured'])->name('categories.featured');
     Route::post('/categories/status', [CategoryController::class, 'updateStatus'])->name('categories.status');
+    // --- Cotizaciones (uso de los comerciales) ---
+    Route::get('/quotations', [App\Http\Controllers\QuotationController::class, 'index'])->name('quotations.index');
+    Route::get('/quotations/create', [App\Http\Controllers\QuotationController::class, 'create'])->name('quotations.create');
+    Route::get('/quotations/buscar-productos', [App\Http\Controllers\QuotationController::class, 'buscarProductos'])->name('quotations.search_products');
+    Route::post('/quotations', [App\Http\Controllers\QuotationController::class, 'store'])->name('quotations.store');
+    Route::get('/quotations/{id}/edit', [App\Http\Controllers\QuotationController::class, 'edit'])->name('quotations.edit');
+    Route::put('/quotations/{id}', [App\Http\Controllers\QuotationController::class, 'update'])->name('quotations.update');
+    Route::get('/quotations/{id}/pdf', [App\Http\Controllers\QuotationController::class, 'pdf'])->name('quotations.pdf');
+    Route::delete('/quotations/{id}', [App\Http\Controllers\QuotationController::class, 'destroy'])->name('quotations.destroy');
+
     Route::get('/product-catalogs', [ProductCatalogController::class, 'index'])->name('product_catalogs.index');
     Route::get('/product-catalogs/category-products', [ProductCatalogController::class, 'categoryProducts'])->name('product_catalogs.category_products');
     Route::get('/product-catalogs/statuses', [ProductCatalogController::class, 'statuses'])->name('product_catalogs.statuses');

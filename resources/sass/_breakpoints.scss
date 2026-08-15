@@ -1,0 +1,59 @@
+// =============================================================
+// Sistema de breakpoints — UNICA fuente de verdad del proyecto.
+//
+// Este archivo se inyecta automaticamente en TODOS los bloques
+// <style lang="scss"> de los componentes .vue mediante la opcion
+// `globalVueStyles` de Laravel Mix (ver webpack.mix.js), y se
+// importa tambien desde app.scss.
+//
+// IMPORTANTE: no debe emitir ni una sola regla CSS. Solo puede
+// contener variables, mapas, mixins y funciones. Cualquier CSS
+// que se escriba aqui se duplicaria en cada componente.
+//
+// Los valores coinciden con los thresholds por defecto de
+// Vuetify 2, de modo que el CSS y `$vuetify.breakpoint` en JS
+// nunca se desincronicen:
+//   xs  <600 | sm 600-960 | md 960-1264 | lg 1264-1904 | xl >1904
+// =============================================================
+
+$breakpoints: (
+    "sm": 600px,
+    "md": 960px,
+    "lg": 1264px,
+    "xl": 1904px,
+);
+
+@function breakpoint($name) {
+    @if not map-has-key($breakpoints, $name) {
+        @error "Breakpoint `#{$name}` no existe. Validos: #{map-keys($breakpoints)}.";
+    }
+
+    @return map-get($breakpoints, $name);
+}
+
+// Mobile-first. Aplica DESDE el breakpoint indicado hacia arriba.
+//   @include respond-up("md") { ... }  ->  min-width: 960px
+@mixin respond-up($name) {
+    @media (min-width: breakpoint($name)) {
+        @content;
+    }
+}
+
+// Desktop-first. Aplica POR DEBAJO del breakpoint indicado.
+// Resta 0.02px para que nunca se solape con respond-up del mismo
+// nombre (el bug de "dos reglas aplicando a la vez en el pixel
+// exacto" que habia repartido por el proyecto).
+//   @include respond-down("md") { ... }  ->  max-width: 959.98px
+@mixin respond-down($name) {
+    @media (max-width: breakpoint($name) - 0.02px) {
+        @content;
+    }
+}
+
+// Rango cerrado [from, to).
+//   @include respond-between("sm", "lg") { ... }
+@mixin respond-between($from, $to) {
+    @media (min-width: breakpoint($from)) and (max-width: breakpoint($to) - 0.02px) {
+        @content;
+    }
+}

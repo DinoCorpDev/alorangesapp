@@ -1,149 +1,100 @@
 <template>
     <div class="topbar">
-        <div v-if="topBannerVisible && !loading && data.top_banner.img" class="position-relative">
+        <!-- Banner promocional (se mantiene tal cual, solo cambia el estilo) -->
+        <div v-if="topBannerVisible && !loading && data.top_banner && data.top_banner.img" class="topbar-banner">
             <dynamic-link :to="data.top_banner.link" append-class="text-reset d-block lh-0">
-                <img :src="data.top_banner.img" class="img-fit h-50px w-100" />
+                <img :src="data.top_banner.img" class="topbar-banner-img" />
             </dynamic-link>
-            <v-btn
-                elevation="0"
-                fab
-                outlined
-                x-small
-                class="absolute-top-right rounded border-2 btn-xxs mt-2 me-2"
-                color="white"
-                @click.native="closeTopBanner"
-            >
-                <i class="las la-times ts-10" />
-            </v-btn>
+            <button type="button" class="topbar-banner-close" aria-label="Cerrar" @click="closeTopBanner">
+                <i class="las la-times" />
+            </button>
         </div>
-        <v-container class="fs-13 py-0 px-0 px-md-3 mr-2">
-            <v-row align="center" class="my-0 d-flex flex-column flex-md-row">
-                <v-col cols="12" md="6" class="py-2">
-                    <div class="d-flex align-center flex-wrap d-none d-md-flex">
-                        <!-- language switcher -->
-                        <v-menu
-                            v-if="data.show_language_switcher == 'on' && allLanguages.length > 1"
-                            offset-y
-                            :close-on-click="menuCloseOnClick"
-                            :elevation="2"
-                        >
-                            <template #activator="{ on, attrs }">
-                                <span v-bind="attrs" class="d-flex align-center" v-on="on">
-                                    <span class="opacity-60">{{ userLanguageObj.name }}</span>
-                                    <i class="las la-angle-down ms-1 fs-12" />
-                                </span>
-                            </template>
 
-                            <v-list class="fs-13">
-                                <v-list-item
-                                    v-for="(language, i) in allLanguages"
-                                    :key="i"
-                                    class="c-pointer d-flex align-center"
-                                    @click="switchLanguage(language.code)"
-                                >
-                                    <img
-                                        :src="static_asset(`/assets/img/flags/${language.flag}.png`)"
-                                        class="me-1 h-10px"
-                                    />
-                                    <v-list-item-title class="fs-13 opacity-60">
-                                        {{ language.name }}
-                                    </v-list-item-title>
-                                </v-list-item>
-                            </v-list>
-                        </v-menu>
+        <div class="topbar-strip">
+            <v-container class="py-0 px-3">
+                <div class="topbar-inner">
+                    <!-- Reclamo principal: es lo que mas vende, asi que va
+                         destacado y es lo unico que nunca se oculta. -->
+                    <span class="topbar-claim">
+                        <i class="las la-truck" />
+                        <span>Envíos a toda Colombia</span>
+                    </span>
 
-                        <!-- currency switcher -->
-                        <!-- <v-menu offset-y :close-on-click="menuCloseOnClick">
-                            <template #activator="{ on, attrs }">
-                                <span v-bind="attrs" class="d-flex align-center py-1 ms-2" v-on="on">
-                                    <span class="opacity-60"
-                                        >{{ cselectedCurrency.name }} ({{ cselectedCurrency.sysmbol }})</span
+                    <div class="topbar-meta">
+                        <a :href="'tel:' + $optional('data.helpline')" class="topbar-link">
+                            <i class="la la-phone" />
+                            <span>+57 3174420109</span>
+                        </a>
+
+                        <span class="topbar-sep" aria-hidden="true"></span>
+
+                        <a :href="'mailto:ventas5@aloranges.com'" class="topbar-link topbar-link--email">
+                            <i class="las la-envelope" />
+                            <span>ventas5@aloranges.com</span>
+                        </a>
+
+                        <!-- Selector de idioma -->
+                        <template v-if="data.show_language_switcher == 'on' && allLanguages.length > 1">
+                            <span class="topbar-sep" aria-hidden="true"></span>
+                            <v-menu offset-y :close-on-click="menuCloseOnClick" :elevation="2">
+                                <template #activator="{ on, attrs }">
+                                    <button type="button" class="topbar-link" v-bind="attrs" v-on="on">
+                                        <span>{{ userLanguageObj.name }}</span>
+                                        <i class="las la-angle-down topbar-caret" />
+                                    </button>
+                                </template>
+                                <v-list dense>
+                                    <v-list-item
+                                        v-for="(language, i) in allLanguages"
+                                        :key="i"
+                                        class="c-pointer d-flex align-center"
+                                        @click="switchLanguage(language.code)"
                                     >
-                                    <i class="las la-angle-down ms-1 fs-12"></i>
-                                </span>
-                            </template>
+                                        <img
+                                            :src="static_asset(`/assets/img/flags/${language.flag}.png`)"
+                                            class="me-2 topbar-flag"
+                                        />
+                                        <v-list-item-title class="fs-13">{{ language.name }}</v-list-item-title>
+                                    </v-list-item>
+                                </v-list>
+                            </v-menu>
+                        </template>
 
-                            <v-list>
-                                <v-list-item v-for="(currency, i) in allCurrencies" :key="i" class="c-pointer">
-                                    <v-list-item-title class="fs-13 opacity-60">
-                                        {{ currency.name }} ({{ currency.symbol }})
-                                    </v-list-item-title>
-                                </v-list-item>
-                            </v-list>
-                        </v-menu> -->
-                        <v-divider
-                            v-if="data.show_language_switcher == 'on' && allLanguages.length > 1"
-                            vertical
-                            class="mx-4"
-                        />
-                        <a
-                            :href="$optional('data.mobile_app_links?.play_store')"
-                            target="_blank"
-                            class="me-4 text-reset"
-                            v-if="data.mobile_app_links && data.mobile_app_links.show_play_store == 'on'"
-                        >
-                            <i class="lab la-android" />
-                            <span class="opacity-60">{{ $t("play_store") }}</span>
-                        </a>
-                        <a
-                            :href="$optional('data.mobile_app_links?.app_store')"
-                            target="_blank"
-                            class="text-reset"
-                            v-if="data.mobile_app_links && data.mobile_app_links.show_app_store == 'on'"
-                        >
-                            <i class="lab la-apple" />
-                            <span class="opacity-60">{{ $t("app_store") }}</span>
-                        </a>
+                        <!-- Enlaces a las tiendas de apps -->
+                        <template v-if="data.mobile_app_links && data.mobile_app_links.show_play_store == 'on'">
+                            <span class="topbar-sep" aria-hidden="true"></span>
+                            <a
+                                :href="$optional('data.mobile_app_links?.play_store')"
+                                target="_blank"
+                                class="topbar-link"
+                            >
+                                <i class="lab la-android" />
+                                <span>{{ $t("play_store") }}</span>
+                            </a>
+                        </template>
+                        <template v-if="data.mobile_app_links && data.mobile_app_links.show_app_store == 'on'">
+                            <span class="topbar-sep" aria-hidden="true"></span>
+                            <a
+                                :href="$optional('data.mobile_app_links?.app_store')"
+                                target="_blank"
+                                class="topbar-link"
+                            >
+                                <i class="lab la-apple" />
+                                <span>{{ $t("app_store") }}</span>
+                            </a>
+                        </template>
+
+                        <!-- Registro de vendedor -->
                         <template v-if="is_addon_activated('multi_vendor')">
-                            <v-divider
-                                vertical
-                                class="mx-4"
-                                v-if="
-                                    data.mobile_app_links &&
-                                    (data.mobile_app_links.show_play_store == 'on' ||
-                                        data.mobile_app_links.show_app_store == 'on')
-                                "
-                            />
-                            <router-link :to="{ name: 'ShopRegistration' }" class="text-reset opacity-60">
+                            <span class="topbar-sep" aria-hidden="true"></span>
+                            <router-link :to="{ name: 'ShopRegistration' }" class="topbar-link topbar-link--accent">
                                 {{ $t("be_a_seller") }}
                             </router-link>
                         </template>
                     </div>
-                </v-col>
-                <v-col cols="12" md="6" class="py-2">
-                    <div class="d-flex align-center justify-end flex-wrap topbar-contact">
-                        <!-- <router-link :to="{ name: 'TrackOrder' }" class="text-reset opacity-60">
-                            {{ $t("track_order") }}
-                        </router-link> -->
-                        <a :href="'tel:' + $optional('data.helpline')" style="color: gray">
-                            <i class="las la-truck" />
-                            <span>Envíos a toda Colombia</span>
-                        </a>
-                        <v-divider vertical class="mx-4" />
-                        <a :href="'tel:' + $optional('data.helpline')" style="color: gray">
-                            <i class="la la-phone" />
-                            <span>+57 3174420109</span>
-                        </a>
-                        <v-divider vertical class="mx-4" />
-                        <!-- <router-link :to="{ name: 'Home' }" class="text-reset opacity-60 me-3">
-                            <span class="">Compare (0)</span>
-                        </router-link> -->
-                        <!-- <router-link
-                            :to="{ name: 'ComparedList' }"
-                            class="text-reset opacity-60 me-3"
-                            v-if="generalSettings.product_comparison == 1"
-                        >
-                            <span class="">{{ $t("compare") }} ({{ getTotalComparedList }})</span>
-                        </router-link> -->
-                        <a :href="'mailto:' + $optional('data.helpline')" style="color: gray">
-                            <i class="las la-envelope" />
-                            <span>ventas5@aloranges.com</span>
-                        </a>
-                    </div>
-                </v-col>
-            </v-row>
-        </v-container>
-        <v-divider class="" />
+                </div>
+            </v-container>
+        </div>
     </div>
 </template>
 
@@ -152,10 +103,13 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
     props: {
-        loading: { type: Boolean, required: true, default: true },
+        // Ningun navbar pasa estas props hoy: `required: true` generaba un
+        // [Vue warn] en cada pagina. Opcionales con defaults seguros.
+        loading: { type: Boolean, default: true },
         data: {
             type: Object,
-            default: {}
+            // Vue exige factory para defaults de tipo Object (era otro warn).
+            default: () => ({})
         }
     },
     data: () => ({
@@ -217,65 +171,173 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+// Franja superior oscura. Antes era blanca sobre un navbar tambien blanco, sin
+// separacion visual y ocupando 64px solo para datos de contacto. Ahora
+// contrasta con el navbar, pesa menos y libera altura para el contenido.
 .topbar {
     position: fixed !important;
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
-    z-index: 1100;
-    min-height: 64px;
-    height: 64px;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    /* MISMA capa que el navbar (10): topbar y navbar son una sola pieza y
+       deben taparse/destaparse juntos.
+       Antes 1100, por encima del drawer lateral (999): al abrir el menu de
+       usuario el contenido y el navbar quedaban bajo el velo, pero la franja
+       oscura del topbar seguia flotando encima de todo, incluido el propio
+       menu. */
+    z-index: 10;
+    // Altura libre: TheShop mide el alto real y desplaza el contenido, asi que
+    // el banner promocional ya no queda recortado como con la altura fija.
+    height: auto;
+    background-color: #25292e;
 }
-.topbar .v-container {
-    padding-top: 0;
-    padding-bottom: 0;
-    height: 100%;
+
+.topbar-strip {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
 }
-.topbar .v-row {
-    justify-content: space-between;
-    height: 100%;
+
+.topbar-inner {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2px 16px;
+    min-height: 40px;
+    padding: 4px 0;
 }
-.topbar .v-row > .v-col {
-    min-width: 0;
+
+.topbar-claim {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+
+    i {
+        color: #f58634;
+        font-size: 16px;
+    }
 }
-.topbar .v-divider {
-    border-color: rgba(0, 0, 0, 0.08);
+
+.topbar-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px 10px;
 }
-@media (max-width: 960px) {
-    .topbar {
-        min-height: 64px;
-        height: 64px;
+
+.topbar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.82);
+    white-space: nowrap;
+    background: none;
+    border: 0;
+    /* Area tactil de 34px sin engordar la barra: el relleno vertical es
+       clicable aunque el texto ocupe menos. Antes eran 22px. */
+    padding: 8px 0;
+    min-height: 34px;
+    font-size: 13px;
+    transition: color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+        color: #ffffff;
     }
-    .topbar .v-row {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        white-space: nowrap;
+
+    i {
+        font-size: 15px;
     }
-    .topbar .v-col {
-        flex: 0 0 auto;
-        min-width: auto;
-        width: auto;
-        padding-left: 8px !important;
-        padding-right: 8px !important;
+
+    &--accent {
+        color: #f58634;
+        font-weight: 600;
+
+        &:hover {
+            color: lighten(#f58634, 10%);
+        }
     }
-    .topbar .topbar-contact {
-        justify-content: flex-start;
-        flex-wrap: nowrap;
-        gap: 0.75rem;
+}
+
+.topbar-caret {
+    font-size: 11px !important;
+    opacity: 0.7;
+}
+
+.topbar-flag {
+    height: 12px;
+    width: auto;
+}
+
+.topbar-sep {
+    width: 1px;
+    height: 14px;
+    background-color: rgba(255, 255, 255, 0.22);
+}
+
+// Banner promocional
+.topbar-banner {
+    position: relative;
+}
+
+.topbar-banner-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    // Antes: `h-50px` + object-fit cover, que recortaba el banner en movil.
+    max-height: 90px;
+    object-fit: contain;
+}
+
+.topbar-banner-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.45);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.7);
     }
-    .topbar .v-divider {
+}
+
+// En movil el reclamo de envios se centra y los datos secundarios se reparten
+// debajo. Nada de scroll horizontal para leer un telefono.
+@include respond-down("md") {
+    .topbar-inner {
+        justify-content: center;
+        gap: 2px 12px;
+    }
+
+    .topbar-meta {
+        justify-content: center;
+    }
+
+    .topbar-link {
+        font-size: 12px;
+    }
+
+    // El correo es el dato mas largo y el menos urgente en movil.
+    .topbar-link--email {
         display: none;
     }
-    .topbar a,
-    .topbar span,
-    .topbar i {
-        font-size: 12px;
+}
+
+@include respond-down("sm") {
+    .topbar-sep {
+        display: none;
     }
 }
 </style>

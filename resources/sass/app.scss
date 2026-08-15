@@ -1,4 +1,5 @@
-// Variables
+// Breakpoints (mixins, sin salida CSS) + custom properties
+@import "breakpoints";
 @import "variables";
 
 @import "~line-awesome/dist/line-awesome/css/line-awesome.css";
@@ -99,11 +100,12 @@ h6 {
     letter-spacing: 0.15px;
 }
 
-.body1,
-.body2 {
-    font-family: var(--font-size-body1);
-    overflow-x: hidden;
-}
+// Nota: aqui habia `font-family: var(--font-size-body1)` (asignaba un
+// TAMANO a font-family, declaracion invalida que tumbaba la fuente) y un
+// `overflow-x: hidden` que se aplicaba a las ~500 apariciones de .body1 y
+// .body2. Ese overflow no arreglaba nada: ocultaba los desbordes reales y
+// hacia imposible localizarlos. Se elimina para que los desbordes se
+// corrijan en su origen.
 
 .body1,
 .subt1 {

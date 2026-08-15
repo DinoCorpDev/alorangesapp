@@ -229,7 +229,9 @@ export default {
 .v-carousel {
     border-radius: 10px;
     background-color: #f4f5f7;
-    border: 1px solidrgb(194, 194, 194)7;
+    // Estaba escrito como `1px solidrgb(194, 194, 194)7`: sintaxis invalida,
+    // el navegador descartaba la declaracion entera y no habia borde.
+    border: 1px solid rgb(194, 194, 194);
     display: flex;
     align-items: center;
     justify-content: center;

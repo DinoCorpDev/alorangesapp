@@ -158,9 +158,15 @@ export default {
 
 <style lang="scss" scoped>
 .tab-icon {
-    width: 92px;
-    height: 62px;
-    border-radius: 6px;
+    /* Antes 92x62 rectangular: las imagenes de categoria son un circulo
+       inscrito en un lienzo cuadrado con fondo pegado (negro o blanco), y el
+       rectangulo mostraba ese fondo. El recorte circular cuadrado ensena solo
+       el circulo de color. */
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
 }
 
 .shop-category-tabs {
@@ -212,9 +218,12 @@ export default {
 }
 
 .static-tab-icon {
-    width: 38px;
-    height: 38px;
+    /* Mismo hueco que .tab-icon para que todas las pestanas midan igual;
+       contain porque estos iconos por defecto si son transparentes. */
+    width: 54px;
+    height: 54px;
     object-fit: contain;
+    flex-shrink: 0;
 }
 
 .shop-category-tab--active,

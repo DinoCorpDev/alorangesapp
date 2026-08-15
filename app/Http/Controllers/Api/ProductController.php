@@ -127,12 +127,58 @@ class ProductController extends Controller
         $products = [];
 
         if ($request->form == 'search') {
+            $query = Product::query();
+            $hasFilter = false;
+
+            $ordenarPorRelevancia = false;
+
             if ($request->keyword) {
-                $products = Product::where('name','LIKE','%'.$request->keyword.'%')->get();
+                $query->where('name', 'LIKE', '%' . $request->keyword . '%');
+                $hasFilter = true;
+                $ordenarPorRelevancia = true;
             }
 
+            // La ruta /brand/{slug} llega aqui con brand_ids (ids numericos o
+            // slug). Antes se ignoraba por completo y la pagina de marca
+            // quedaba siempre vacia.
+            if ($request->brand_ids) {
+                $ids = collect(explode(',', (string) $request->brand_ids))->filter();
+                $numeric = $ids->filter(fn ($v) => is_numeric($v))->values();
+                $slugs = $ids->reject(fn ($v) => is_numeric($v))->values();
+
+                $brandIds = Brand::query()
+                    ->when($numeric->isNotEmpty(), fn ($q) => $q->orWhereIn('id', $numeric))
+                    ->when($slugs->isNotEmpty(), fn ($q) => $q->orWhereIn('slug', $slugs))
+                    ->pluck('id');
+
+                $query->whereIn('brand_id', $brandIds);
+                $hasFilter = true;
+            }
+
+            // Relevancia. Ordenar solo por nombre ascendente hacia que toda
+            // busqueda empezara por articulos cuyo nombre arranca con "*" o
+            // "****" (nomenclatura interna), que ademas suelen ser los 4.109
+            // productos sin precio. Ahora primero lo que empieza por el
+            // termino buscado, y antes lo que tiene precio que lo que no.
+            if ($ordenarPorRelevancia) {
+                $termino = $request->keyword;
+                $query->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', [$termino . '%'])
+                      ->orderByRaw('CASE WHEN lowest_price > 0 THEN 0 ELSE 1 END');
+            }
+
+            // El autocompletado del buscador solo necesita unas pocas
+            // sugerencias. Sin este limite la consulta devolvia TODAS las
+            // coincidencias (p.ej. "papel" son ~150KB de JSON), demasiado
+            // para dispararse en cada pulsacion de tecla.
+            // Es opcional: sin `limit` el comportamiento es el de siempre.
+            if ($hasFilter && $request->filled('limit')) {
+                $query->limit(max(1, min(50, (int) $request->limit)));
+            }
+
+            $products = $hasFilter ? $query->orderBy('name', 'asc')->get() : [];
+
             $collection = new ProductCollection($products);
-            
+
             return response()->json([
                 'success' => true,
                 'products' => $collection,
@@ -344,7 +390,11 @@ class ProductController extends Controller
 
     public function productComparedList(Request $request)
     {
-        $products = Product::whereIn('id', $request->data)->get();
+        // Sin ids (lista de comparacion vacia) whereIn recibia NULL y Laravel
+        // lanzaba un TypeError -> 500. Se normaliza a array siempre.
+        $ids = array_filter((array) $request->data);
+
+        $products = Product::whereIn('id', $ids)->get();
         $products_array = array();
 
         foreach ($products as $product) {

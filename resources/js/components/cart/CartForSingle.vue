@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="side-cart">
         <v-list-item class="d-flex pa-4 border-bottom side-cart-top">
             <i class="la la-shopping-cart la-3x me-2 text-primary" />
             <div class="lh-1-4">
@@ -91,9 +91,29 @@ export default {
 }
 </script>
 <style scoped>
+/* Antes: `height: calc(100vh - 205px)`, con 205 como constante magica (y
+   CartForMulti usaba 152 para el mismo layout). Ademas 100vh en Safari/Chrome
+   moviles incluye la barra de URL, asi que los ultimos articulos y el boton de
+   pagar quedaban fuera de la pantalla.
+
+   Con flex, la zona scrollable ocupa exactamente el espacio que sobra entre
+   cabecera y pie, sea cual sea su alto. Sin numeros magicos y sin vh. */
+.side-cart {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.side-cart-top,
+.side-cart-bottom {
+    flex: 0 0 auto;
+}
+
 .side-cart-content {
-    height: calc(100vh - 205px);
-    max-height: calc(100vh - 205px);
+    flex: 1 1 auto;
+    /* Imprescindible: sin el, un hijo flex no encoge por debajo de su
+       contenido y el scroll interno no llega a activarse. */
+    min-height: 0;
     overflow-y: auto;
 }
 </style>

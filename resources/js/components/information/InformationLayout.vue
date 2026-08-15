@@ -18,7 +18,7 @@
                                 <div>
                                     <v-avatar size="50">
                                         <img
-                                            :src="previewAvatar || currentUser.avatar"
+                                            :src="previewAvatar || currentUser.avatar || $helpers.imagePlaceholder()"
                                             @error="imageFallback($event)"
                                             class="border border-4"
                                         />

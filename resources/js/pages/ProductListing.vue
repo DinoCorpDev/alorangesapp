@@ -133,19 +133,27 @@ export default {
 
             const res = await this.call_api("get", url);
 
-            if (res.data.success) {
+            if (res && res.data && res.data.success) {
+                // El endpoint `product/search` se reescribio y ahora solo
+                // devuelve `products`. El acceso directo a res.data.attributes
+                // .data (y demas) lanzaba un TypeError en CADA busqueda:
+                // los productos se pintaban pero filtros y paginacion morian
+                // en silencio. Acceso defensivo con valores por defecto.
+                const d = res.data;
                 this.loading = false;
-                this.metaTitle = res.data.metaTitle;
-                this.products = res.data.products.data;
-                this.attributes = res.data.attributes.data;
-                this.allBrands = res.data.allBrands.data;
-                this.rootCategories = res.data.rootCategories.data;
-                this.parentCategory = res.data.parentCategory ? res.data.parentCategory : {};
-                this.currentCategory = res.data.currentCategory ? res.data.currentCategory : {};
-                this.childCategories = res.data.childCategories ? res.data.childCategories.data : [];
-                this.totalPages = res.data.totalPage;
-                this.totalProducts = res.data.total;
-                this.queryParam.page = res.data.currentPage;
+                this.metaTitle = d.metaTitle || "";
+                this.products = (d.products && d.products.data) || [];
+                this.attributes = (d.attributes && d.attributes.data) || [];
+                this.allBrands = (d.allBrands && d.allBrands.data) || [];
+                this.rootCategories = (d.rootCategories && d.rootCategories.data) || [];
+                this.parentCategory = d.parentCategory || {};
+                this.currentCategory = d.currentCategory || {};
+                this.childCategories = (d.childCategories && d.childCategories.data) || [];
+                this.totalPages = d.totalPage || 1;
+                this.totalProducts = d.total != null ? d.total : this.products.length;
+                this.queryParam.page = d.currentPage || 1;
+            } else {
+                this.loading = false;
             }
         },
         categoryChange(id) {

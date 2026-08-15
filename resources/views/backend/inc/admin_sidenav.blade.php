@@ -57,6 +57,15 @@
                     </li>
                 @endcan
 
+                <!-- Cotizaciones (seccion principal: la usan los comerciales a diario) -->
+                <li class="aiz-side-nav-item">
+                    <a href="{{ route('quotations.index') }}"
+                        class="aiz-side-nav-link {{ areActiveRoutes(['quotations.index', 'quotations.create', 'quotations.edit']) }}">
+                        <i class="las la-file-invoice-dollar aiz-side-nav-icon"></i>
+                        <span class="aiz-side-nav-text">{{ translate('Cotizaciones') }}</span>
+                    </a>
+                </li>
+
                 <!-- Product -->
                 @canany(['show_products', 'show_seller_products', 'show_services', 'show_categories', 'show_brands', 'show_attributes', 'show_reviews', 'product_bulk_import', 'product_bulk_export'])
                     <li class="aiz-side-nav-item">

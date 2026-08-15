@@ -234,19 +234,40 @@ export default {
         justify-content: center;
     }
 
+    /* El enlace envuelve imagen + titulo: se apilan centrados */
+    &-wrap a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        min-width: 0;
+    }
+
     &-image {
-        width: 175px;
+        /* Era `width: 175px` FIJO dentro de una columna de 168px: la imagen
+           se salia del recuadro en movil. Ahora ocupa el ancho disponible,
+           con un tope para que no se agrande de mas en pantallas anchas. */
+        width: 100%;
+        max-width: 150px;
+        height: auto;
         aspect-ratio: 1;
-        border-radius: 100%;
+        /* Las imagenes de categoria son un circulo de color inscrito en un
+           lienzo cuadrado con fondo pegado (negro/blanco segun la categoria):
+           `cover` recorta justo el circulo y esconde ese fondo. */
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
     }
 
     &-title {
-        font-size: 25px;
+        /* 25px fijos partian nombres largos; ahora escala con el viewport */
+        font-size: clamp(15px, 4.2vw, 22px);
+        line-height: 1.25;
+        font-weight: 600;
         text-align: center;
-
-        @media (max-width: 600px) {
-            font-weight: 600;
-        }
+        margin: 0;
+        overflow-wrap: anywhere;
     }
 }
 </style>
