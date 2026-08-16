@@ -132,10 +132,109 @@
 
     {!! get_setting('web_custom_css') !!}
     {!! get_setting('header_script') !!}
+
+    {{-- Estilos de la pantalla de carga EN LINEA a proposito: app.css pesa
+         ~0,8 MB y el bundle ~5,3 MB, asi que sin esto el usuario ve la pagina
+         en blanco durante toda la descarga. Asi el logo aparece al instante. --}}
+    <style>
+        #app-splash {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 26px;
+            background: linear-gradient(160deg, #ffffff 0%, #fff6ed 100%);
+            transition: opacity .45s ease, visibility .45s ease;
+        }
+
+        #app-splash.is-oculto {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-marca {
+            position: relative;
+            width: 96px;
+            height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Anillo que gira alrededor del isotipo */
+        .splash-anillo {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid rgba(245, 134, 52, .18);
+            border-top-color: #f58634;
+            animation: splash-giro 1s linear infinite;
+        }
+
+        .splash-icono {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+            animation: splash-latido 1.8s ease-in-out infinite;
+        }
+
+        .splash-logo {
+            width: 168px;
+            max-width: 60vw;
+            height: auto;
+            opacity: .92;
+        }
+
+        .splash-texto {
+            margin: 0;
+            font-family: "Roboto", system-ui, sans-serif;
+            font-size: 13px;
+            letter-spacing: .3px;
+            color: #8a8f94;
+        }
+
+        @keyframes splash-giro {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes splash-latido {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* Respeta a quien pidio menos animacion en su sistema */
+        @media (prefers-reduced-motion: reduce) {
+            .splash-anillo { animation-duration: 3s; }
+            .splash-icono { animation: none; }
+        }
+    </style>
 </head>
 
 <body>
     <noscript>To run this application, JavaScript is required to be enabled.</noscript>
+
+    {{-- Se retira desde TheShop en cuanto la aplicacion monta --}}
+    <div id="app-splash" role="status" aria-live="polite" aria-label="Cargando">
+        <span class="splash-marca">
+            <span class="splash-anillo"></span>
+            <img
+                class="splash-icono"
+                src="{{ static_asset('assets/img/LogoIconoAloranges.png') }}"
+                alt=""
+                aria-hidden="true"
+            >
+        </span>
+        <img
+            class="splash-logo"
+            src="{{ static_asset('assets/img/aloranges-logo.png') }}"
+            alt="{{ get_setting('site_name') }}"
+        >
+        <p class="splash-texto">Preparando tu catálogo…</p>
+    </div>
+
     <div id="app">
         <theShop></theShop>
     </div>

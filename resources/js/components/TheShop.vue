@@ -1,5 +1,6 @@
 <template>
     <v-app class="d-flex flex-column">
+
         <Navbar v-if="$route.meta.hasHeader && $route.name == 'Home2'" />
         <NavbarAuth v-if="$route.meta.hasHeader && $route.name != 'Home2'" @toggleMenu="toggleMenu" />
 
@@ -104,6 +105,30 @@ export default {
         },
         toggleMenu() {
             this.userNavDrawerActive = !this.userNavDrawerActive;
+        },
+        /**
+         * Retira la pantalla de carga inicial que pinta el Blade.
+         * Se difumina primero y se elimina del DOM despues, para que no
+         * quede capturando pulsaciones por encima de la pagina.
+         *
+         * Se mantiene un minimo en pantalla: con el bundle ya en cache la app
+         * monta en decimas de segundo y el logo apenas se llegaba a ver, lo
+         * que producia un parpadeo mas molesto que no mostrar nada.
+         */
+        retirarSplash() {
+            const splash = document.getElementById("app-splash");
+            if (!splash) return;
+
+            const MINIMO_VISIBLE = 1400;
+            // performance.now() cuenta desde que empezo a cargar la pagina,
+            // asi que en una carga lenta el minimo ya esta cumplido y no
+            // se anade ninguna espera.
+            const restante = Math.max(0, MINIMO_VISIBLE - performance.now());
+
+            setTimeout(() => {
+                splash.classList.add("is-oculto");
+                setTimeout(() => splash.remove(), 500);
+            }, restante);
         },
         // Suma la altura de las piezas fijas del header. Cubre de una vez
         // todas las variables que antes se intentaban acertar a mano:
@@ -216,6 +241,7 @@ export default {
         }, 200);
     },
     mounted() {
+        this.retirarSplash();
         this.scheduleHeaderSync();
         this.startHeaderWatchdog();
         window.addEventListener("resize", this.onWindowResize, { passive: true });
@@ -242,6 +268,9 @@ export default {
     z-index: 10000;
 }
 
+/* --- Barra de progreso de navegacion ---
+   Va pegada al borde superior, por encima del header pero por debajo de los
+   modales y del menu lateral (999). */
 // El offset del header lo aplica `mainOffsetStyle` como margin-top inline,
 // calculado a partir de la altura real medida.
 //

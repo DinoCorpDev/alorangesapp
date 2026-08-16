@@ -25,25 +25,36 @@
                     <SearchInput :showInput="false" :placeholder="'Escribe lo que buscas'" />
                 </div>
 
-                <div class="header-actions navbar-actions">
+                <!-- En movil con sesion iniciada el header se queda SOLO con el
+                     boton de menu: dentro estan Carrito, Mi lista, Pedidos,
+                     Perfil y Cerrar sesion, asi que repetirlos fuera sobra.
+                     Sin sesion no hay menu, asi que los botones se mantienen
+                     para no dejar la barra sin acciones. -->
+                <div class="header-actions navbar-actions" :class="{ 'solo-menu': soloMenuEnMovil }">
                     <!-- Icono de linea, como los del topbar. El anterior era
                          una bolsa solida y rellena que desentonaba con el
                          resto del header. -->
-                    <router-link :to="{ name: 'Shop' }" class="navbar-action" title="Tienda" aria-label="Tienda">
+                    <router-link
+                        :to="{ name: 'Shop' }"
+                        class="navbar-action accion-secundaria"
+                        title="Tienda"
+                        aria-label="Tienda"
+                    >
                         <i class="las la-store navbar-action-icono" aria-hidden="true"></i>
                         <span class="navbar-action-label">Tienda</span>
                     </router-link>
 
                     <div class="layout-navbar-auth-nav">
-                        <DoubleButton />
+                        <DoubleButton class="accion-secundaria" />
                         <div class="d-flex d-lg-none" v-if="userIsLoggedIn">
                             <button
                                 type="button"
-                                class="navbar-action navbar-action--icon"
+                                class="navbar-action"
                                 aria-label="Abrir menú"
                                 @click.stop="toggleMenu"
                             >
-                                <BurgerMenu />
+                                <i class="las la-bars navbar-action-icono" aria-hidden="true"></i>
+                                <span class="navbar-action-label">Menú</span>
                             </button>
                         </div>
                         <div style="display: none">
@@ -152,6 +163,17 @@ export default {
     computed: {
         ...mapGetters("auth", ["userShortName"]),
         ...mapGetters("auth", ["userIsLoggedIn"]),
+        /**
+         * En la tienda y con sesion iniciada, el header movil se queda solo
+         * con el boton de menu. Se limita a las rutas de tienda a proposito:
+         * el menu lateral NO incluye "Tienda", asi que ocultarla en el resto
+         * de paginas dejaria sin ese acceso. Aqui no molesta porque ya se
+         * esta dentro de la tienda.
+         */
+        soloMenuEnMovil() {
+            if (!this.userIsLoggedIn) return false;
+            return (this.$route.path || "").startsWith("/shop");
+        },
         breadcrumbItems() {
             return this.$store.getters["breadcrumb/breadcrumbItems"];
         }
@@ -243,28 +265,42 @@ export default {
    Antes "Tienda" y el burger eran iconos sueltos con etiqueta de 11px, un
    tercer estilo que no casaba con ninguno de los otros dos. */
 .navbar-action {
-    position: relative;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    border: 1.5px solid #e3e7eb;
-    border-radius: 50%;
-    background: #ffffff;
+    gap: 4px;
+    min-width: 56px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
     color: #3d4248;
     text-decoration: none;
     line-height: 1;
     cursor: pointer;
-    transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease,
-        transform 0.15s ease;
+    transition: color 0.18s ease, transform 0.15s ease;
+
+    /* El circulo rodea solo al icono; la etiqueta va debajo */
+    .navbar-action-icono {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1.5px solid #e3e7eb;
+        border-radius: 50%;
+        background: #ffffff;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
 
     &:hover,
     &:focus-visible {
-        border-color: #f58634;
         color: #f58634;
-        box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+
+        .navbar-action-icono {
+            border-color: #f58634;
+            box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+        }
     }
 
     &:active {
@@ -272,10 +308,20 @@ export default {
     }
 }
 
-/* La etiqueta ya no se pinta: el circulo se explica con su icono, y el
-   nombre queda en title/aria-label para tooltip y lectores de pantalla. */
+/* Etiqueta bajo el icono: al cliente le gusta ver el nombre de la accion */
 .navbar-action-label {
-    display: none;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* En movil, cuando hay menu, el header se queda solo con el.
+   Tienda / Cuenta / Carrito viven dentro del menu, asi que fuera sobran. */
+@include respond-down("sm") {
+    .navbar-actions.solo-menu .accion-secundaria {
+        display: none !important;
+    }
 }
 
 .navbar-action-icono {

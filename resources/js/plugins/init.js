@@ -14,7 +14,9 @@ export default function init(store, router) {
             return response;
         },
         function (error) {
-            if (error.response.status == 401) {
+            // `error.response` no existe si la peticion se cancela o no hay
+            // red: sin esta comprobacion el propio interceptor reventaba.
+            if (error.response && error.response.status == 401) {
                 store.dispatch("auth/logout");
                 router.push({ name: "Home2" });
             }

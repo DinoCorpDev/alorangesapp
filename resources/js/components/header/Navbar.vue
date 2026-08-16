@@ -155,28 +155,41 @@ export default {
 /* Mismo lenguaje que el buscador (pildora con borde) y el boton de cuenta
    (circulo con borde): todas las acciones del header son circulos de 40px. */
 .navbar-action {
-    position: relative;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    border: 1.5px solid #e3e7eb;
-    border-radius: 50%;
-    background: #ffffff;
+    gap: 4px;
+    min-width: 56px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
     color: #3d4248;
     text-decoration: none;
     line-height: 1;
     cursor: pointer;
-    transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease,
-        transform 0.15s ease;
+    transition: color 0.18s ease, transform 0.15s ease;
+
+    .navbar-action-icono {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1.5px solid #e3e7eb;
+        border-radius: 50%;
+        background: #ffffff;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
 
     &:hover,
     &:focus-visible {
-        border-color: #f58634;
         color: #f58634;
-        box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+
+        .navbar-action-icono {
+            border-color: #f58634;
+            box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+        }
     }
 
     &:active {
@@ -185,7 +198,10 @@ export default {
 }
 
 .navbar-action-label {
-    display: none;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .navbar-action-icono {

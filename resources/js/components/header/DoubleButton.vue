@@ -19,9 +19,14 @@
                     v-bind="attrs"
                     v-on="on"
                 >
-                    <span v-if="userIsLoggedIn" class="cuenta-inicial">{{ inicialUsuario }}</span>
-                    <i v-else class="las la-user cuenta-icono" aria-hidden="true"></i>
-                    <span v-if="userIsLoggedIn" class="cuenta-punto" aria-hidden="true"></span>
+                    <span class="cuenta-circulo">
+                        <span v-if="userIsLoggedIn" class="cuenta-inicial">{{ inicialUsuario }}</span>
+                        <i v-else class="las la-user cuenta-icono" aria-hidden="true"></i>
+                        <span v-if="userIsLoggedIn" class="cuenta-punto" aria-hidden="true"></span>
+                    </span>
+                    <span class="cuenta-etiqueta">
+                        {{ userIsLoggedIn ? userShortName || "Mi cuenta" : "Ingresar" }}
+                    </span>
                 </button>
             </template>
 
@@ -146,28 +151,41 @@ export default {
    acciones del navbar: un solo lenguaje visual en todo el header. Antes era
    icono + etiqueta "Carrito" en columna, un estilo distinto al resto. */
 .account-action {
-    position: relative;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    border: 1.5px solid #e3e7eb;
-    border-radius: 50%;
-    background: #ffffff;
+    gap: 4px;
+    min-width: 56px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
     color: #3d4248;
     text-decoration: none;
     line-height: 1;
     cursor: pointer;
-    transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease,
-        transform 0.15s ease;
+    transition: color 0.18s ease, transform 0.15s ease;
+
+    /* El circulo envuelve solo al icono; la etiqueta va debajo */
+    .account-action-badge-wrap {
+        width: 40px;
+        height: 40px;
+        border: 1.5px solid #e3e7eb;
+        border-radius: 50%;
+        background: #ffffff;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
 
     &:hover,
     &:focus-visible {
-        border-color: #f58634;
         color: #f58634;
-        box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+
+        .account-action-badge-wrap {
+            border-color: #f58634;
+            box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+        }
     }
 
     &:active {
@@ -180,44 +198,51 @@ export default {
     line-height: 1;
 }
 
-/* ---------- Boton de cuenta (circular) ---------- */
+/* ---------- Boton de cuenta ----------
+   Identico a las demas acciones del header (mismo circulo blanco con borde y
+   etiqueta debajo), con y SIN sesion. Antes, al iniciar sesion, pasaba a un
+   circulo naranja con degradado y sin borde: rompia la fila. */
 .cuenta-boton {
     position: relative;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    border: 1.5px solid #e3e7eb;
-    border-radius: 50%;
-    background: #ffffff;
+    gap: 4px;
+    min-width: 56px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
     color: #3d4248;
     cursor: pointer;
-    transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease,
-        transform 0.15s ease;
+    transition: color 0.18s ease, transform 0.15s ease;
+
+    .cuenta-circulo {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        border: 1.5px solid #e3e7eb;
+        border-radius: 50%;
+        background: #ffffff;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
 
     &:hover,
     &:focus-visible {
-        border-color: #f58634;
         color: #f58634;
-        box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+
+        .cuenta-circulo {
+            border-color: #f58634;
+            box-shadow: 0 4px 12px rgba(245, 134, 52, 0.22);
+        }
     }
 
     &:active {
         transform: scale(0.95);
-    }
-
-    /* Con sesion, el circulo se rellena con la inicial */
-    &--sesion {
-        border-color: transparent;
-        background: linear-gradient(135deg, #f9a05a 0%, #f58634 100%);
-        color: #ffffff;
-
-        &:hover,
-        &:focus-visible {
-            color: #ffffff;
-        }
     }
 }
 
@@ -233,15 +258,29 @@ export default {
 }
 
 /* Punto verde: indica sesion iniciada de un vistazo */
+/* Va anclado al circulo, no al boton entero (que ahora incluye la etiqueta) */
 .cuenta-punto {
     position: absolute;
-    right: 1px;
-    bottom: 1px;
+    right: -1px;
+    bottom: -1px;
     width: 10px;
     height: 10px;
     border-radius: 50%;
     background: #22c55e;
     box-shadow: 0 0 0 2px #ffffff;
+}
+
+/* Etiqueta bajo el icono, igual que el resto de acciones del header */
+.cuenta-etiqueta {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    /* El nombre del usuario puede ser largo: se recorta en vez de deformar
+       la barra y empujar al resto de acciones. */
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ---------- Menu desplegable ---------- */
@@ -362,10 +401,12 @@ export default {
     }
 }
 
-/* La etiqueta no se pinta: el circulo se explica con su icono y la insignia,
-   y "Carrito" queda en el title para tooltip y lectores de pantalla. */
+/* Etiqueta bajo el icono: al cliente le gusta ver el nombre de la accion */
 .account-action-label {
-    display: none;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 // Insignia con el numero de articulos, encima del icono del carrito.
