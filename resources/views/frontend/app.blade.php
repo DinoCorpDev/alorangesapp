@@ -2,6 +2,16 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-609734454"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'AW-609734454');
+    </script>
+
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -264,6 +274,27 @@
     @endif
 
     {!! get_setting('footer_script') !!}
+
+    <!-- Conversión por clic en WhatsApp -->
+    <script>
+        document.addEventListener('click', function (event) {
+            const whatsappLink = event.target.closest(
+                'a[href*="wa.me"], a[href*="api.whatsapp.com"], a[href*="whatsapp.com"]'
+            );
+
+            if (!whatsappLink) {
+                return;
+            }
+
+            if (typeof window.gtag === 'function') {
+                window.gtag('event', 'conversion', {
+                    'send_to': 'AW-609734454/6sgKCNmCkM4cELae36IC',
+                    'value': 1.0,
+                    'currency': 'COP'
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
