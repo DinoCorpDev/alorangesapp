@@ -114,6 +114,8 @@ class ProductCatalogStore
             'show_payment_page' => true,
             'show_info_page' => true,
             'show_page_four' => false,
+            'show_alphabetic_navigator' => true,
+            'standalone_letter_position' => 'right',
             'description_limit' => 90,
             'products_per_page' => 12,
             'cover_image' => null,

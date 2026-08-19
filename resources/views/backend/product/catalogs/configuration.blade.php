@@ -461,6 +461,33 @@
                         </div>
 
                         <div class="tab-pane fade" id="config-style" role="tabpanel">
+                            <div class="config-panel">
+                                <div class="config-toggle-row mb-0">
+                                    <div>
+                                        <h6>Navegador alfabético interactivo</h6>
+                                        <p>Agrega el abecedario navegable en el encabezado de cada página de productos.</p>
+                                    </div>
+                                    <label class="aiz-checkbox mb-0">
+                                        <input type="checkbox" name="show_alphabetic_navigator" value="1" @if (old('show_alphabetic_navigator', $settings['show_alphabetic_navigator'] ?? true)) checked @endif>
+                                        <span class="aiz-square-check"></span>
+                                        <span>Incluir</span>
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block mt-2">Letras disponibles en verde, sección actual en naranja y letras sin productos en gris. Los enlaces llevan a la primera página de cada letra.</small>
+                            </div>
+
+                            <div class="config-panel">
+                                <div class="form-group mb-0">
+                                    <label class="fw-700">Posición de la letra grande sin navegador</label>
+                                    <p class="text-muted mb-2">Esta opción se usa cuando desactivas el navegador alfabético. Para PDF en dispositivos se recomienda <strong>Derecha</strong>. Para impresión a doble cara selecciona <strong>Impresión alternada</strong>: páginas impares a la derecha y páginas pares a la izquierda, siempre hacia el borde exterior.</p>
+                                    <select name="standalone_letter_position" class="form-control aiz-selectpicker">
+                                        <option value="right" @if (old('standalone_letter_position', $settings['standalone_letter_position'] ?? 'right') === 'right') selected @endif>Derecha — PDF para dispositivos</option>
+                                        <option value="alternate_outer" @if (old('standalone_letter_position', $settings['standalone_letter_position'] ?? 'right') === 'alternate_outer') selected @endif>Impresión alternada — impares derecha / pares izquierda</option>
+                                        <option value="left" @if (old('standalone_letter_position', $settings['standalone_letter_position'] ?? 'right') === 'left') selected @endif>Izquierda fija</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="config-panel-white mb-0">
                                 <h5 class="config-section-title">Colores por letra</h5>
                                 <div class="row gutters-10 mt-3">

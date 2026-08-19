@@ -117,6 +117,8 @@ class ProductCatalogController extends Controller
         $settings['advertising_items'] = $this->catalogAdvertisingItems($existing['settings'] ?? []);
         $settings['letter_intro_ads'] = $this->catalogLetterIntroAds($existing['settings'] ?? []);
         $settings['products_per_page'] = (int) ($existing['settings']['products_per_page'] ?? 12) === 20 ? 20 : 12;
+        $settings['diagnostic_filler_blocks'] = $existing['settings']['diagnostic_filler_blocks'] ?? [];
+        $settings['filler_mode'] = ! empty($settings['diagnostic_filler_blocks']) ? 'diagnostic' : 'off';
 
         $this->store->update($catalog, [
             'settings' => $settings,
@@ -270,6 +272,60 @@ class ProductCatalogController extends Controller
         return redirect()->route('product_catalogs.index');
     }
 
+    public function duplicate($catalog)
+    {
+        $existing = $this->store->find($catalog);
+
+        if (! $existing) {
+            flash(translate('Catalog was not found'))->error();
+            return back();
+        }
+
+        $newId = (string) Str::uuid();
+        $now = now()->format('Y-m-d H:i:s');
+        $copy = $existing;
+        $copy['id'] = $newId;
+        $copy['name'] = 'Copia de ' . ($existing['name'] ?? translate('Catalog'));
+        $copy['created_by'] = auth()->id();
+        $copy['created_at'] = $now;
+        $copy['updated_at'] = $now;
+        $copy['status_message'] = null;
+
+        // Make the PDF file independent too. This prevents editing, regenerating or
+        // deleting the copy from affecting the original catalog file.
+        $copy['file_path'] = null;
+        $copy['generated_at'] = null;
+        $copy['status'] = ProductCatalogStore::STATUS_QUEUED;
+
+        $sourceRelativePath = $existing['file_path'] ?? null;
+        if ($sourceRelativePath) {
+            $sourcePath = public_path($sourceRelativePath);
+
+            if (is_file($sourcePath)) {
+                $extension = pathinfo($sourceRelativePath, PATHINFO_EXTENSION) ?: 'pdf';
+                $directory = trim(str_replace('\\', '/', dirname($sourceRelativePath)), '/.');
+                $directory = $directory !== '' ? $directory : 'uploads/catalogs';
+                $targetRelativePath = $directory . '/copia-' . $newId . '.' . $extension;
+                $targetPath = public_path($targetRelativePath);
+
+                if (! is_dir(dirname($targetPath))) {
+                    mkdir(dirname($targetPath), 0755, true);
+                }
+
+                if (@copy($sourcePath, $targetPath)) {
+                    $copy['file_path'] = $targetRelativePath;
+                    $copy['generated_at'] = $now;
+                    $copy['status'] = ProductCatalogStore::STATUS_READY;
+                }
+            }
+        }
+
+        $this->store->put($copy);
+
+        flash('Copia creada correctamente. Ya puedes editarla sin modificar el catalogo original.')->success();
+        return redirect()->route('product_catalogs.edit', $newId);
+    }
+
     public function download($catalog)
     {
         $catalog = $this->store->find($catalog);
@@ -382,6 +438,40 @@ class ProductCatalogController extends Controller
             'letter_intro_ad_category_ids.*' => 'nullable|integer|exists:categories,id',
             'letter_intro_ad_letters' => 'nullable|array',
             'letter_intro_ad_letters.*' => 'nullable|string|max:1',
+            'letter_intro_ad_orders' => 'nullable|array',
+            'letter_intro_ad_orders.*' => 'nullable|integer|in:1,2',
+            'diagnostic_filler_images' => 'nullable|array',
+            'diagnostic_filler_images.*' => 'nullable|string|max:255',
+            'diagnostic_filler_category_ids' => 'nullable|array',
+            'diagnostic_filler_category_ids.*' => 'nullable|integer|exists:categories,id',
+            'diagnostic_filler_letters' => 'nullable|array',
+            'diagnostic_filler_letters.*' => 'nullable|string|max:1',
+            'diagnostic_filler_block_indexes' => 'nullable|array',
+            'diagnostic_filler_block_indexes.*' => 'nullable|integer|min:0|max:99',
+            'diagnostic_filler_xs' => 'nullable|array',
+            'diagnostic_filler_xs.*' => 'nullable|integer|min:0|max:4',
+            'diagnostic_filler_ys' => 'nullable|array',
+            'diagnostic_filler_ys.*' => 'nullable|integer|min:0|max:5',
+            'diagnostic_filler_widths' => 'nullable|array',
+            'diagnostic_filler_widths.*' => 'nullable|integer|min:1|max:4',
+            'diagnostic_filler_heights' => 'nullable|array',
+            'diagnostic_filler_heights.*' => 'nullable|integer|min:1|max:5',
+            'diagnostic_filler_spaces' => 'nullable|array',
+            'diagnostic_filler_spaces.*' => 'nullable|integer|min:1|max:20',
+            'diagnostic_filler_width_mms' => 'nullable|array',
+            'diagnostic_filler_width_mms.*' => 'nullable|numeric|min:1|max:300',
+            'diagnostic_filler_height_mms' => 'nullable|array',
+            'diagnostic_filler_height_mms.*' => 'nullable|numeric|min:1|max:300',
+            'diagnostic_filler_width_pixels' => 'nullable|array',
+            'diagnostic_filler_width_pixels.*' => 'nullable|integer|min:1|max:10000',
+            'diagnostic_filler_height_pixels' => 'nullable|array',
+            'diagnostic_filler_height_pixels.*' => 'nullable|integer|min:1|max:10000',
+            'diagnostic_filler_products_on_last_page' => 'nullable|array',
+            'diagnostic_filler_products_on_last_page.*' => 'nullable|integer|min:0|max:20',
+            'diagnostic_filler_capacities' => 'nullable|array',
+            'diagnostic_filler_capacities.*' => 'nullable|integer|in:12,20',
+            'diagnostic_filler_free_spaces' => 'nullable|array',
+            'diagnostic_filler_free_spaces.*' => 'nullable|integer|min:1|max:20',
             'products_per_page' => 'required|integer|in:12,20',
         ]);
 
@@ -412,10 +502,17 @@ class ProductCatalogController extends Controller
         // adicionales, tipografia, colores, etc.) siempre se toman frescos desde el default
         // global vigente, sin congelar una copia por catalogo — asi un cambio global aplica
         // de inmediato la proxima vez que se edite o regenere cualquier catalogo.
+        $diagnosticFillerBlocks = $this->sanitizeDiagnosticFillerBlocks($request);
+
         $settings = array_merge($this->store->defaults(), [
             'cover_image' => $request->cover_image,
             'advertising_items' => $this->sanitizeAdvertisingItems($request),
             'letter_intro_ads' => $this->sanitizeLetterIntroAds($request),
+            'filler_mode' => empty($diagnosticFillerBlocks) ? 'off' : 'diagnostic',
+            'auto_fill_enabled' => false,
+            'filler_ads' => [],
+            'manual_filler_ads' => [],
+            'diagnostic_filler_blocks' => $diagnosticFillerBlocks,
             'products_per_page' => (int) $request->products_per_page,
         ]);
 
@@ -443,6 +540,152 @@ class ProductCatalogController extends Controller
             'created_at' => $existing['created_at'] ?? now()->format('Y-m-d H:i:s'),
             'updated_at' => now()->format('Y-m-d H:i:s'),
         ];
+    }
+
+    /**
+     * Calcula los espacios libres reales de la última página de cada letra.
+     * Devuelve bloques rectangulares (columnas x filas) y las medidas exactas
+     * para que la interfaz pueda descargar plantillas SVG a escala correcta.
+     */
+    public function fillerDiagnostics(Request $request)
+    {
+        $request->validate([
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => 'integer|exists:categories,id',
+            'product_ids' => 'required|string',
+            'products_per_page' => 'required|integer|in:12,20',
+            'advertising_letters' => 'nullable|array',
+            'advertising_letters.*' => 'nullable|string|max:1',
+        ]);
+
+        $categoryIds = array_values(array_unique(array_map('intval', $request->category_ids)));
+        $requestedIds = $this->parseIdList($request->product_ids);
+        $productIds = $this->selectableProductIds($requestedIds, $categoryIds);
+        $productsPerPage = (int) $request->products_per_page;
+        $columns = $productsPerPage === 20 ? 4 : 3;
+        $rows = (int) ($productsPerPage / $columns);
+        $cardWidth = $productsPerPage === 20 ? 45.0 : 58.0;
+        $gap = $productsPerPage === 20 ? 3.0 : 5.0;
+        $rowHeight = $productsPerPage === 20 ? 48.0 : 62.0;
+        $verticalTrim = $productsPerPage === 20 ? 2.5 : 7.0;
+        $advertisingCounts = collect($request->input('advertising_letters', []))
+            ->filter()->map(fn ($letter) => Str::upper((string) $letter))->countBy();
+        $categories = Category::whereIn('id', $categoryIds)->orderBy('order_level')->orderBy('name')->get();
+        $groups = $this->renderer->productsByCategory($categories, $productIds);
+        $result = [];
+
+        foreach ($groups as $group) {
+            $category = $group['category'];
+            foreach ($group['letter_groups'] as $letter => $products) {
+                $remaining = $products->count();
+                $adCount = (int) ($advertisingCounts[$letter] ?? 0);
+                $adIndex = 0;
+                $lastCount = 0;
+                $lastHasAd = false;
+
+                while ($remaining > 0) {
+                    $hasAd = $adIndex < $adCount;
+                    $capacity = $productsPerPage - ($hasAd ? 4 : 0);
+                    $lastCount = min($remaining, $capacity);
+                    $remaining -= $lastCount;
+                    $lastHasAd = $hasAd;
+                    if ($hasAd) $adIndex++;
+                }
+
+                $grid = array_fill(0, $rows, array_fill(0, $columns, false));
+                if ($lastHasAd) {
+                    // Publicidad interna ocupa las dos columnas derechas de las primeras dos filas.
+                    for ($r = 0; $r < min(2, $rows); $r++) {
+                        for ($c = max(0, $columns - 2); $c < $columns; $c++) $grid[$r][$c] = true;
+                    }
+                    $featuredColumns = max(0, $columns - 2);
+                    $featuredCapacity = $featuredColumns * min(2, $rows);
+                    $featured = min($lastCount, $featuredCapacity);
+                    for ($i = 0; $i < $featured; $i++) {
+                        $r = intdiv($i, max(1, $featuredColumns));
+                        $c = $i % max(1, $featuredColumns);
+                        $grid[$r][$c] = true;
+                    }
+                    $regular = $lastCount - $featured;
+                    for ($i = 0; $i < $regular; $i++) {
+                        $r = 2 + intdiv($i, $columns);
+                        $c = $i % $columns;
+                        if ($r < $rows) $grid[$r][$c] = true;
+                    }
+                } else {
+                    for ($i = 0; $i < $lastCount; $i++) {
+                        $r = intdiv($i, $columns);
+                        $c = $i % $columns;
+                        if ($r < $rows) $grid[$r][$c] = true;
+                    }
+                }
+
+                $blocks = [];
+                if (! $lastHasAd) {
+                    $partial = $lastCount % $columns;
+                    $usedRows = $lastCount ? (int) ceil($lastCount / $columns) : 0;
+                    if ($partial > 0) {
+                        $blocks[] = ['x' => $partial, 'y' => $usedRows - 1, 'width' => $columns - $partial, 'height' => 1];
+                    }
+                    $fullEmptyRows = $rows - $usedRows;
+                    if ($fullEmptyRows > 0) {
+                        $blocks[] = ['x' => 0, 'y' => $usedRows, 'width' => $columns, 'height' => $fullEmptyRows];
+                    }
+                } else {
+                    // Descomposición rectangular genérica para páginas con publicidad interna.
+                    $empty = [];
+                    for ($r=0;$r<$rows;$r++) for($c=0;$c<$columns;$c++) if(!$grid[$r][$c]) $empty["$r:$c"] = true;
+                    while ($empty) {
+                        $best = null;
+                        foreach ($empty as $key => $_) {
+                            [$sr,$sc] = array_map('intval', explode(':',$key));
+                            for ($h=1;$sr+$h<=$rows;$h++) {
+                                for ($w=1;$sc+$w<=$columns;$w++) {
+                                    $ok=true;
+                                    for($rr=$sr;$rr<$sr+$h && $ok;$rr++) for($cc=$sc;$cc<$sc+$w;$cc++) if(!isset($empty["$rr:$cc"])){$ok=false;break;}
+                                    if(!$ok) continue;
+                                    $area=$w*$h;
+                                    if(!$best || $area>$best['area'] || ($area===$best['area'] && $w>$best['width'])) $best=['x'=>$sc,'y'=>$sr,'width'=>$w,'height'=>$h,'area'=>$area];
+                                }
+                            }
+                        }
+                        if(!$best) break;
+                        for($rr=$best['y'];$rr<$best['y']+$best['height'];$rr++) for($cc=$best['x'];$cc<$best['x']+$best['width'];$cc++) unset($empty["$rr:$cc"]);
+                        unset($best['area']); $blocks[]=$best;
+                    }
+                }
+
+                $blocks = collect($blocks)->map(function ($block) use ($cardWidth,$gap,$rowHeight,$verticalTrim) {
+                    $widthMm = ($block['width'] * $cardWidth) + (($block['width'] - 1) * $gap);
+                    $heightMm = ($block['height'] * $rowHeight) - $verticalTrim;
+                    return array_merge($block, [
+                        'spaces' => $block['width'] * $block['height'],
+                        'width_mm' => round($widthMm, 1),
+                        'height_mm' => round($heightMm, 1),
+                        'width_px_300' => (int) round($widthMm / 25.4 * 300),
+                        'height_px_300' => (int) round($heightMm / 25.4 * 300),
+                    ]);
+                })->values()->all();
+
+                $free = collect($blocks)->sum('spaces');
+                if ($free > 0) {
+                    $result[] = [
+                        'category_id' => (int) $category->id,
+                        'category_name' => $category->getTranslation('name'),
+                        'letter' => $letter,
+                        'products_on_last_page' => $lastCount,
+                        'capacity' => $productsPerPage,
+                        'free_spaces' => $free,
+                        'columns' => $columns,
+                        'rows' => $rows,
+                        'grid' => $grid,
+                        'blocks' => $blocks,
+                    ];
+                }
+            }
+        }
+
+        return response()->json(['diagnostics' => $result]);
     }
 
     /**
@@ -550,7 +793,7 @@ class ProductCatalogController extends Controller
     {
         $letter = Str::upper(Str::substr(trim($name), 0, 1));
 
-        return preg_match('/^[A-Z0-9]$/', $letter) ? $letter : '#';
+        return preg_match('/^[A-ZÑ0-9]$/u', $letter) ? $letter : '#';
     }
 
     protected function validatedConfigurationSettings(Request $request)
@@ -599,6 +842,8 @@ class ProductCatalogController extends Controller
             'product_reference_font_size' => 'nullable|integer|min:7|max:22',
             'product_box_colors' => 'nullable|array',
             'product_text_colors' => 'nullable|array',
+            'show_alphabetic_navigator' => 'nullable|boolean',
+            'standalone_letter_position' => 'nullable|in:left,right,alternate_outer',
         ]);
 
         return array_merge($this->store->defaultSettings(), [
@@ -606,6 +851,8 @@ class ProductCatalogController extends Controller
             'show_payment_page' => $request->has('show_payment_page'),
             'show_info_page' => $request->has('show_info_page'),
             'show_page_four' => $request->has('show_page_four'),
+            'show_alphabetic_navigator' => $request->has('show_alphabetic_navigator'),
+            'standalone_letter_position' => in_array($request->standalone_letter_position, ['left', 'right', 'alternate_outer'], true) ? $request->standalone_letter_position : 'right',
             'description_limit' => (int) ($request->description_limit ?: 90),
             'payment_page_image' => $request->payment_page_image,
             'payment_bank_icon' => $request->payment_bank_icon,
@@ -774,23 +1021,39 @@ class ProductCatalogController extends Controller
         $images = $request->letter_intro_ad_images ?: [];
         $categoryIds = $request->letter_intro_ad_category_ids ?: [];
         $letters = $request->letter_intro_ad_letters ?: [];
+        $orders = $request->letter_intro_ad_orders ?: [];
         $allowedLetters = array_merge(range('A', 'Z'), ['#']);
-        $items = [];
+        $itemsByKey = [];
 
         foreach ($images as $index => $image) {
             $image = trim((string) $image);
             $categoryId = (int) ($categoryIds[$index] ?? 0);
             $letter = Str::upper(trim((string) ($letters[$index] ?? '')));
+            $order = (int) ($orders[$index] ?? 1);
 
             if ($image === '' || $categoryId <= 0 || ! in_array($letter, $allowedLetters, true)) {
                 continue;
             }
 
-            $items[] = [
+            $order = in_array($order, [1, 2], true) ? $order : 1;
+            $key = $categoryId . '|' . $letter;
+
+            // Máximo dos separadores por categoría y letra. Si se repite el mismo
+            // orden, la última fila configurada reemplaza la anterior.
+            $itemsByKey[$key][$order] = [
                 'image' => $image,
                 'category_id' => $categoryId,
                 'letter' => $letter,
+                'order' => $order,
             ];
+        }
+
+        $items = [];
+        foreach ($itemsByKey as $orderedItems) {
+            ksort($orderedItems);
+            foreach (array_slice($orderedItems, 0, 2, true) as $item) {
+                $items[] = $item;
+            }
         }
 
         return $items;
@@ -810,6 +1073,123 @@ class ProductCatalogController extends Controller
         }
 
         return [];
+    }
+
+    /**
+     * Guarda todos los bloques detectados, incluso los que todavía no tienen imagen.
+     * Así la tabla puede volver a mostrarse al editar el catálogo. Cada bloque admite
+     * una sola pieza; seleccionar otra imagen reemplaza el valor anterior.
+     */
+    protected function sanitizeDiagnosticFillerBlocks(Request $request): array
+    {
+        $images = $request->input('diagnostic_filler_images', []);
+        $categoryIds = $request->input('diagnostic_filler_category_ids', []);
+        $letters = $request->input('diagnostic_filler_letters', []);
+        $blockIndexes = $request->input('diagnostic_filler_block_indexes', []);
+        $xs = $request->input('diagnostic_filler_xs', []);
+        $ys = $request->input('diagnostic_filler_ys', []);
+        $widths = $request->input('diagnostic_filler_widths', []);
+        $heights = $request->input('diagnostic_filler_heights', []);
+        $spaces = $request->input('diagnostic_filler_spaces', []);
+        $widthMms = $request->input('diagnostic_filler_width_mms', []);
+        $heightMms = $request->input('diagnostic_filler_height_mms', []);
+        $widthPixels = $request->input('diagnostic_filler_width_pixels', []);
+        $heightPixels = $request->input('diagnostic_filler_height_pixels', []);
+        $productsOnLastPage = $request->input('diagnostic_filler_products_on_last_page', []);
+        $capacities = $request->input('diagnostic_filler_capacities', []);
+        $freeSpaces = $request->input('diagnostic_filler_free_spaces', []);
+        $items = [];
+
+        foreach ($categoryIds as $index => $rawCategoryId) {
+            $categoryId = (int) $rawCategoryId;
+            $letter = mb_strtoupper(trim((string) ($letters[$index] ?? '')), 'UTF-8');
+            $width = max(1, min(4, (int) ($widths[$index] ?? 1)));
+            $height = max(1, min(5, (int) ($heights[$index] ?? 1)));
+
+            if ($categoryId <= 0 || $letter === '') {
+                continue;
+            }
+
+            $items[] = [
+                'image' => trim((string) ($images[$index] ?? '')),
+                'category_id' => $categoryId,
+                'letter' => $letter,
+                'block_index' => max(0, min(99, (int) ($blockIndexes[$index] ?? $index))),
+                'x' => max(0, min(4, (int) ($xs[$index] ?? 0))),
+                'y' => max(0, min(5, (int) ($ys[$index] ?? 0))),
+                'width' => $width,
+                'height' => $height,
+                'spaces' => max(1, min(20, (int) ($spaces[$index] ?? ($width * $height)))),
+                'width_mm' => round(max(1, min(300, (float) ($widthMms[$index] ?? 1))), 1),
+                'height_mm' => round(max(1, min(300, (float) ($heightMms[$index] ?? 1))), 1),
+                'width_px_300' => max(1, min(10000, (int) ($widthPixels[$index] ?? 1))),
+                'height_px_300' => max(1, min(10000, (int) ($heightPixels[$index] ?? 1))),
+                'products_on_last_page' => max(0, min(20, (int) ($productsOnLastPage[$index] ?? 0))),
+                'capacity' => (int) ($capacities[$index] ?? 12) === 20 ? 20 : 12,
+                'free_spaces' => max(1, min(20, (int) ($freeSpaces[$index] ?? ($width * $height)))),
+            ];
+        }
+
+        usort($items, fn ($a, $b) => [$a['category_id'], $a['letter'], $a['block_index']] <=> [$b['category_id'], $b['letter'], $b['block_index']]);
+
+        return $items;
+    }
+
+    protected function sanitizeFillerAds(Request $request): array
+    {
+        $images = $request->filler_ad_images ?: [];
+        $sizes = $request->filler_ad_sizes ?: [];
+        $heights = $request->filler_ad_heights ?: [];
+        $categoryIds = $request->filler_ad_category_ids ?: [];
+        $priorities = $request->filler_ad_priorities ?: [];
+        $items = [];
+
+        foreach ($images as $index => $image) {
+            $image = trim((string) $image);
+            if ($image === '') continue;
+            $items[] = [
+                'image' => $image,
+                'size' => max(1, min(4, (int) ($sizes[$index] ?? 1))),
+                'height' => max(1, min(5, (int) ($heights[$index] ?? 1))),
+                'category_id' => ((int) ($categoryIds[$index] ?? 0)) ?: null,
+                'priority' => max(1, min(999, (int) ($priorities[$index] ?? 100))),
+            ];
+        }
+        return $items;
+    }
+
+    protected function sanitizeManualFillerAds(Request $request): array
+    {
+        $images = $request->manual_filler_images ?: [];
+        $sizes = $request->manual_filler_sizes ?: [];
+        $heights = $request->manual_filler_heights ?: [];
+        $categoryIds = $request->manual_filler_category_ids ?: [];
+        $letters = $request->manual_filler_letters ?: [];
+        $orders = $request->manual_filler_orders ?: [];
+        $items = [];
+
+        foreach ($images as $index => $image) {
+            $image = trim((string) $image);
+            $letter = mb_strtoupper(trim((string) ($letters[$index] ?? '')), 'UTF-8');
+            $categoryId = (int) ($categoryIds[$index] ?? 0);
+
+            if ($image === '' || $categoryId <= 0 || $letter === '') {
+                continue;
+            }
+
+            $items[] = [
+                'image' => $image,
+                'size' => max(1, min(4, (int) ($sizes[$index] ?? 1))),
+                'height' => max(1, min(5, (int) ($heights[$index] ?? 1))),
+                'category_id' => $categoryId,
+                'letter' => $letter,
+                'order' => max(1, min(99, (int) ($orders[$index] ?? ($index + 1)))),
+            ];
+        }
+
+        usort($items, fn ($a, $b) => [$a['category_id'], $a['letter'], $a['order']] <=> [$b['category_id'], $b['letter'], $b['order']]);
+
+        return $items;
     }
 
     protected function catalogLetterIntroAds(array $settings)

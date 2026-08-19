@@ -1,4 +1,4 @@
-﻿@extends('backend.layouts.app')
+@extends('backend.layouts.app')
 
 @section('content')
     @php
@@ -40,13 +40,42 @@
                     'image' => $image,
                     'category_id' => old('letter_intro_ad_category_ids.' . $index),
                     'letter' => old('letter_intro_ad_letters.' . $index),
+                    'order' => old('letter_intro_ad_orders.' . $index, 1),
                 ];
             })->values()->all()
             : ($settings['letter_intro_ads'] ?? []);
 
         if (empty($letterIntroAdRows)) {
-            $letterIntroAdRows = [['image' => '', 'category_id' => '', 'letter' => 'A']];
+            $letterIntroAdRows = [['image' => '', 'category_id' => '', 'letter' => 'A', 'order' => 1]];
         }
+        $diagnosticFillerRows = collect();
+        if (old('diagnostic_filler_category_ids') !== null) {
+            $oldDiagnosticCategoryIds = old('diagnostic_filler_category_ids', []);
+            foreach ($oldDiagnosticCategoryIds as $index => $categoryId) {
+                $diagnosticFillerRows->push([
+                    'image' => old('diagnostic_filler_images.' . $index, ''),
+                    'category_id' => $categoryId,
+                    'letter' => old('diagnostic_filler_letters.' . $index, ''),
+                    'block_index' => old('diagnostic_filler_block_indexes.' . $index, $index),
+                    'x' => old('diagnostic_filler_xs.' . $index, 0),
+                    'y' => old('diagnostic_filler_ys.' . $index, 0),
+                    'width' => old('diagnostic_filler_widths.' . $index, 1),
+                    'height' => old('diagnostic_filler_heights.' . $index, 1),
+                    'spaces' => old('diagnostic_filler_spaces.' . $index, 1),
+                    'width_mm' => old('diagnostic_filler_width_mms.' . $index, 1),
+                    'height_mm' => old('diagnostic_filler_height_mms.' . $index, 1),
+                    'width_px_300' => old('diagnostic_filler_width_pixels.' . $index, 1),
+                    'height_px_300' => old('diagnostic_filler_height_pixels.' . $index, 1),
+                    'products_on_last_page' => old('diagnostic_filler_products_on_last_page.' . $index, 0),
+                    'capacity' => old('diagnostic_filler_capacities.' . $index, 12),
+                    'free_spaces' => old('diagnostic_filler_free_spaces.' . $index, 1),
+                ]);
+            }
+        } else {
+            $diagnosticFillerRows = collect($settings['diagnostic_filler_blocks'] ?? []);
+        }
+        $diagnosticFillerGroups = $diagnosticFillerRows
+            ->groupBy(fn ($item) => (string) ($item['category_id'] ?? '') . '|' . (string) ($item['letter'] ?? ''));
 
         $productsPerPage = (int) old('products_per_page', $settings['products_per_page'] ?? 12) === 20 ? 20 : 12;
         $fullPageImageHint = 'Tamano recomendado: 2550 x 3300 px - carta vertical';
@@ -688,7 +717,7 @@
                             <div>
                                 <div class="section-kicker"><span>4</span> Separadores</div>
                                 <h6>Publicidad al iniciar una letra</h6>
-                                <p>Imagen a pagina completa que se muestra una sola vez antes de iniciar la letra elegida.</p>
+                                <p>Permite colocar hasta dos imágenes a página completa antes de iniciar la letra elegida y definir cuál aparece primero.</p>
                                 <p class="text-muted mb-0"><small>Solo se muestra si la categoria seleccionada tiene productos con esa letra. Las letras sin productos quedan deshabilitadas.</small></p>
                             </div>
                             <button type="button" class="btn btn-soft-primary btn-sm" id="add-letter-intro-ad-row">
@@ -703,6 +732,7 @@
                                         <th>Imagen a pagina completa</th>
                                         <th width="260">Categoria</th>
                                         <th width="150">Letra</th>
+                                        <th width="110">Orden</th>
                                         <th width="80" class="text-center">Opciones</th>
                                     </tr>
                                 </thead>
@@ -735,6 +765,12 @@
                                                     @endforeach
                                                 </select>
                                             </td>
+                                            <td>
+                                                <select class="form-control aiz-selectpicker" name="letter_intro_ad_orders[]">
+                                                    <option value="1" @if ((int) ($letterIntroAdRow['order'] ?? 1) === 1) selected @endif>1 - Primero</option>
+                                                    <option value="2" @if ((int) ($letterIntroAdRow['order'] ?? 1) === 2) selected @endif>2 - Segundo</option>
+                                                </select>
+                                            </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="Eliminar">
                                                     <i class="las la-trash"></i>
@@ -747,10 +783,97 @@
                         </div>
                     </div>
 
+                    <div class="catalog-section catalog-section-soft">
+                        <div class="catalog-section-title">
+                            <div>
+                                <div class="section-kicker"><span>5</span> Rellenos</div>
+                                <h6>Piezas gráficas en espacios libres</h6>
+                                <p>Calcula los espacios al finalizar cada letra y carga directamente una imagen para cada bloque detectado.</p>
+                            </div>
+                        </div>
+
+                        <div class="config-panel-white mb-0" id="filler-diagnostics-panel">
+                            <div class="catalog-section-title mb-3">
+                                <div>
+                                    <h6>Diagnóstico de espacios</h6>
+                                    <p>Las medidas aparecen debajo de cada selector. Para reemplazar una pieza, elige otra imagen en el mismo campo.</p>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" id="calculate-filler-spaces">
+                                    <i class="las la-calculator"></i> Calcular espacios disponibles
+                                </button>
+                            </div>
+
+                            <div id="filler-diagnostics-empty" class="alert alert-light border mb-0 {{ $diagnosticFillerGroups->isNotEmpty() ? 'd-none' : '' }}">
+                                Primero selecciona las categorías y los productos. Después pulsa <strong>Calcular espacios disponibles</strong>.
+                            </div>
+
+                            <div id="filler-diagnostics-wrap" class="table-responsive {{ $diagnosticFillerGroups->isEmpty() ? 'd-none' : '' }}">
+                                <table class="table table-bordered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Categoría y letra</th>
+                                            <th width="150">Última página</th>
+                                            <th width="120">Espacios libres</th>
+                                            <th>Bloques detectados</th>
+                                            <th width="310">Piezas gráficas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="filler-diagnostics-body">
+                                        @foreach ($diagnosticFillerGroups as $diagnosticKey => $diagnosticGroup)
+                                            @php
+                                                $diagnosticGroup = collect($diagnosticGroup)->sortBy('block_index')->values();
+                                                $diagnosticFirst = $diagnosticGroup->first();
+                                                $diagnosticCategory = $categories->firstWhere('id', (int) ($diagnosticFirst['category_id'] ?? 0));
+                                                $diagnosticCategoryName = $diagnosticCategory ? $diagnosticCategory->getTranslation('name') : 'Categoría';
+                                                $diagnosticBlocksLabel = $diagnosticGroup->map(fn ($block) => ($block['width'] ?? 1) . ' × ' . ($block['height'] ?? 1) . ' (' . ($block['spaces'] ?? 1) . ' espacios)')->join(' + ');
+                                            @endphp
+                                            <tr>
+                                                <td><strong>{{ $diagnosticCategoryName }}</strong><br><span class="badge badge-soft-success">Letra {{ $diagnosticFirst['letter'] ?? '' }}</span></td>
+                                                <td>{{ $diagnosticFirst['products_on_last_page'] ?? 0 }} de {{ $diagnosticFirst['capacity'] ?? 12 }}</td>
+                                                <td><strong>{{ $diagnosticFirst['free_spaces'] ?? $diagnosticGroup->sum('spaces') }}</strong></td>
+                                                <td>{{ $diagnosticBlocksLabel }}</td>
+                                                <td>
+                                                    @foreach ($diagnosticGroup as $diagnosticBlock)
+                                                        <div class="border rounded p-2 mb-2 diagnostic-filler-piece">
+                                                            <strong class="d-block mb-1">{{ $diagnosticBlock['width'] ?? 1 }} × {{ $diagnosticBlock['height'] ?? 1 }}</strong>
+                                                            <div class="input-group" data-toggle="aizuploader" data-type="image">
+                                                                <div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Subir gráfica</div></div>
+                                                                <div class="form-control file-amount">Elegir archivo</div>
+                                                                <input type="hidden" name="diagnostic_filler_images[]" class="selected-files diagnostic-filler-image" value="{{ $diagnosticBlock['image'] ?? '' }}">
+                                                            </div>
+                                                            <div class="file-preview box sm"></div>
+                                                            <input type="hidden" name="diagnostic_filler_category_ids[]" value="{{ $diagnosticBlock['category_id'] ?? '' }}">
+                                                            <input type="hidden" name="diagnostic_filler_letters[]" value="{{ $diagnosticBlock['letter'] ?? '' }}">
+                                                            <input type="hidden" name="diagnostic_filler_block_indexes[]" value="{{ $diagnosticBlock['block_index'] ?? $loop->index }}">
+                                                            <input type="hidden" name="diagnostic_filler_xs[]" value="{{ $diagnosticBlock['x'] ?? 0 }}">
+                                                            <input type="hidden" name="diagnostic_filler_ys[]" value="{{ $diagnosticBlock['y'] ?? 0 }}">
+                                                            <input type="hidden" name="diagnostic_filler_widths[]" value="{{ $diagnosticBlock['width'] ?? 1 }}">
+                                                            <input type="hidden" name="diagnostic_filler_heights[]" value="{{ $diagnosticBlock['height'] ?? 1 }}">
+                                                            <input type="hidden" name="diagnostic_filler_spaces[]" value="{{ $diagnosticBlock['spaces'] ?? 1 }}">
+                                                            <input type="hidden" name="diagnostic_filler_width_mms[]" value="{{ $diagnosticBlock['width_mm'] ?? 1 }}">
+                                                            <input type="hidden" name="diagnostic_filler_height_mms[]" value="{{ $diagnosticBlock['height_mm'] ?? 1 }}">
+                                                            <input type="hidden" name="diagnostic_filler_width_pixels[]" value="{{ $diagnosticBlock['width_px_300'] ?? 1 }}">
+                                                            <input type="hidden" name="diagnostic_filler_height_pixels[]" value="{{ $diagnosticBlock['height_px_300'] ?? 1 }}">
+                                                            <input type="hidden" name="diagnostic_filler_products_on_last_page[]" value="{{ $diagnosticBlock['products_on_last_page'] ?? 0 }}">
+                                                            <input type="hidden" name="diagnostic_filler_capacities[]" value="{{ $diagnosticBlock['capacity'] ?? 12 }}">
+                                                            <input type="hidden" name="diagnostic_filler_free_spaces[]" value="{{ $diagnosticBlock['free_spaces'] ?? 1 }}">
+                                                            <small class="text-muted d-block mt-1">{{ $diagnosticBlock['width_mm'] ?? 1 }} × {{ $diagnosticBlock['height_mm'] ?? 1 }} mm · {{ $diagnosticBlock['width_px_300'] ?? 1 }} × {{ $diagnosticBlock['height_px_300'] ?? 1 }} px</small>
+                                                        </div>
+                                                    @endforeach
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <small class="text-muted d-block mt-2">Al volver a calcular se eliminarán todas las piezas cargadas, previa confirmación. La última imagen seleccionada en cada campo reemplaza a la anterior.</small>
+                        </div>
+                    </div>
+
                     <div class="catalog-section">
                         <div class="catalog-section-title">
                             <div>
-                                <div class="section-kicker"><span>5</span> Productos</div>
+                                <div class="section-kicker"><span>6</span> Productos</div>
                                 <h6>Seleccion de productos</h6>
                                 <p>Solo se pueden seleccionar productos con precio mayor a cero.</p>
                             </div>
@@ -912,6 +1035,13 @@
                                         <i class="las la-edit"></i>
                                         Editar
                                     </a>
+                                    <form action="{{ route('product_catalogs.duplicate', $catalogItem['id']) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Crear una copia independiente de este catalogo?');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-soft-success btn-sm" title="Crear una copia para editar sin alterar el original">
+                                            <i class="las la-copy"></i>
+                                            Copiar
+                                        </button>
+                                    </form>
                                     <a class="btn btn-soft-primary btn-sm catalog-download" href="{{ route('product_catalogs.download', $catalogItem['id']) }}" title="Descargar">
                                         <i class="las la-download"></i>
                                         Descargar
@@ -1038,9 +1168,95 @@
                 '<td><div class="input-group" data-toggle="aizuploader" data-type="image"><div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Buscar</div></div><div class="form-control file-amount">Elegir archivo</div><input type="hidden" name="letter_intro_ad_images[]" class="selected-files" value=""></div><div class="file-preview box sm"></div><small class="text-muted d-block mt-1">{{ $fullPageImageHint }}</small></td>' +
                 '<td><select class="form-control aiz-selectpicker letter-intro-ad-category" name="letter_intro_ad_category_ids[]" data-live-search="true">' + categoryOptionsTemplate() + '</select></td>' +
                 '<td><select class="form-control aiz-selectpicker" name="letter_intro_ad_letters[]">' + letterOptions + '</select></td>' +
+                '<td><select class="form-control aiz-selectpicker" name="letter_intro_ad_orders[]"><option value="1">1 - Primero</option><option value="2">2 - Segundo</option></select></td>' +
                 '<td class="text-center"><button type="button" class="btn btn-soft-danger btn-icon btn-circle btn-sm remove-letter-intro-ad-row" title="Eliminar"><i class="las la-trash"></i></button></td>' +
             '</tr>';
         }
+
+        var fillerDiagnosticsUrl = @json(route('product_catalogs.filler_diagnostics'));
+
+        function diagnosticPieceHtml(d, b, blockIndex) {
+            var prefix = '<input type="hidden" name="diagnostic_filler_category_ids[]" value="'+escapeHtml(d.category_id)+'">' +
+                '<input type="hidden" name="diagnostic_filler_letters[]" value="'+escapeHtml(d.letter)+'">' +
+                '<input type="hidden" name="diagnostic_filler_block_indexes[]" value="'+blockIndex+'">' +
+                '<input type="hidden" name="diagnostic_filler_xs[]" value="'+b.x+'">' +
+                '<input type="hidden" name="diagnostic_filler_ys[]" value="'+b.y+'">' +
+                '<input type="hidden" name="diagnostic_filler_widths[]" value="'+b.width+'">' +
+                '<input type="hidden" name="diagnostic_filler_heights[]" value="'+b.height+'">' +
+                '<input type="hidden" name="diagnostic_filler_spaces[]" value="'+b.spaces+'">' +
+                '<input type="hidden" name="diagnostic_filler_width_mms[]" value="'+b.width_mm+'">' +
+                '<input type="hidden" name="diagnostic_filler_height_mms[]" value="'+b.height_mm+'">' +
+                '<input type="hidden" name="diagnostic_filler_width_pixels[]" value="'+b.width_px_300+'">' +
+                '<input type="hidden" name="diagnostic_filler_height_pixels[]" value="'+b.height_px_300+'">' +
+                '<input type="hidden" name="diagnostic_filler_products_on_last_page[]" value="'+d.products_on_last_page+'">' +
+                '<input type="hidden" name="diagnostic_filler_capacities[]" value="'+d.capacity+'">' +
+                '<input type="hidden" name="diagnostic_filler_free_spaces[]" value="'+d.free_spaces+'">';
+
+            return '<div class="border rounded p-2 mb-2 diagnostic-filler-piece">' +
+                '<strong class="d-block mb-1">'+b.width+' × '+b.height+'</strong>' +
+                '<div class="input-group" data-toggle="aizuploader" data-type="image">' +
+                    '<div class="input-group-prepend"><div class="input-group-text bg-soft-secondary font-weight-medium">Subir gráfica</div></div>' +
+                    '<div class="form-control file-amount">Elegir archivo</div>' +
+                    '<input type="hidden" name="diagnostic_filler_images[]" class="selected-files diagnostic-filler-image" value="">' +
+                '</div><div class="file-preview box sm"></div>' + prefix +
+                '<small class="text-muted d-block mt-1">'+b.width_mm+' × '+b.height_mm+' mm · '+b.width_px_300+' × '+b.height_px_300+' px</small>' +
+            '</div>';
+        }
+
+        $('#calculate-filler-spaces').on('click', function() {
+            var categoryIds = $('select[name="category_ids[]"]').val() || [];
+            var productIds = $('#catalog-product-ids').val() || '';
+            if (!categoryIds.length || !productIds) {
+                AIZ.plugins.notify('warning', 'Selecciona categorías y productos antes de calcular.');
+                return;
+            }
+
+            var hasUploadedPieces = $('input[name="diagnostic_filler_images[]"]').filter(function() {
+                return $.trim($(this).val() || '') !== '';
+            }).length > 0;
+
+            if (hasUploadedPieces && !window.confirm('Los espacios serán recalculados y se eliminarán todas las piezas gráficas cargadas. ¿Continuar?')) {
+                return;
+            }
+
+            var btn = $(this);
+            btn.prop('disabled', true).html('<i class="las la-spinner la-spin"></i> Calculando');
+            $.ajax({
+                url: fillerDiagnosticsUrl,
+                method: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    category_ids: categoryIds,
+                    product_ids: productIds,
+                    products_per_page: $('input[name="products_per_page"]:checked').val(),
+                    advertising_letters: $('.advertising-row').map(function() {
+                        var image = $(this).find('input[name="advertising_images[]"]').val();
+                        return image ? $(this).find('select[name="advertising_letters[]"]').val() : null;
+                    }).get()
+                }
+            }).done(function(resp) {
+                var rows = '';
+                (resp.diagnostics || []).forEach(function(d) {
+                    var blocks = d.blocks.map(function(b) {
+                        return b.width+' × '+b.height+' ('+b.spaces+' espacios)';
+                    }).join(' + ');
+                    var pieces = d.blocks.map(function(b, i) {
+                        return diagnosticPieceHtml(d, b, i);
+                    }).join('');
+                    rows += '<tr><td><strong>'+escapeHtml(d.category_name)+'</strong><br><span class="badge badge-soft-success">Letra '+escapeHtml(d.letter)+'</span></td>' +
+                        '<td>'+d.products_on_last_page+' de '+d.capacity+'</td>' +
+                        '<td><strong>'+d.free_spaces+'</strong></td>' +
+                        '<td>'+blocks+'</td><td>'+pieces+'</td></tr>';
+                });
+                $('#filler-diagnostics-body').html(rows || '<tr><td colspan="5" class="text-center text-muted">No se detectaron espacios libres.</td></tr>');
+                $('#filler-diagnostics-empty').addClass('d-none');
+                $('#filler-diagnostics-wrap').removeClass('d-none');
+            }).fail(function(xhr) {
+                AIZ.plugins.notify('danger', (xhr.responseJSON && xhr.responseJSON.message) || 'No fue posible calcular los espacios.');
+            }).always(function() {
+                btn.prop('disabled', false).html('<i class="las la-calculator"></i> Calcular espacios disponibles');
+            });
+        });
 
         function refreshCategorySummary() {
             var count = ($('#catalog-category').val() || []).length;
@@ -1448,6 +1664,7 @@
             $('.submit-label').text('Enviando...');
         });
 
+
         $('#add-advertising-row').on('click', function() {
             $('#advertising-table tbody').append(advertisingRowTemplate());
             if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
@@ -1472,6 +1689,7 @@
                 row.find('.file-preview').empty();
                 row.find('select').val('');
                 row.find('select[name="letter_intro_ad_letters[]"]').val('A');
+                row.find('select[name="letter_intro_ad_orders[]"]').val('1');
                 if ($.fn.selectpicker) { $('.aiz-selectpicker').selectpicker('refresh'); }
                 return;
             }

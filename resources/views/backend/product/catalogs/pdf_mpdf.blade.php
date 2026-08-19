@@ -46,6 +46,7 @@
         'product_price_font_size'        => 16,
         'product_reference_font_family'  => 'DejaVu Sans',
         'product_reference_font_size'    => 12,
+        'standalone_letter_position'     => 'right',
         'product_box_colors'             => [],
         'product_text_colors'            => [],
     ], $settings ?? []);
@@ -171,15 +172,41 @@
             'image'  => $pageImage($item['image'] ?? null),
         ];
     })->filter(fn($i) => $i['letter'] && $i['image'])->groupBy('letter');
-    $letterIntroAdsByKey = collect($settings['letter_intro_ads'] ?? [])->map(function ($item) use ($pageImage) {
+    $letterIntroAdsByKey = collect($settings['letter_intro_ads'] ?? [])->map(function ($item, $index) use ($pageImage) {
         $categoryId = (int) ($item['category_id'] ?? 0);
         $letter = \Illuminate\Support\Str::upper($item['letter'] ?? '');
+        $order = (int) ($item['order'] ?? ($index + 1));
 
         return [
             'key' => $categoryId . '|' . $letter,
             'image' => $pageImage($item['image'] ?? null),
+            'order' => in_array($order, [1, 2], true) ? $order : 1,
         ];
-    })->filter(fn($i) => $i['key'] !== '0|' && $i['image'])->groupBy('key')->map(fn($items) => $items->first());
+    })->filter(fn($i) => $i['key'] !== '0|' && $i['image'])
+      ->groupBy('key')
+      ->map(fn($items) => $items->sortBy('order')->take(2)->values());
+
+    $productsPerPage = in_array((int) ($settings['products_per_page'] ?? 12), [12, 20], true)
+        ? (int) $settings['products_per_page']
+        : 12;
+    $compactProducts = $productsPerPage === 20;
+    $productColumns = $compactProducts ? 4 : 3;
+
+    $diagnosticFillerByKey = collect($settings['diagnostic_filler_blocks'] ?? [])->map(function ($item, $index) use ($pageImage, $productColumns) {
+        $categoryId = (int) ($item['category_id'] ?? 0);
+        $letter = \Illuminate\Support\Str::upper($item['letter'] ?? '');
+        return [
+            'key' => $categoryId . '|' . $letter,
+            'image' => $pageImage($item['image'] ?? null),
+            'block_index' => (int) ($item['block_index'] ?? $index),
+            'x' => max(0, min($productColumns - 1, (int) ($item['x'] ?? 0))),
+            'y' => max(0, min(4, (int) ($item['y'] ?? 0))),
+            'width' => max(1, min($productColumns, (int) ($item['width'] ?? 1))),
+            'height' => max(1, min(5, (int) ($item['height'] ?? 1))),
+        ];
+    })->filter(fn ($item) => $item['key'] !== '0|' && $item['image'])
+      ->groupBy('key')
+      ->map(fn ($items) => $items->sortBy('block_index')->values());
 
     $descriptionLimit = (int) ($settings['description_limit'] ?: 90);
 
@@ -219,15 +246,16 @@
     };
     $coverTitleBottomSpace = max(0, 276 - $coverTitleTop - $coverTitleHeight - $coverFooterHeight);
 
-    $productsPerPage = in_array((int) ($settings['products_per_page'] ?? 12), [12, 20], true)
-        ? (int) $settings['products_per_page']
-        : 12;
-    $compactProducts = $productsPerPage === 20;
-    $productColumns = $compactProducts ? 4 : 3;
     $productTableColspan = ($productColumns * 2) + 1;
-    $productSideSpace = $compactProducts ? 6 : 8;
     $productGap = $compactProducts ? 3 : 5;
     $productCardWidth = $compactProducts ? 45 : 58;
+
+    // La retícula debe sumar exactamente los 216 mm de la página. Antes los anchos
+    // declarados sumaban menos y mPDF repartía el sobrante entre las columnas. Las
+    // tarjetas quedaban pegadas al lado izquierdo de una celda ensanchada, mientras
+    // las gráficas se centraban: por eso ambos bloques parecían corridos.
+    $productGridWidth = ($productCardWidth * $productColumns) + ($productGap * ($productColumns - 1));
+    $productSideSpace = (216 - $productGridWidth) / 2;
     $productCardHeight = $compactProducts ? 45 : 54;
     $productHeadHeight = $compactProducts ? 8 : 10;
     $productMediaHeight = $compactProducts ? 27 : 32;
@@ -237,7 +265,26 @@
     $productRowHeight = $compactProducts ? 48 : 62;
     $productCellPaddingTop = $compactProducts ? 1.5 : 4;
     $productCellPaddingBottom = $compactProducts ? 1 : 3;
-    $productHeaderHeight = $compactProducts ? 22 : 22;
+    $showAlphabeticNavigator = (bool) ($settings['show_alphabetic_navigator'] ?? true);
+    $standaloneLetterPosition = in_array(($settings['standalone_letter_position'] ?? 'right'), ['left', 'right', 'alternate_outer'], true)
+        ? $settings['standalone_letter_position']
+        : 'right';
+    $catalogAlphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+    $availableCatalogLetters = $productsByCategory
+        ->flatMap(function ($categoryGroup) {
+            return collect($categoryGroup['letter_groups'])->keys();
+        })
+        ->filter(function ($letter) use ($catalogAlphabet) {
+            return in_array($letter, $catalogAlphabet, true);
+        })
+        ->unique()
+        ->values()
+        ->all();
+    $catalogLetterAnchor = function ($letter) {
+        return 'catalog-letter-' . ($letter === 'Ñ' ? 'N-TILDE' : $letter);
+    };
+    $anchoredCatalogLetters = [];
+    $productHeaderHeight = $showAlphabeticNavigator ? 18 : 22;
     $productBannerLimit = $compactProducts ? 34 : 42;
     $advertisingWidth = ($productCardWidth * 2) + $productGap;
     $advertisingHeight = ($productRowHeight * 2) - $productCellPaddingTop - $productCellPaddingBottom;
@@ -254,13 +301,15 @@
         : min(9, max(7, (int) ($settings['product_reference_font_size'] ?: 9)));
 
     $pdfPageRendered = false;
+    $currentPdfPageNumber = 0;
     // $showPageNumber = true shows the page number (used only on product pages);
     // every other page explicitly turns it off so numbering never leaks onto other pages.
     // Every page also opens with a marker so the renderer can split this document into
     // fragments small enough for mPDF's pcre.backtrack_limit guard, always cutting between
     // pages and never inside a table.
     $marker = \App\Http\Services\ProductCatalogPdfRenderer::PAGE_MARKER;
-    $pageBreak = function ($showPageNumber = false) use (&$pdfPageRendered, $marker) {
+    $pageBreak = function ($showPageNumber = false) use (&$pdfPageRendered, &$currentPdfPageNumber, $marker) {
+        $currentPdfPageNumber++;
         $margins = $showPageNumber ? ' margin-bottom="3" margin-footer="3"' : ' margin-bottom="0" margin-footer="0"';
         $toggle = '<sethtmlpagefooter name="pageFooter" page="ALL" value="' . ($showPageNumber ? 'ON' : 'OFF') . '" />';
 
@@ -332,12 +381,19 @@
         .info-table td { border-bottom: 0.25mm solid #e5e7eb; padding: 4mm; vertical-align: top; font-size: 10px; line-height: 1.45; }
         .info-table tr:last-child td { border-bottom: 0; }
         .info-table-label { width: 34%; color: #0f766e; font-weight: 700; background: #f0fdfa; text-transform: uppercase; }
-        .product-sheet { width: 216mm; height: 276mm; border-collapse: collapse; background: #f5f7fb; }
-        .product-sheet-header { height: {{ $productHeaderHeight }}mm; padding: 6mm {{ $compactProducts ? 8 : 10 }}mm 3mm; vertical-align: top; background: #ffffff; border-bottom: 0.35mm solid #dde5ef; }
+        .product-sheet { width: 216mm; height: 276mm; margin: 0; border-collapse: collapse; table-layout: fixed; background: #f5f7fb; }
+        .product-sheet-header { height: {{ $productHeaderHeight }}mm; padding: 0; vertical-align: middle; background: #f7f9f7; border-bottom: 0.35mm solid #d3d9d4; }
         .product-category { color: #64748b; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
-        .product-letter { color: #111827; font-size: 30px; font-weight: 700; line-height: 1; text-align: right; }
+        .product-letter { color: #538442; font-size: 29px; font-weight: 700; line-height: 1; text-align: center; }
+        .alphabet-nav-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .alphabet-nav-cell { height: 12mm; padding: 3.0mm 0.1mm 0.8mm; text-align: center; vertical-align: middle; border-bottom: 0.25mm solid #d3d9d4; }
+        .alphabet-nav-link, .alphabet-nav-disabled { display: block; width: 100%; font-size: 14px; font-weight: bold; line-height: 1; text-decoration: none; }
+        .alphabet-nav-link { color: #538442; font-weight: bold; }
+        .alphabet-nav-current { color: #f58634; font-weight: bold; }
+        .alphabet-nav-disabled { color: #9a9a9a; font-weight: bold; }
+        .alphabet-current-cell { width: 18mm; height: 12mm; padding: 0.7mm 2mm 0 2mm; text-align: center; vertical-align: middle; }
         .product-row { height: {{ $productRowHeight }}mm; }
-        .product-cell { width: {{ 100 / $productColumns }}%; vertical-align: top; }
+        .product-cell { width: {{ $productCardWidth }}mm; padding-left: 0; padding-right: 0; text-align: left; vertical-align: top; }
         .product-card { width: {{ $productCardWidth }}mm; height: {{ $productCardHeight }}mm; border-collapse: collapse; table-layout: fixed; background: #ffffff; border: 0.3mm solid #dfe5e8; }
         .product-head { width: {{ $productCardWidth }}mm; height: {{ $productHeadHeight }}mm; padding: {{ $compactProducts ? 1.2 : 1.8 }}mm {{ $compactProducts ? 1.6 : 2.2 }}mm; font-weight: 700; line-height: 1.13; vertical-align: middle; text-transform: uppercase; }
         .product-media { width: {{ $productCardWidth }}mm; height: {{ $productMediaHeight }}mm; padding: {{ $compactProducts ? 1 : 1.5 }}mm; text-align: center; vertical-align: middle; background: #ffffff; }
@@ -451,7 +507,7 @@
         @php
             $boxColor  = $productBoxColors[$letter] ?? $letterPalette[$letter] ?? '#f36f21';
             $textColor = $settings['product_text_colors'][$letter] ?? '#ffffff';
-            $letterIntroAd = $letterIntroAdsByKey->get($executiveCategoryId . '|' . $letter);
+            $letterIntroAds = $letterIntroAdsByKey->get($executiveCategoryId . '|' . $letter, collect());
             $remainingLetterProducts = $letterProducts->values();
             $letterAdvertising = $advertisingByLetter->get($letter, collect())->values();
             $letterPages = collect();
@@ -474,96 +530,187 @@
             }
         @endphp
 
-        @if ($letterIntroAd)
+        @foreach ($letterIntroAds as $letterIntroAd)
             {!! $pageBreak() !!}
             <div class="pdf-page">
                 <img class="full-page-bg" src="{{ $letterIntroAd['image'] }}" alt="">
             </div>
-        @endif
+        @endforeach
 
         @foreach ($letterPages as $letterPage)
             @php
-                $chunk = $letterPage['products'];
+                $chunk = $letterPage['products']->values();
                 $advertisingItem = $letterPage['advertising'];
-                $featuredProductColumns = $productColumns - 2;
-                $featuredProductCount = $featuredProductColumns * 2;
-                $featuredProducts = $advertisingItem
-                    ? $chunk->take($featuredProductCount)->values()
-                    : collect();
-                $regularProducts = $advertisingItem
-                    ? $chunk->slice($featuredProductCount)->values()
-                    : $chunk;
+                $rowsTotal = (int) ($productsPerPage / $productColumns);
+                $pageGrid = array_fill(0, $rowsTotal, array_fill(0, $productColumns, null));
+
+                $placeGridItem = function ($x, $y, $width, $height, $type, $value) use (&$pageGrid, $productColumns, $rowsTotal) {
+                    $x = (int) $x; $y = (int) $y; $width = (int) $width; $height = (int) $height;
+                    if ($x < 0 || $y < 0 || $width < 1 || $height < 1 || $x + $width > $productColumns || $y + $height > $rowsTotal) return false;
+                    for ($rr = $y; $rr < $y + $height; $rr++) {
+                        for ($cc = $x; $cc < $x + $width; $cc++) {
+                            if ($pageGrid[$rr][$cc] !== null) return false;
+                        }
+                    }
+                    $anchor = ['x'=>$x,'y'=>$y,'width'=>$width,'height'=>$height,'type'=>$type,'value'=>$value];
+                    for ($rr = $y; $rr < $y + $height; $rr++) {
+                        for ($cc = $x; $cc < $x + $width; $cc++) $pageGrid[$rr][$cc] = $anchor;
+                    }
+                    return true;
+                };
+
+                if ($advertisingItem) {
+                    $featuredColumns = max(0, $productColumns - 2);
+                    $featuredCapacity = $featuredColumns * min(2, $rowsTotal);
+                    $featuredProducts = $chunk->take($featuredCapacity)->values();
+                    foreach ($featuredProducts as $index => $product) {
+                        $placeGridItem($index % max(1, $featuredColumns), intdiv($index, max(1, $featuredColumns)), 1, 1, 'product', $product);
+                    }
+                    $placeGridItem(max(0, $productColumns - 2), 0, 2, min(2, $rowsTotal), 'advertising', $advertisingItem);
+                    $regularProducts = $chunk->slice($featuredCapacity)->values();
+                    foreach ($regularProducts as $index => $product) {
+                        $placeGridItem($index % $productColumns, 2 + intdiv($index, $productColumns), 1, 1, 'product', $product);
+                    }
+                } else {
+                    foreach ($chunk as $index => $product) {
+                        $placeGridItem($index % $productColumns, intdiv($index, $productColumns), 1, 1, 'product', $product);
+                    }
+                }
+
+                if ($loop->last) {
+                    foreach ($diagnosticFillerByKey->get($executiveCategoryId . '|' . $letter, collect()) as $diagnosticFiller) {
+                        $placeGridItem($diagnosticFiller['x'], $diagnosticFiller['y'], $diagnosticFiller['width'], $diagnosticFiller['height'], 'filler', $diagnosticFiller);
+                    }
+                }
             @endphp
 
             {!! $pageBreak(true) !!}
+            @php
+                $standaloneLetterAlign = $standaloneLetterPosition === 'alternate_outer'
+                    ? (($currentPdfPageNumber % 2) === 1 ? 'right' : 'left')
+                    : $standaloneLetterPosition;
+            @endphp
             <table class="product-sheet">
+                <colgroup>
+                    <col style="width:{{ $productSideSpace }}mm;">
+                    @for ($columnIndex = 0; $columnIndex < $productColumns; $columnIndex++)
+                        <col style="width:{{ $productCardWidth }}mm;">
+                        @if ($columnIndex < $productColumns - 1)
+                            <col style="width:{{ $productGap }}mm;">
+                        @endif
+                    @endfor
+                    <col style="width:{{ $productSideSpace }}mm;">
+                </colgroup>
                 <tr>
-                    <td colspan="{{ $productTableColspan }}" class="product-sheet-header" style="text-align:right;">
-                        <div class="product-letter" style="color:{{ $boxColor }};">{{ $letter }}</div>
+                    <td colspan="{{ $productTableColspan }}" class="product-sheet-header">
+                        @php
+                            $isFirstCatalogPageForLetter = ! in_array($letter, $anchoredCatalogLetters, true);
+                            if ($isFirstCatalogPageForLetter) {
+                                $anchoredCatalogLetters[] = $letter;
+                            }
+                        @endphp
+                        @if ($isFirstCatalogPageForLetter && in_array($letter, $catalogAlphabet, true))
+                            <a name="{{ $catalogLetterAnchor($letter) }}"></a>
+                        @endif
+
+                        @if ($showAlphabeticNavigator)
+                            <table class="alphabet-nav-table">
+                                <tr>
+                                    <td style="width:6mm;">&nbsp;</td>
+                                    @foreach ($catalogAlphabet as $navigatorLetter)
+                                        <td class="alphabet-nav-cell">
+                                            @if (in_array($navigatorLetter, $availableCatalogLetters, true))
+                                                <a href="#{{ $catalogLetterAnchor($navigatorLetter) }}"
+                                                   class="alphabet-nav-link{{ $navigatorLetter === $letter ? ' alphabet-nav-current' : '' }}"
+                                                   style="color:{{ $navigatorLetter === $letter ? '#f58634' : '#538442' }};">{{ $navigatorLetter }}</a>
+                                            @else
+                                                <span class="alphabet-nav-disabled">{{ $navigatorLetter }}</span>
+                                            @endif
+                                        </td>
+                                    @endforeach
+                                    <td style="width:4mm;">&nbsp;</td>
+                                    <td class="alphabet-current-cell">
+                                        <div class="product-letter">{{ $letter }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        @else
+                            <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                                <tr>
+                                    @if ($standaloneLetterAlign === 'left')
+                                        <td style="width:50%; padding:5mm 0 3mm {{ $compactProducts ? 8 : 10 }}mm; text-align:left; vertical-align:middle;">
+                                            <span class="product-letter" style="color:{{ $boxColor }};">{{ $letter }}</span>
+                                        </td>
+                                        <td style="width:50%;">&nbsp;</td>
+                                    @else
+                                        <td style="width:50%;">&nbsp;</td>
+                                        <td style="width:50%; padding:5mm {{ $compactProducts ? 8 : 10 }}mm 3mm 0; text-align:right; vertical-align:middle;">
+                                            <span class="product-letter" style="color:{{ $boxColor }};">{{ $letter }}</span>
+                                        </td>
+                                    @endif
+                                </tr>
+                            </table>
+                        @endif
                     </td>
                 </tr>
 
-                @if ($advertisingItem)
-                    @for ($featuredRow = 0; $featuredRow < 2; $featuredRow++)
-                        <tr class="product-row">
-                            <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
+                @for ($gridRow = 0; $gridRow < $rowsTotal; $gridRow++)
+                    <tr class="product-row">
+                        <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
+                        @php $gridColumn = 0; @endphp
+                        @while ($gridColumn < $productColumns)
+                            @php
+                                $gridItem = $pageGrid[$gridRow][$gridColumn] ?? null;
+                            @endphp
 
-                            @for ($featuredColumn = 0; $featuredColumn < $featuredProductColumns; $featuredColumn++)
-                                @php
-                                    $featuredProduct = $featuredProducts->get(($featuredRow * $featuredProductColumns) + $featuredColumn);
-                                @endphp
+                            @if ($gridItem && $gridItem['x'] === $gridColumn && $gridItem['y'] < $gridRow)
+                                @php $gridColumn += $gridItem['width']; @endphp
+                                @if ($gridColumn < $productColumns)<td style="width:{{ $productGap }}mm;">&nbsp;</td>@endif
+                                @continue
+                            @endif
 
-                                <td class="product-cell" style="width:{{ $productCardWidth }}mm; padding-top:{{ $productCellPaddingTop }}mm; padding-bottom:{{ $productCellPaddingBottom }}mm; vertical-align:top;">
-                                    @if ($featuredProduct)
-                                        @include('backend.product.catalogs._pdf_product_card', ['product' => $featuredProduct])
-                                    @else
-                                        &nbsp;
-                                    @endif
+                            @php
+                                $itemWidth = $gridItem && $gridItem['x'] === $gridColumn && $gridItem['y'] === $gridRow ? $gridItem['width'] : 1;
+                                $itemHeight = $gridItem && $gridItem['x'] === $gridColumn && $gridItem['y'] === $gridRow ? $gridItem['height'] : 1;
+                                $itemColspan = ($itemWidth * 2) - 1;
+                                $itemWidthMm = ($productCardWidth * $itemWidth) + ($productGap * ($itemWidth - 1));
+                                $itemHeightMm = ($productRowHeight * $itemHeight) - $productCellPaddingTop - $productCellPaddingBottom;
+                            @endphp
+
+                            @if (! $gridItem)
+                                <td class="product-cell" style="width:{{ $productCardWidth }}mm;">&nbsp;</td>
+                            @elseif ($gridItem['type'] === 'product')
+                                <td class="product-cell" style="width:{{ $productCardWidth }}mm; padding:{{ $productCellPaddingTop }}mm 0 {{ $productCellPaddingBottom }}mm 0; text-align:left; vertical-align:top;">
+                                    @include('backend.product.catalogs._pdf_product_card', ['product' => $gridItem['value']])
                                 </td>
-                                <td style="width:{{ $productGap }}mm;">&nbsp;</td>
-                            @endfor
-
-                            @if ($featuredRow === 0)
-                                <td class="product-advertising-cell" colspan="3" rowspan="2">
-                                    <table class="product-advertising-frame">
+                            @elseif ($gridItem['type'] === 'advertising')
+                                <td colspan="{{ $itemColspan }}" rowspan="{{ $itemHeight }}" style="padding:{{ $productCellPaddingTop }}mm 0 {{ $productCellPaddingBottom }}mm 0; text-align:left; vertical-align:top; line-height:0; font-size:0;">
+                                    <table style="width:{{ $itemWidthMm }}mm; height:{{ $itemHeightMm }}mm; border-collapse:collapse; table-layout:fixed; border:0.3mm solid #dfe5e8; background:#fff; margin:0;">
                                         <tr>
-                                            <td style="text-align:center; vertical-align:middle;">
-                                                <img class="product-advertising-image" src="{{ $advertisingItem['image'] }}" alt="">
+                                            <td style="width:{{ $itemWidthMm }}mm; height:{{ $itemHeightMm }}mm; padding:0; text-align:center; vertical-align:middle; line-height:0; font-size:0;">
+                                                <img src="{{ $gridItem['value']['image'] }}" style="max-width:{{ $itemWidthMm - 1 }}mm; max-height:{{ $itemHeightMm - 1 }}mm; width:auto; height:auto; margin:0;">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            @else
+                                <td colspan="{{ $itemColspan }}" rowspan="{{ $itemHeight }}" style="padding:{{ $productCellPaddingTop }}mm 0 {{ $productCellPaddingBottom }}mm 0; text-align:left; vertical-align:top; overflow:hidden; line-height:0; font-size:0;">
+                                    <table style="width:{{ $itemWidthMm }}mm; height:{{ $itemHeightMm }}mm; border-collapse:collapse; table-layout:fixed; margin:0;">
+                                        <tr>
+                                            <td style="width:{{ $itemWidthMm }}mm; height:{{ $itemHeightMm }}mm; padding:0; text-align:center; vertical-align:middle; line-height:0; font-size:0; overflow:hidden;">
+                                                <img src="{{ $gridItem['value']['image'] }}" style="max-width:{{ $itemWidthMm }}mm; max-height:{{ $itemHeightMm }}mm; width:auto; height:auto; margin:0;">
                                             </td>
                                         </tr>
                                     </table>
                                 </td>
                             @endif
 
-                            <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
-                        </tr>
-                    @endfor
-                @endif
-
-                @foreach ($regularProducts->chunk($productColumns) as $row)
-                    @php $rowProducts = $row->values(); @endphp
-                    <tr class="product-row">
-                        <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
-
-                        @for ($productSlot = 0; $productSlot < $productColumns; $productSlot++)
-                            @php $product = $rowProducts->get($productSlot); @endphp
-
-                            @if ($product)
-                                <td class="product-cell" style="width:{{ $productCardWidth }}mm; padding-top:{{ $productCellPaddingTop }}mm; padding-bottom:{{ $productCellPaddingBottom }}mm; vertical-align:top;">
-                                    @include('backend.product.catalogs._pdf_product_card', ['product' => $product])
-                                </td>
-                            @else
-                                <td class="product-cell" style="width:{{ $productCardWidth }}mm;">&nbsp;</td>
-                            @endif
-
-                            @if ($productSlot < ($productColumns - 1))
-                                <td style="width:{{ $productGap }}mm;">&nbsp;</td>
-                            @endif
-                        @endfor
-
+                            @php $gridColumn += $itemWidth; @endphp
+                            @if ($gridColumn < $productColumns)<td style="width:{{ $productGap }}mm;">&nbsp;</td>@endif
+                        @endwhile
                         <td style="width:{{ $productSideSpace }}mm;">&nbsp;</td>
                     </tr>
-                @endforeach
+                @endfor
             </table>
         @endforeach
     @endforeach

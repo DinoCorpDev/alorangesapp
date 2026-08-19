@@ -153,7 +153,7 @@ class ProductCatalogPdfRenderer
                 'category' => $category,
                 'letter_groups' => $products->groupBy(function ($product) {
                     $letter = Str::upper(Str::substr(trim($product->getTranslation('name')), 0, 1));
-                    return preg_match('/[A-Z0-9]/', $letter) ? $letter : '#';
+                    return preg_match('/^[A-ZÑ0-9]$/u', $letter) ? $letter : '#';
                 })->sortKeys(),
             ];
         })->filter(function ($group) {
